@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="备考计时器">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<title>备考倒计时器</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --danger: #f87171;
+    --success: #4ade80;
+    --warn: #fbbf24;
+    --border: #334155;
+    --radius: 12px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-top: env(safe-area-inset-top, 0px);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { height: 100%; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100%;
+    min-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: calc(20px + var(--safe-top)) 16px calc(24px + var(--safe-bottom)) 16px;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* ---- Header ---- */
+  h1 {
+    text-align: center;
+    font-size: clamp(1.2rem, 4vw, 1.5rem);
+    font-weight: 700;
+    letter-spacing: .04em;
+    color: var(--text);
+    padding: 4px 0;
+  }
+
+  /* ---- Timer Display ---- */
+  .timer-display {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: clamp(24px, 5vw, 40px) 16px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color .3s, box-shadow .3s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .timer-display:active { background: #1a2538; }
+
+  .timer-display.warning { border-color: var(--warn); box-shadow: 0 0 24px rgba(251,191,36,.15); }
+  .timer-display.timeout { border-color: var(--danger); animation: pulse 1s infinite; }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 16px rgba(248,113,113,.2); }
+    50%      { box-shadow: 0 0 40px rgba(248,113,113,.5); }
+  }
+
+  .time {
+    font-size: clamp(3.5rem, 14vw, 6rem);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .04em;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .warning .time { color: var(--warn); }
+  .timeout .time { color: var(--danger); }
+
+  .time-label {
+    margin-top: 8px;
+    font-size: clamp(0.8rem, 2.5vw, 0.95rem);
+    color: var(--muted);
+  }
+
+  /* ---- Setter ---- */
+  .setter {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+
+  .setter h3 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .input-group label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .input-group input {
+    width: clamp(56px, 16vw, 72px);
+    height: 44px;
+    padding: 6px;
+    text-align: center;
+    font-size: 16px; /* 16px prevents iOS auto-zoom */
+    font-weight: 600;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    outline: none;
+    transition: border .15s;
+  }
+  .input-group input:focus { border-color: var(--accent); }
+
+  .sep {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--muted);
+    padding: 0 2px;
+    margin-top: 12px;
+  }
+
+  .presets {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    justify-content: center;
+  }
+  .preset-btn {
+    padding: 10px 16px;
+    font-size: clamp(0.78rem, 2.5vw, 0.85rem);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .15s;
+    min-height: 40px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .preset-btn:active { background: var(--accent); color: #0f172a; border-color: var(--accent); }
+
+  @media (hover: hover) {
+    .preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+  }
+
+  /* ---- Actions ---- */
+  .actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 14px 12px;
+    font-size: clamp(0.9rem, 3vw, 1rem);
+    font-weight: 700;
+    border-radius: var(--radius);
+    border: none;
+    cursor: pointer;
+    transition: all .15s;
+    letter-spacing: .02em;
+    min-height: 52px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-start  { background: var(--accent); color: #0f172a; }
+  .btn-pause  { background: var(--warn); color: #0f172a; }
+  .btn-reset  { background: var(--border); color: var(--text); }
+
+  @media (hover: hover) {
+    .btn-start:hover  { filter: brightness(1.1); }
+    .btn-pause:hover  { filter: brightness(1.1); }
+    .btn-reset:hover  { background: #475569; }
+  }
+
+  /* ---- Records ---- */
+  .records {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+
+  .records-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .records-header h3 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+  }
+  .records-header .stats {
+    font-size: 0.78rem;
+    color: var(--accent);
+  }
+
+  /* ── Note Input ── */
+  .note-area { margin-bottom: 12px; }
+  .note-area input {
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 16px; /* 16px prevents iOS auto-zoom */
+    outline: none;
+  }
+  .note-area input:focus { border-color: var(--accent2); }
+  .note-area input::placeholder { color: var(--muted); font-size: 0.85rem; }
+
+  .record-list {
+    list-style: none;
+    max-height: 260px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .record-list::-webkit-scrollbar { width: 3px; }
+  .record-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .record-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: var(--bg);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    gap: 8px;
+  }
+  .record-item .rec-date { color: var(--muted); font-size: 0.75rem; }
+  .record-item .rec-duration {
+    color: var(--accent);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+  .record-item .rec-note {
+    color: var(--text);
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.85rem;
+  }
+  .record-item .rec-del {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 1.1rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .record-item .rec-del:active { background: rgba(248,113,113,.2); }
+
+  @media (hover: hover) {
+    .record-item .rec-del:hover { background: rgba(248,113,113,.15); }
+  }
+
+  .empty-hint {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    padding: 24px 0;
+  }
+
+  .clear-all {
+    margin-top: 12px;
+    width: 100%;
+    height: 44px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .clear-all:active { border-color: var(--danger); color: var(--danger); }
+
+  @media (hover: hover) {
+    .clear-all:hover { border-color: var(--danger); color: var(--danger); }
+  }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: calc(24px + var(--safe-bottom));
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--accent2);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 24px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    z-index: 999;
+    pointer-events: none;
+    transition: transform .3s ease;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── Small screen adjustments ── */
+  @media (max-width: 360px) {
+    body { padding: 12px 10px calc(16px + var(--safe-bottom)); }
+    .container { gap: 12px; }
+    .timer-display { padding: 20px 12px; }
+    .setter { padding: 12px; }
+    .records { padding: 12px; }
+    .btn { padding: 13px 8px; min-height: 48px; }
+    .preset-btn { padding: 8px 12px; min-height: 36px; font-size: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>⏳ 备考倒计时器</h1>
+
+  <!-- 计时显示 -->
+  <div class="timer-display" id="timerDisplay">
+    <div class="time" id="timeText">25:00</div>
+    <div class="time-label" id="timeLabel">准备开始</div>
+  </div>
+
+  <!-- 时间设置 -->
+  <div class="setter">
+    <h3>⚙️ 设置倒计时</h3>
+    <div class="input-row">
+      <div class="input-group">
+        <label>小时</label>
+        <input type="number" id="inputH" value="0" min="0" max="99" inputmode="numeric" pattern="[0-9]*">
+      </div>
+      <span class="sep">:</span>
+      <div class="input-group">
+        <label>分钟</label>
+        <input type="number" id="inputM" value="25" min="0" max="59" inputmode="numeric" pattern="[0-9]*">
+      </div>
+      <span class="sep">:</span>
+      <div class="input-group">
+        <label>秒</label>
+        <input type="number" id="inputS" value="0" min="0" max="59" inputmode="numeric" pattern="[0-9]*">
+      </div>
+    </div>
+    <div class="presets">
+      <button class="preset-btn" data-h="0" data-m="5"  data-s="0">5 分钟</button>
+      <button class="preset-btn" data-h="0" data-m="15" data-s="0">15 分钟</button>
+      <button class="preset-btn" data-h="0" data-m="25" data-s="0">25 分钟</button>
+      <button class="preset-btn" data-h="0" data-m="45" data-s="0">45 分钟</button>
+      <button class="preset-btn" data-h="1" data-m="0"  data-s="0">1 小时</button>
+      <button class="preset-btn" data-h="1" data-m="30" data-s="0">1.5 小时</button>
+      <button class="preset-btn" data-h="2" data-m="0"  data-s="0">2 小时</button>
+      <button class="preset-btn" data-h="3" data-m="0"  data-s="0">3 小时</button>
+    </div>
+  </div>
+
+  <!-- 操作按钮 -->
+  <div class="actions">
+    <button class="btn btn-start" id="btnStart">▶ 开始</button>
+    <button class="btn btn-pause" id="btnPause">⏸ 暂停</button>
+    <button class="btn btn-reset" id="btnReset">↺ 重置</button>
+  </div>
+
+  <!-- 记录区域 -->
+  <div class="records">
+    <div class="records-header">
+      <h3>📋 学习记录</h3>
+      <span class="stats" id="statsText">共 0 条</span>
+    </div>
+    <div class="note-area">
+      <input type="text" id="noteInput" placeholder="备注（如：数学第三章、英语单词…）" maxlength="60" enterkeyhint="done">
+    </div>
+    <ul class="record-list" id="recordList">
+      <li class="empty-hint">还没有记录，开始计时吧 ✍️</li>
+    </ul>
+    <button class="clear-all" id="btnClearAll">🗑 清空全部记录</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DOM ──
+const timerDisplay = document.getElementById('timerDisplay');
+const timeText     = document.getElementById('timeText');
+const timeLabel    = document.getElementById('timeLabel');
+const inputH       = document.getElementById('inputH');
+const inputM       = document.getElementById('inputM');
+const inputS       = document.getElementById('inputS');
+const btnStart     = document.getElementById('btnStart');
+const btnPause     = document.getElementById('btnPause');
+const btnReset     = document.getElementById('btnReset');
+const recordList   = document.getElementById('recordList');
+const noteInput    = document.getElementById('noteInput');
+const statsText    = document.getElementById('statsText');
+const btnClearAll  = document.getElementById('btnClearAll');
+const toast        = document.getElementById('toast');
+
+const STORAGE_KEY = 'exam_timer_records';
+const ALARM_DURATION = 8000;
+
+// ── State ──
+let totalSeconds = 25 * 60;
+let remaining    = totalSeconds;
+let timerId      = null;
+let alarmId      = null;
+let isRunning    = false;
+let isPaused     = false;
+let wakeLock     = null;
+
+// ── Toast ──
+let toastTimer = null;
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+// ── Wake Lock (防锁屏) ──
+async function requestWakeLock() {
+  if ('wakeLock' in navigator && document.visibilityState === 'visible') {
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    } catch (_) { /* 用户拒绝或不支持 */ }
+  }
+}
+
+async function releaseWakeLock() {
+  if (wakeLock) {
+    try { await wakeLock.release(); } catch (_) {}
+    wakeLock = null;
+  }
+}
+
+// 页面恢复可见时重新获取 wakelock
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && isRunning && !isPaused) {
+    requestWakeLock();
+  }
+});
+
+// ── Vibration (移动端震动) ──
+function vibrate(pattern) {
+  if ('vibrate' in navigator) {
+    navigator.vibrate(pattern);
+  }
+}
+
+// ── Audio ──
+let audioCtx = null;
+function resumeAudio() {
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}
+
+function playAlarm() {
+  if (alarmId) return;
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    resumeAudio();
+
+    const playBeep = () => {
+      if (!isRunning) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+      osc.start(audioCtx.currentTime);
+      osc.stop(audioCtx.currentTime + 0.3);
+    };
+
+    const interval = 600;
+    const start = Date.now();
+    const beepLoop = () => {
+      if (!isRunning) { alarmId = null; return; }
+      if (Date.now() - start > ALARM_DURATION) { alarmId = null; return; }
+      playBeep();
+      vibrate(200);
+      alarmId = setTimeout(beepLoop, interval);
+    };
+    beepLoop();
+  } catch (_) {}
+}
+
+function stopAlarm() {
+  if (alarmId) { clearTimeout(alarmId); alarmId = null; }
+}
+
+// ── Display ──
+function formatTime(s) {
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (h > 0) {
+    return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+  }
+  return String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+}
+
+function updateDisplay() {
+  timeText.textContent = formatTime(remaining);
+  timerDisplay.classList.remove('warning', 'timeout');
+
+  if (remaining === 0 && isRunning) {
+    timerDisplay.classList.add('timeout');
+    timeLabel.textContent = '⏰ 时间到！';
+  } else if (remaining <= 60 && isRunning) {
+    timerDisplay.classList.add('warning');
+    timeLabel.textContent = '⚠️ 最后 1 分钟';
+  } else if (isRunning) {
+    timeLabel.textContent = '▶ 计时中…';
+  } else if (isPaused) {
+    timeLabel.textContent = '⏸ 已暂停';
+  } else {
+    timeLabel.textContent = '准备开始';
+  }
+}
+
+function readInput() {
+  let h = parseInt(inputH.value) || 0;
+  let m = parseInt(inputM.value) || 0;
+  let s = parseInt(inputS.value) || 0;
+  h = Math.max(0, Math.min(99, h));
+  m = Math.max(0, Math.min(59, m));
+  s = Math.max(0, Math.min(59, s));
+  inputH.value = h;
+  inputM.value = m;
+  inputS.value = s;
+  return h * 3600 + m * 60 + s;
+}
+
+function syncInputsFromRemaining() {
+  inputH.value = Math.floor(remaining / 3600);
+  inputM.value = Math.floor((remaining % 3600) / 60);
+  inputS.value = remaining % 60;
+}
+
+// ── Timer ──
+function tick() {
+  if (remaining > 0) {
+    remaining--;
+    updateDisplay();
+    syncInputsFromRemaining();
+  }
+  if (remaining === 0) {
+    stop();
+    isRunning = true;
+    updateDisplay();
+    playAlarm();
+    vibrate([500, 200, 500, 200, 500]);
+    autoRecord();
+    releaseWakeLock();
+  }
+}
+
+function start() {
+  if (isRunning && !isPaused) return;
+  if (remaining <= 0) reset();
+
+  if (!isPaused) {
+    remaining = readInput();
+    totalSeconds = remaining;
+  }
+
+  // 首次用户交互时解锁音频（iOS 要求）
+  resumeAudio();
+
+  isRunning = true;
+  isPaused = false;
+  stopAlarm();
+  updateDisplay();
+  timerId = setInterval(tick, 1000);
+  updateButtons();
+  requestWakeLock();
+  showToast('▶ 计时开始');
+}
+
+function pause() {
+  if (!isRunning || isPaused) return;
+  isPaused = true;
+  clearInterval(timerId);
+  timerId = null;
+  stopAlarm();
+  updateDisplay();
+  updateButtons();
+  releaseWakeLock();
+  showToast('⏸ 已暂停');
+}
+
+function reset() {
+  stop();
+  remaining = readInput();
+  totalSeconds = remaining;
+  isRunning = false;
+  isPaused = false;
+  stopAlarm();
+  updateDisplay();
+  updateButtons();
+  releaseWakeLock();
+  showToast('↺ 已重置');
+}
+
+function stop() {
+  clearInterval(timerId);
+  timerId = null;
+  isRunning = false;
+  isPaused = false;
+}
+
+function updateButtons() {
+  if (isRunning && !isPaused) {
+    btnStart.textContent = '▶ 计时中…';
+    btnStart.style.opacity = '0.6';
+    btnPause.textContent = '⏸ 暂停';
+  } else if (isPaused) {
+    btnStart.textContent = '▶ 继续';
+    btnStart.style.opacity = '1';
+    btnPause.textContent = '⏸ 已暂停';
+  } else {
+    btnStart.textContent = '▶ 开始';
+    btnStart.style.opacity = '1';
+    btnPause.textContent = '⏸ 暂停';
+  }
+}
+
+// ── Records ──
+function loadRecords() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch (_) { return []; }
+}
+
+function saveRecords(records) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+}
+
+function autoRecord() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit' });
+  const timeStr = now.toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' });
+  const note = noteInput.value.trim() || '无备注';
+
+  const record = {
+    id: Date.now(),
+    date: dateStr + ' ' + timeStr,
+    duration: totalSeconds,
+    note,
+  };
+
+  const records = loadRecords();
+  records.unshift(record);
+  saveRecords(records);
+  renderRecords();
+  showToast('✅ 已自动记录 · ' + formatDuration(totalSeconds));
+
+  remaining = totalSeconds;
+  isRunning = false;
+  isPaused = false;
+  stopAlarm();
+  updateDisplay();
+  updateButtons();
+}
+
+function manualRecord() {
+  if (totalSeconds === remaining) {
+    showToast('⚠️ 还没有开始计时');
+    return;
+  }
+  const elapsed = totalSeconds - remaining;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit' });
+  const timeStr = now.toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' });
+  const note = noteInput.value.trim() || '手动记录';
+
+  const record = {
+    id: Date.now(),
+    date: dateStr + ' ' + timeStr,
+    duration: elapsed,
+    note,
+  };
+
+  const records = loadRecords();
+  records.unshift(record);
+  saveRecords(records);
+  renderRecords();
+  showToast('📝 已记录 · ' + formatDuration(elapsed));
+}
+
+function deleteRecord(id) {
+  vibrate(30);
+  let records = loadRecords();
+  records = records.filter(r => r.id !== id);
+  saveRecords(records);
+  renderRecords();
+}
+
+function clearAllRecords() {
+  if (!confirm('确定要清空全部学习记录吗？此操作不可撤销。')) return;
+  saveRecords([]);
+  renderRecords();
+  showToast('🗑 记录已清空');
+}
+
+function formatDuration(s) {
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  const parts = [];
+  if (h > 0) parts.push(h + 'h');
+  if (m > 0) parts.push(m + 'm');
+  if (sec > 0 || parts.length === 0) parts.push(sec + 's');
+  return parts.join(' ');
+}
+
+function renderRecords() {
+  const records = loadRecords();
+  statsText.textContent = '共 ' + records.length + ' 条';
+
+  if (records.length === 0) {
+    recordList.innerHTML = '<li class="empty-hint">还没有记录，开始计时吧 ✍️</li>';
+    return;
+  }
+
+  recordList.innerHTML = records.map(r => `
+    <li class="record-item">
+      <div style="min-width:0;">
+        <div class="rec-note">${escapeHtml(r.note)}</div>
+        <div class="rec-date">${r.date}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <span class="rec-duration">${formatDuration(r.duration)}</span>
+        <button class="rec-del" data-id="${r.id}" title="删除">✕</button>
+      </div>
+    </li>
+  `).join('');
+
+  // 用事件委托绑定删除按钮
+  recordList.querySelectorAll('.rec-del').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteRecord(parseInt(btn.dataset.id));
+    });
+  });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ── Events ──
+btnStart.addEventListener('click', start);
+btnPause.addEventListener('click', pause);
+btnReset.addEventListener('click', reset);
+btnClearAll.addEventListener('click', clearAllRecords);
+
+// 点击计时器区域：手动记录
+timerDisplay.addEventListener('click', () => {
+  if (totalSeconds !== remaining && !isRunning) {
+    // 计时已结束（归零后），提示可以手动记录
+  }
+});
+
+// 长按计时器区域：手动记录（移动端友好）
+let longPressTimer = null;
+timerDisplay.addEventListener('pointerdown', (e) => {
+  longPressTimer = setTimeout(() => {
+    if (totalSeconds !== remaining) {
+      vibrate(20);
+      if (confirm('要手动记录当前已完成的学习时长吗？')) {
+        manualRecord();
+      }
+    }
+  }, 600);
+});
+timerDisplay.addEventListener('pointerup', () => clearTimeout(longPressTimer));
+timerDisplay.addEventListener('pointerleave', () => clearTimeout(longPressTimer));
+timerDisplay.addEventListener('pointercancel', () => clearTimeout(longPressTimer));
+
+// 预设按钮
+document.querySelectorAll('.preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    vibrate(10);
+    inputH.value = btn.dataset.h;
+    inputM.value = btn.dataset.m;
+    inputS.value = btn.dataset.s;
+    if (!isRunning) {
+      remaining = readInput();
+      totalSeconds = remaining;
+      updateDisplay();
+    }
+  });
+});
+
+// 输入框变化时同步
+[inputH, inputM, inputS].forEach(el => {
+  el.addEventListener('input', () => {
+    if (!isRunning) {
+      remaining = readInput();
+      totalSeconds = remaining;
+      updateDisplay();
+    }
+  });
+});
+
+// 键盘快捷键（桌面端）
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT') return;
+  switch (e.code) {
+    case 'Space':
+      e.preventDefault();
+      if (isRunning && !isPaused) pause();
+      else start();
+      break;
+    case 'KeyR':
+      if (!e.ctrlKey && !e.metaKey) reset();
+      break;
+  }
+});
+
+// ── Init ──
+remaining = readInput();
+totalSeconds = remaining;
+updateDisplay();
+updateButtons();
+renderRecords();
+</script>
+
+</body>
+</html>
