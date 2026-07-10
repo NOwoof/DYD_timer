@@ -1,9 +1,10 @@
 {
   "version": 1,
-  "updatedAt": 1783670584292,
+  "updatedAt": 1783670634511,
   "points": {
-    "total": 5,
-    "today": 5
+    "total": 10,
+    "today": 0,
+    "todayDate": "2026/7/10"
   },
   "records": [],
   "exHistory": [],
