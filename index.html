@@ -800,7 +800,7 @@
 
 <!-- ═══════════ 主页面 ═══════════ -->
 <div class="container page page-active" id="pageMain">
-  <h1>👑 丫丫无敌大王计时器</h1>
+  <h1>👑 丫丫无敌大王计时器 <span id="syncBadge" style="font-size:0.55rem;vertical-align:middle;cursor:pointer;" title="点击设置云同步">☁️</span></h1>
 
   <!-- 计时显示 -->
   <div class="timer-display" id="timerDisplay">
@@ -963,6 +963,28 @@
     </div>
     <div class="modal-btns" style="margin-top:-8px;">
       <button class="btn-danger" id="btnEditZero" style="flex:1;">归零积分</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 云同步设置弹窗 ═══════════ -->
+<div class="modal-overlay hidden" id="modalSync">
+  <div class="modal-box">
+    <h3>☁️ 云同步设置</h3>
+    <p class="hint" id="syncStatusText">未配置云同步</p>
+    <input type="password" id="syncTokenInput" placeholder="输入 GitHub Token" maxlength="100" style="font-size:14px;">
+    <p class="hint" style="font-size:0.68rem;line-height:1.5;">
+      1. 打开 <a href="https://github.com/settings/tokens" target="_blank" style="color:var(--accent);">github.com/settings/tokens</a><br>
+      2. 点 Generate new token (classic)<br>
+      3. 勾选 <b>repo</b> 权限，生成后粘贴到上方
+    </p>
+    <div class="modal-btns">
+      <button class="btn-cancel" id="btnSyncCancel">关闭</button>
+      <button class="btn-confirm" id="btnSyncSave">保存并同步</button>
+    </div>
+    <div class="modal-btns" style="margin-top:-8px;">
+      <button class="btn-danger" id="btnSyncDisable" style="flex:1;">关闭云同步</button>
+      <button class="btn-confirm" id="btnSyncNow" style="flex:1;">🔄 立即同步</button>
     </div>
   </div>
 </div>
@@ -1139,6 +1161,7 @@ function doSpecialExchange() {
   updateExBalance();
   showToast('💝 特别兑换成功！「' + input + '」');
   vibrate([50, 100, 50]);
+  scheduleAutoSync();
 }
 
 // 积分编辑弹窗
@@ -1178,6 +1201,7 @@ function savePointsEdit() {
   } else {
     showToast('✅ 积分 ' + delta);
   }
+  scheduleAutoSync();
 }
 
 function zeroPoints() {
@@ -1189,6 +1213,7 @@ function zeroPoints() {
   renderPoints();
   hideAllModals();
   showToast('🔄 积分已归零');
+  scheduleAutoSync();
 }
 
 // 修改密码弹窗
@@ -1537,6 +1562,8 @@ function autoRecord() {
   // 庆祝弹窗
   setTimeout(() => showCelebration(), 600);
 
+  scheduleAutoSync();
+
   remaining = totalSeconds;
   isRunning = false;
   isPaused = false;
@@ -1571,6 +1598,7 @@ function manualRecord() {
   const earned = awardPoints(elapsed, note);
   spawnFlyPoints(earned);
   showToast('📝 已记录 · +' + earned + '积分 · ' + formatDuration(elapsed));
+  scheduleAutoSync();
 }
 
 function deleteRecord(id) {
@@ -1890,6 +1918,7 @@ function redeemItem(itemId) {
   updateExBalance();
   showToast('🎉 兑换成功！「' + item.name + '」');
   vibrate([30, 50, 30]);
+  scheduleAutoSync();
 }
 
 function updateExBalance() {
@@ -1979,6 +2008,36 @@ document.getElementById('btnChPwdConfirm').addEventListener('click', confirmChan
 document.getElementById('btnChPwdCancel').addEventListener('click', hideAllModals);
 document.getElementById('newPwdInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') confirmChangePwd(); });
 
+// ── 云同步弹窗事件 ──
+document.getElementById('syncBadge').addEventListener('click', () => {
+  const token = getSyncToken();
+  document.getElementById('syncTokenInput').value = token;
+  document.getElementById('syncStatusText').textContent = token ? '☁️ 云同步已配置' : '未配置云同步';
+  document.getElementById('modalSync').classList.remove('hidden');
+});
+document.getElementById('btnSyncCancel').addEventListener('click', () => {
+  document.getElementById('modalSync').classList.add('hidden');
+});
+document.getElementById('btnSyncSave').addEventListener('click', () => {
+  const token = document.getElementById('syncTokenInput').value.trim();
+  if (!token) { showToast('⚠️ 请输入 Token'); return; }
+  setSyncToken(token);
+  updateSyncBadge();
+  document.getElementById('modalSync').classList.add('hidden');
+  doSync(false);
+});
+document.getElementById('btnSyncDisable').addEventListener('click', () => {
+  if (!confirm('确定关闭云同步吗？')) return;
+  setSyncToken('');
+  updateSyncBadge();
+  document.getElementById('modalSync').classList.add('hidden');
+  showToast('☁️ 云同步已关闭');
+});
+document.getElementById('btnSyncNow').addEventListener('click', () => {
+  document.getElementById('modalSync').classList.add('hidden');
+  doSync(false);
+});
+
 // 点击计时器区域：手动记录
 timerDisplay.addEventListener('click', () => {
   if (totalSeconds !== remaining && !isRunning) {
@@ -2043,6 +2102,186 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+// ── Cloud Sync ──
+const SYNC_TOKEN_KEY = 'yaya_sync_token';
+const SYNC_REPO = 'NOwoof/DYD_timer';
+const SYNC_FILE = 'data.json';
+const SYNC_RAW_URL = 'https://raw.githubusercontent.com/' + SYNC_REPO + '/master/' + SYNC_FILE;
+const SYNC_API_URL = 'https://api.github.com/repos/' + SYNC_REPO + '/contents/' + SYNC_FILE;
+
+function getSyncToken() {
+  return localStorage.getItem(SYNC_TOKEN_KEY) || '';
+}
+
+function setSyncToken(t) {
+  localStorage.setItem(SYNC_TOKEN_KEY, t);
+}
+
+function updateSyncBadge() {
+  const badge = document.getElementById('syncBadge');
+  const token = getSyncToken();
+  if (!token) {
+    badge.textContent = '☁️';
+    badge.title = '云同步未配置，点击设置';
+    badge.style.opacity = '0.5';
+  } else {
+    badge.textContent = '☁️✓';
+    badge.title = '云同步已开启，点击管理';
+    badge.style.opacity = '1';
+  }
+}
+
+// 打包所有数据
+function packSyncData() {
+  return {
+    version: 1,
+    updatedAt: Date.now(),
+    device: navigator.userAgent.slice(0, 60),
+    points: loadPoints(),
+    records: loadRecords(),
+    exHistory: loadExHistory(),
+    password: getPassword(),
+  };
+}
+
+// 解包并合并数据
+function unpackSyncData(data, mode) {
+  if (!data || !data.version) return false;
+
+  if (mode === 'overwrite') {
+    savePoints(data.points || { total: 0, today: 0 });
+    saveRecords(data.records || []);
+    saveExHistory(data.exHistory || []);
+    if (data.password) setPassword(data.password);
+  } else {
+    // 智能合并：积分取最大值
+    const cur = loadPoints();
+    const merged = {
+      total: Math.max(cur.total, data.points?.total || 0),
+      today: Math.max(cur.today, data.points?.today || 0),
+    };
+    savePoints(merged);
+
+    // 记录合并去重
+    const allR = [...(data.records || []), ...loadRecords()];
+    const seenR = new Set();
+    saveRecords(allR.filter(r => seenR.has(r.id) ? false : (seenR.add(r.id), true)));
+
+    // 兑换历史合并
+    const allE = [...(data.exHistory || []), ...loadExHistory()];
+    const seenE = new Set();
+    saveExHistory(allE.filter(h => seenE.has(h.id) ? false : (seenE.add(h.id), true)));
+  }
+  return true;
+}
+
+// 从 GitHub 拉取数据
+async function pullFromGitHub() {
+  const token = getSyncToken();
+  if (!token) return null;
+  try {
+    const resp = await fetch(SYNC_RAW_URL + '?t=' + Date.now(), {
+      headers: { 'Authorization': 'token ' + token, 'Cache-Control': 'no-cache' }
+    });
+    if (!resp.ok) return null; // 文件可能还不存在
+    return await resp.json();
+  } catch (_) {
+    return null;
+  }
+}
+
+// 推送到 GitHub
+async function pushToGitHub() {
+  const token = getSyncToken();
+  if (!token) return false;
+  try {
+    const content = JSON.stringify(packSyncData(), null, 2);
+    const base64 = btoa(unescape(encodeURIComponent(content)));
+
+    // 先获取当前文件 SHA
+    let sha = null;
+    try {
+      const getResp = await fetch(SYNC_API_URL, {
+        headers: { 'Authorization': 'token ' + token }
+      });
+      if (getResp.ok) {
+        const info = await getResp.json();
+        sha = info.sha;
+      }
+    } catch (_) {}
+
+    // PUT 更新
+    const body = {
+      message: '☁️ 自动同步数据 [' + new Date().toLocaleString('zh-CN') + ']',
+      content: base64,
+    };
+    if (sha) body.sha = sha;
+
+    const putResp = await fetch(SYNC_API_URL, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'token ' + token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+
+    return putResp.ok;
+  } catch (_) {
+    return false;
+  }
+}
+
+// 同步流程：先拉取远端 → 合并 → 再推送
+async function doSync(silent) {
+  const token = getSyncToken();
+  if (!token) {
+    if (!silent) showToast('⚠️ 请先设置 GitHub Token');
+    return;
+  }
+
+  const badge = document.getElementById('syncBadge');
+  badge.textContent = '☁️↻';
+
+  const remote = await pullFromGitHub();
+  if (remote && remote.updatedAt) {
+    const local = packSyncData();
+    if (remote.updatedAt > local.updatedAt + 5000) {
+      // 远端更新 → 合并
+      unpackSyncData(remote, 'merge');
+      renderPoints();
+      renderRecords();
+      if (!silent) showToast('☁️ 已从云端同步最新数据');
+    }
+  }
+
+  // 推送本地到云端
+  const ok = await pushToGitHub();
+  if (ok) {
+    badge.textContent = '☁️✓';
+    if (!silent) showToast('☁️ 同步成功');
+  } else {
+    badge.textContent = '☁️✗';
+    if (!silent) showToast('☁️ 同步失败，请检查 Token');
+  }
+}
+
+// 自动后台同步（不显示 toast）
+function autoSync() {
+  const token = getSyncToken();
+  if (!token) return;
+  doSync(true).catch(() => {});
+}
+
+// 防抖同步：数据变更后延迟 3 秒自动推送
+let syncDebounce = null;
+function scheduleAutoSync() {
+  const token = getSyncToken();
+  if (!token) return;
+  clearTimeout(syncDebounce);
+  syncDebounce = setTimeout(() => doSync(true), 3000);
+}
+
 // ── Init ──
 remaining = readInput();
 totalSeconds = remaining;
@@ -2050,6 +2289,9 @@ updateDisplay();
 updateButtons();
 renderRecords();
 renderPoints();
+updateSyncBadge();
+// 启动时自动从云端拉取
+setTimeout(() => autoSync(), 1000);
 </script>
 
 </body>
