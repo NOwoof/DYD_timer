@@ -1263,8 +1263,17 @@
     <div style="width:56px;"></div>
   </div>
 
+  <!-- 发送设置 -->
+  <div class="notes-add-card" style="margin-bottom:4px;">
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:4px;">💌 发送设置（学习完成后告诉她）</div>
+    <input type="tel" id="gfPhoneInput" placeholder="她的手机号（如：13800138000）" maxlength="20">
+    <input type="email" id="gfEmailInput" placeholder="她的邮箱（如：xxx@qq.com）" maxlength="60">
+    <button class="notes-add-btn" id="btnSaveContact" style="background:linear-gradient(135deg, #f472b6, #e879a0);">💾 保存联系方式</button>
+  </div>
+
   <!-- 添加笔记 -->
   <div class="notes-add-card">
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:4px;">📝 添加资料收藏</div>
     <input type="text" id="noteTitleInput" placeholder="标题（如：数学视频）" maxlength="40" enterkeyhint="next">
     <input type="url" id="noteLinkInput" placeholder="链接（如：https://...）" maxlength="500" enterkeyhint="next">
     <input type="text" id="noteDescInput" placeholder="备注（可选）" maxlength="80" enterkeyhint="done">
@@ -1555,6 +1564,7 @@
     <div class="celeb-sub">继续加油</div>
     <div class="celeb-heart">爱你哟~ 💖</div>
     <button class="celeb-btn" id="btnCelebClose">✨ 好的！✨</button>
+    <button class="celeb-btn" id="btnCelebTell" style="background:linear-gradient(135deg, #f472b6, #e879a0);color:#fff;margin-top:8px;">💌 告诉她</button>
   </div>
 </div>
 
@@ -2473,7 +2483,64 @@ const EXCHANGE_ITEMS = [
 const EX_HISTORY_KEY = 'yaya_exchange_history';
 const NOTES_KEY = 'yaya_notes';
 const DAILY_KEY = 'yaya_daily_time';
+const CONTACT_KEY = 'yaya_contact';
 let selectedTag = '无标签';
+
+// ── 发送消息 ──
+function loadContact() {
+  try { return JSON.parse(localStorage.getItem(CONTACT_KEY)) || { phone: '', email: '' }; }
+  catch (_) { return { phone: '', email: '' }; }
+}
+
+function saveContact(c) {
+  localStorage.setItem(CONTACT_KEY, JSON.stringify(c));
+}
+
+function buildLoveMessage() {
+  const p = loadPoints();
+  const records = loadRecords();
+  const today = new Date().toLocaleDateString('zh-CN');
+  // 今日学习时长
+  let todaySec = 0;
+  records.forEach(r => {
+    if (r.date && r.date.startsWith(today)) todaySec += r.duration || 0;
+  });
+  const h = Math.floor(todaySec / 3600);
+  const m = Math.floor((todaySec % 3600) / 60);
+  const timeStr = h > 0 ? h + '小时' + m + '分钟' : m + '分钟';
+  const rank = getRank(p.lifetime || p.total);
+
+  const templates = [
+    '💕 宝贝，我今天已经学了' + timeStr + '啦！为了我们的未来，我会继续加油的~',
+    '📚 刚完成' + timeStr + '的学习！想你的时候就来学习，这样时间过得快一点~',
+    '🌟 今日学习打卡：' + timeStr + '！等级：' + rank.emoji + rank.title + '。爱你哟~',
+    '💪 今天学了' + timeStr + '，离梦想又近了一步！都是为了你呀~',
+  ];
+  return templates[Math.floor(Math.random() * templates.length)];
+}
+
+function tellHer() {
+  const contact = loadContact();
+  const msg = buildLoveMessage();
+
+  if (contact.phone) {
+    // 优先短信
+    window.open('sms:' + contact.phone + '?body=' + encodeURIComponent(msg), '_blank');
+    showToast('💌 已打开短信');
+  } else if (contact.email) {
+    window.open('mailto:' + contact.email + '?subject=' + encodeURIComponent('学习打卡💕') + '&body=' + encodeURIComponent(msg), '_blank');
+    showToast('📧 已打开邮件');
+  } else {
+    // 都没设置，复制到剪贴板
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(msg).then(() => {
+        showToast('📋 消息已复制，去发给她吧~');
+      });
+    } else {
+      prompt('复制这条消息发给她吧~', msg);
+    }
+  }
+}
 
 // ── 每日学习追踪 & 连击倍率 ──
 function loadDaily() {
@@ -3041,6 +3108,9 @@ function switchTo(page) {
     renderExHistory();
   } else if (page === 'notes') {
     document.getElementById('pageNotes').classList.add('page-active');
+    const c = loadContact();
+    document.getElementById('gfPhoneInput').value = c.phone || '';
+    document.getElementById('gfEmailInput').value = c.email || '';
     renderNotes();
   } else if (page === 'stats') {
     document.getElementById('pageStats').classList.add('page-active');
@@ -3078,6 +3148,12 @@ document.getElementById('btnLotteryReset').addEventListener('click', () => {
   openPasswordModal();
   passwordCallback = 'resetLottery';
 });
+document.getElementById('btnSaveContact').addEventListener('click', () => {
+  const phone = document.getElementById('gfPhoneInput').value.trim();
+  const email = document.getElementById('gfEmailInput').value.trim();
+  saveContact({ phone, email });
+  showToast('💌 联系方式已保存');
+});
 document.getElementById('btnAddNote').addEventListener('click', addNote);
 document.getElementById('noteDescInput').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') addNote();
@@ -3091,6 +3167,10 @@ btnExport.addEventListener('click', exportTxt);
 
 // ── 庆祝弹窗关闭 ──
 btnCelebClose.addEventListener('click', () => celebrationOverlay.classList.add('hidden'));
+document.getElementById('btnCelebTell').addEventListener('click', () => {
+  celebrationOverlay.classList.add('hidden');
+  tellHer();
+});
 
 // ── 特别兑换 ──
 document.getElementById('btnSpecialExchange').addEventListener('click', () => {
