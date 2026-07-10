@@ -1408,15 +1408,18 @@
     </div>
 
     <div class="rule-section">
-      <div class="rule-title">⭐ 称号等级</div>
+      <div class="rule-title">⭐ 称号等级（基于终身学习积分，永不降级）</div>
       <div class="rule-text">
         🌰 种子选手（0-249）<br>
-        🌱 学习新芽（250-999）<br>
-        🌿 学习达人（1000-2999）<br>
-        🔥 学习高手（3000-7499）<br>
-        ⭐ 学习大师（7500-14999）<br>
-        💎 学习传说（15000-24999）<br>
-        👑 无敌学习王（25000+）
+        🌱 学习新芽（250-999）→ 升级奖励 <b>+100</b> 分<br>
+        🌿 学习达人（1000-2999）→ 升级奖励 <b>+300</b> 分<br>
+        🔥 学习高手（3000-7499）→ 升级奖励 <b>+500</b> 分<br>
+        ⭐ 学习大师（7500-14999）→ 升级奖励 <b>+1000</b> 分<br>
+        💎 学习传说（15000-24999）→ 升级奖励 <b>+2000</b> 分<br>
+        👑 无敌学习王（25000+）→ 升级奖励 <b>+5000</b> 分<br>
+        <br>• 等级仅由学习时长获得的积分累计<br>
+        • 积分兑换后等级不下降<br>
+        • 每个等级奖励仅领取一次
       </div>
     </div>
 
@@ -1755,14 +1758,15 @@ function savePointsEdit() {
 }
 
 function zeroPoints() {
-  if (!confirm('确定要将积分归零吗？此操作不可撤销。')) return;
+  if (!confirm('确定要将积分归零吗？（称号等级不受影响）')) return;
   const p = loadPoints();
   p.total = 0;
   p.today = 0;
+  // lifetime 不重置，称号永不降级
   savePoints(p);
   renderPoints();
   hideAllModals();
-  showToast('🔄 积分已归零');
+  showToast('🔄 积分已归零（称号保留）');
   scheduleAutoSync();
 }
 
@@ -2024,22 +2028,37 @@ function updateButtons() {
 
 // ── Points ──
 function loadPoints() {
-  try { return JSON.parse(localStorage.getItem(POINTS_KEY)) || { total: 0, today: 0 }; }
-  catch (_) { return { total: 0, today: 0 }; }
+  try { return JSON.parse(localStorage.getItem(POINTS_KEY)) || { total: 0, today: 0, lifetime: 0, claimedRanks: [] }; }
+  catch (_) { return { total: 0, today: 0, lifetime: 0, claimedRanks: [] }; }
 }
 
 function savePoints(p) {
   localStorage.setItem(POINTS_KEY, JSON.stringify(p));
 }
 
-function getRank(total) {
-  if (total >= 25000) return { emoji: '👑', title: '无敌学习王' };
-  if (total >= 15000) return { emoji: '💎', title: '学习传说' };
-  if (total >= 7500)  return { emoji: '⭐', title: '学习大师' };
-  if (total >= 3000)  return { emoji: '🔥', title: '学习高手' };
-  if (total >= 1000)  return { emoji: '🌿', title: '学习达人' };
-  if (total >= 250)   return { emoji: '🌱', title: '学习新芽' };
-  return { emoji: '🌰', title: '种子选手' };
+const RANK_LEVELS = [
+  { min: 25000, emoji: '👑', title: '无敌学习王', reward: 5000 },
+  { min: 15000, emoji: '💎', title: '学习传说',   reward: 2000 },
+  { min: 7500,  emoji: '⭐', title: '学习大师',   reward: 1000 },
+  { min: 3000,  emoji: '🔥', title: '学习高手',   reward: 500 },
+  { min: 1000,  emoji: '🌿', title: '学习达人',   reward: 300 },
+  { min: 250,   emoji: '🌱', title: '学习新芽',   reward: 100 },
+  { min: 0,     emoji: '🌰', title: '种子选手',   reward: 0 },
+];
+
+function getRank(lifetime) {
+  for (const r of RANK_LEVELS) {
+    if (lifetime >= r.min) return r;
+  }
+  return RANK_LEVELS[RANK_LEVELS.length - 1];
+}
+
+// 检查是否升级，返回新等级（如果有）
+function checkRankUp(oldLifetime, newLifetime) {
+  const oldRank = getRank(oldLifetime);
+  const newRank = getRank(newLifetime);
+  if (newRank.min > oldRank.min) return newRank;
+  return null;
 }
 
 function awardPoints(seconds, note) {
@@ -2054,21 +2073,52 @@ function awardPoints(seconds, note) {
   addDailyTime(seconds);
 
   const p = loadPoints();
+  const oldLifetime = p.lifetime || 0;
   p.total += points;
   p.today += points;
+  p.lifetime = (p.lifetime || 0) + points; // 终身累计，只增不减
+  if (!p.claimedRanks) p.claimedRanks = [];
+
+  // 检查升级
+  const rankUp = checkRankUp(oldLifetime, p.lifetime);
+  if (rankUp && !p.claimedRanks.includes(rankUp.title)) {
+    // 升级奖励
+    p.total += rankUp.reward;
+    p.today += rankUp.reward;
+    p.lifetime += rankUp.reward;
+    p.claimedRanks.push(rankUp.title);
+    savePoints(p);
+    renderPoints();
+    updateStreakDisplay();
+    // 弹窗庆祝
+    setTimeout(() => showRankUpCelebration(rankUp), 500);
+    return points;
+  }
+
   savePoints(p);
   renderPoints();
   updateStreakDisplay();
   return points;
 }
 
+function showRankUpCelebration(rank) {
+  celebrationOverlay.classList.remove('hidden');
+  const box = document.querySelector('.celebration-box');
+  box.querySelector('.celeb-emoji').textContent = rank.emoji;
+  box.querySelector('.celeb-title').textContent = '🎉 称号升级！';
+  box.querySelector('.celeb-sub').textContent = rank.emoji + ' ' + rank.title;
+  box.querySelector('.celeb-heart').textContent = '升级奖励 +' + rank.reward + ' 积分！💖';
+}
+
 function renderPoints() {
   const p = loadPoints();
+  if (!p.claimedRanks) p.claimedRanks = [];
+  savePoints(p);
 
   totalPointsEl.textContent = p.total;
   todayPointsEl.textContent = '+' + p.today;
 
-  const rank = getRank(p.total);
+  const rank = getRank(p.lifetime || p.total);
   rankTextEl.textContent = rank.emoji + ' ' + rank.title;
 
   updateStreakDisplay();
@@ -2292,10 +2342,12 @@ function importAllData(file) {
         const curRecords = loadRecords();
         const curExHistory = loadExHistory();
 
-        // 积分取最大值
+        // 积分取最大值，lifetime 永不降低
         const mergedPoints = {
           total: Math.max(curPoints.total, data.points?.total || 0),
           today: Math.max(curPoints.today, data.points?.today || 0),
+          lifetime: Math.max(curPoints.lifetime || 0, data.points?.lifetime || 0),
+          claimedRanks: [...new Set([...(curPoints.claimedRanks || []), ...(data.points?.claimedRanks || [])])],
         };
         savePoints(mergedPoints);
 
