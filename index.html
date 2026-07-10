@@ -2104,6 +2104,7 @@ document.addEventListener('keydown', (e) => {
 
 // ── Cloud Sync ──
 const SYNC_TOKEN_KEY = 'yaya_sync_token';
+const SYNC_TS_KEY    = 'yaya_last_sync_at';
 const SYNC_REPO = 'NOwoof/DYD_timer';
 const SYNC_FILE = 'data.json';
 const SYNC_RAW_URL = 'https://raw.githubusercontent.com/' + SYNC_REPO + '/master/' + SYNC_FILE;
@@ -2112,9 +2113,14 @@ const SYNC_API_URL = 'https://api.github.com/repos/' + SYNC_REPO + '/contents/' 
 function getSyncToken() {
   return localStorage.getItem(SYNC_TOKEN_KEY) || '';
 }
-
 function setSyncToken(t) {
   localStorage.setItem(SYNC_TOKEN_KEY, t);
+}
+function getLastSyncAt() {
+  return parseInt(localStorage.getItem(SYNC_TS_KEY)) || 0;
+}
+function setLastSyncAt(ts) {
+  localStorage.setItem(SYNC_TS_KEY, ts);
 }
 
 function updateSyncBadge() {
@@ -2131,7 +2137,7 @@ function updateSyncBadge() {
   }
 }
 
-// 可靠的 UTF-8 → Base64 编码
+// UTF-8 → Base64
 function utf8ToBase64(str) {
   const bytes = new TextEncoder().encode(str);
   let binary = '';
@@ -2139,11 +2145,10 @@ function utf8ToBase64(str) {
   return btoa(binary);
 }
 
-// 打包所有数据
-function packSyncData() {
+function packSyncData(ts) {
   return {
     version: 1,
-    updatedAt: Date.now(),
+    updatedAt: ts || Date.now(),
     points: loadPoints(),
     records: loadRecords(),
     exHistory: loadExHistory(),
@@ -2151,35 +2156,17 @@ function packSyncData() {
   };
 }
 
-// 解包并合并数据
-function unpackSyncData(data, mode) {
-  if (!data || !data.version) return false;
-
-  if (mode === 'overwrite') {
-    savePoints(data.points || { total: 0, today: 0 });
-    saveRecords(data.records || []);
-    saveExHistory(data.exHistory || []);
-    if (data.password) setPassword(data.password);
-  } else {
-    const cur = loadPoints();
-    const merged = {
-      total: Math.max(cur.total, data.points?.total || 0),
-      today: Math.max(cur.today, data.points?.today || 0),
-    };
-    savePoints(merged);
-
-    const allR = [...(data.records || []), ...loadRecords()];
-    const seenR = new Set();
-    saveRecords(allR.filter(r => seenR.has(r.id) ? false : (seenR.add(r.id), true)));
-
-    const allE = [...(data.exHistory || []), ...loadExHistory()];
-    const seenE = new Set();
-    saveExHistory(allE.filter(h => seenE.has(h.id) ? false : (seenE.add(h.id), true)));
-  }
-  return true;
+// 用云端数据覆盖本地
+function applyRemoteData(data) {
+  if (!data || !data.version) return;
+  savePoints(data.points || { total: 0, today: 0 });
+  saveRecords(data.records || []);
+  saveExHistory(data.exHistory || []);
+  if (data.password) setPassword(data.password);
+  setLastSyncAt(data.updatedAt || Date.now());
 }
 
-// 从 GitHub 拉取数据（raw URL 是公开的，不需要 token）
+// 从 GitHub 拉取
 async function pullFromGitHub() {
   try {
     const resp = await fetch(SYNC_RAW_URL + '?t=' + Date.now(), { cache: 'no-store' });
@@ -2198,46 +2185,33 @@ async function pushToGitHub() {
   const token = getSyncToken();
   if (!token) return false;
   try {
-    const content = JSON.stringify(packSyncData(), null, 2);
+    const now = Date.now();
+    const content = JSON.stringify(packSyncData(now), null, 2);
     const base64 = utf8ToBase64(content);
 
-    // 先获取当前文件 SHA
     let sha = null;
     try {
       const getResp = await fetch(SYNC_API_URL, {
         headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' }
       });
-      if (getResp.ok) {
-        const info = await getResp.json();
-        sha = info.sha;
-      }
-    } catch (e) {
-      console.error('[Sync] get sha error:', e.message);
-    }
+      if (getResp.ok) { const info = await getResp.json(); sha = info.sha; }
+    } catch (e) { console.error('[Sync] sha error:', e.message); }
 
-    // PUT 更新
-    const body = {
-      message: '☁️ sync: ' + new Date().toLocaleString('zh-CN'),
-      content: base64,
-    };
+    const body = { message: '☁️ sync @ ' + new Date().toLocaleString('zh-CN'), content: base64 };
     if (sha) body.sha = sha;
 
     const putResp = await fetch(SYNC_API_URL, {
       method: 'PUT',
-      headers: {
-        'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/json',
-        'Accept': 'application/vnd.github+json',
-      },
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github+json' },
       body: JSON.stringify(body),
     });
 
     if (!putResp.ok) {
-      const errBody = await putResp.text();
-      console.error('[Sync] push failed:', putResp.status, errBody.slice(0, 200));
+      console.error('[Sync] push failed:', putResp.status);
       return false;
     }
-    console.log('[Sync] push OK');
+    setLastSyncAt(now);
+    console.log('[Sync] push OK @', now);
     return true;
   } catch (e) {
     console.error('[Sync] push error:', e.message);
@@ -2245,32 +2219,46 @@ async function pushToGitHub() {
   }
 }
 
-// 同步流程：拉远端 → 合并 → 推本地
+// 启动时：从云端拉取最新数据
+async function autoSync() {
+  const token = getSyncToken();
+  if (!token) return;
+  const remote = await pullFromGitHub();
+  if (!remote || !remote.updatedAt) return;
+
+  const lastSync = getLastSyncAt();
+  console.log('[Sync] remote ts:', remote.updatedAt, 'local lastSync:', lastSync);
+
+  // 云端比本地记录的时间戳更新 → 说明另一设备更新了数据
+  if (remote.updatedAt > lastSync) {
+    applyRemoteData(remote);
+    renderPoints();
+    renderRecords();
+    console.log('[Sync] loaded from cloud! records:', (remote.records||[]).length);
+    showToast('☁️ 已同步最新数据（' + (remote.records||[]).length + '条记录）');
+  }
+}
+
+// 完整同步：先拉后推
 async function doSync(silent) {
   const token = getSyncToken();
-  if (!token) {
-    if (!silent) showToast('⚠️ 请先设置 GitHub Token');
-    return;
-  }
+  if (!token) { if (!silent) showToast('⚠️ 请先设置 GitHub Token'); return; }
 
   const badge = document.getElementById('syncBadge');
   badge.textContent = '☁️↻';
   badge.style.color = '#fbbf24';
 
-  // 先拉远端
+  // 先拉取合并
   const remote = await pullFromGitHub();
-  if (remote && remote.updatedAt) {
-    const local = packSyncData();
-    if (remote.updatedAt > local.updatedAt + 3000) {
-      unpackSyncData(remote, 'merge');
-      renderPoints();
-      renderRecords();
-      console.log('[Sync] pulled remote data, merged');
-      if (!silent) showToast('☁️ 已从云端同步最新数据');
-    }
+  if (remote && remote.updatedAt && remote.updatedAt > getLastSyncAt()) {
+    applyRemoteData(remote);
+    renderPoints();
+    renderRecords();
+    console.log('[Sync] merged from remote');
+    if (!silent) showToast('☁️ 已同步云端数据');
   }
 
-  // 推本地到云端
+  // 再推送
   const ok = await pushToGitHub();
   if (ok) {
     badge.textContent = '☁️✓';
@@ -2279,27 +2267,11 @@ async function doSync(silent) {
   } else {
     badge.textContent = '☁️✗';
     badge.style.color = '#f87171';
-    if (!silent) showToast('☁️ 同步失败，请检查 Token 权限');
+    if (!silent) showToast('☁️ 同步失败');
   }
 }
 
-// 启动时自动拉取
-async function autoSync() {
-  const token = getSyncToken();
-  if (!token) return;
-  const remote = await pullFromGitHub();
-  if (remote && remote.updatedAt) {
-    const local = packSyncData();
-    if (remote.updatedAt > local.updatedAt + 3000) {
-      unpackSyncData(remote, 'merge');
-      renderPoints();
-      renderRecords();
-      console.log('[Sync] auto-loaded from cloud');
-    }
-  }
-}
-
-// 防抖同步：数据变更后延迟 3 秒自动推送
+// 防抖推送
 let syncDebounce = null;
 function scheduleAutoSync() {
   const token = getSyncToken();
