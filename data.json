@@ -1,18 +1,11 @@
 {
   "version": 1,
-  "updatedAt": 1783671855781,
+  "updatedAt": 1783672058164,
   "points": {
     "total": 10,
     "today": 10
   },
-  "records": [
-    {
-      "id": 1783671852777,
-      "date": "2026/07/10 16:24",
-      "duration": 60,
-      "note": "无备注"
-    }
-  ],
+  "records": [],
   "exHistory": [],
   "password": "1234"
 }
