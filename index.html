@@ -343,6 +343,7 @@
 
   @media (hover: hover) {
     .clear-all:hover { border-color: var(--danger); color: var(--danger); }
+    #btnExport:hover { border-color: var(--accent2); color: var(--accent2); background: rgba(129,140,248,.08); }
   }
 
   /* ── Toast ── */
@@ -437,7 +438,10 @@
     <ul class="record-list" id="recordList">
       <li class="empty-hint">还没有记录，开始计时吧 ✍️</li>
     </ul>
-    <button class="clear-all" id="btnClearAll">🗑 清空全部记录</button>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="clear-all" id="btnClearAll" style="margin-top:0;flex:1;">🗑 清空全部记录</button>
+      <button class="clear-all" id="btnExport" style="margin-top:0;flex:1;border-color:var(--accent);color:var(--accent);">📄 导出 TXT</button>
+    </div>
   </div>
 </div>
 
@@ -459,6 +463,7 @@ const recordList   = document.getElementById('recordList');
 const noteInput    = document.getElementById('noteInput');
 const statsText    = document.getElementById('statsText');
 const btnClearAll  = document.getElementById('btnClearAll');
+const btnExport    = document.getElementById('btnExport');
 const toast        = document.getElementById('toast');
 
 const STORAGE_KEY = 'exam_timer_records';
@@ -772,6 +777,66 @@ function clearAllRecords() {
   showToast('🗑 记录已清空');
 }
 
+function exportTxt() {
+  const records = loadRecords();
+  if (records.length === 0) {
+    showToast('⚠️ 没有记录可以导出');
+    return;
+  }
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit' });
+  const timeStr = now.toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' });
+
+  // 计算总学习时长
+  const totalSec = records.reduce((sum, r) => sum + r.duration, 0);
+
+  // 构建 TXT 内容
+  const lines = [];
+  lines.push('═══════════════════════════════════════');
+  lines.push('        📋 备考学习日志');
+  lines.push('═══════════════════════════════════════');
+  lines.push('');
+  lines.push('  导出时间：' + dateStr + ' ' + timeStr);
+  lines.push('  记录总数：' + records.length + ' 条');
+  lines.push('  总学习时长：' + formatDuration(totalSec));
+  lines.push('');
+  lines.push('───────────────────────────────────────');
+  lines.push('');
+
+  records.forEach((r, i) => {
+    lines.push('【' + (i + 1) + '】' + r.date);
+    lines.push('    时长：' + formatDuration(r.duration));
+    lines.push('    备注：' + r.note);
+    lines.push('');
+  });
+
+  lines.push('───────────────────────────────────────');
+  lines.push('  导出完毕 — 继续加油！💪');
+  lines.push('═══════════════════════════════════════');
+
+  const text = lines.join('\n');
+
+  // 生成文件名：备考日志_2024-01-15.txt
+  const filename = '备考日志_' + now.toLocaleDateString('zh-CN', {
+    year:'numeric', month:'2-digit', day:'2-digit'
+  }).replace(/\//g, '-') + '.txt';
+
+  // 下载文件
+  const blob = new Blob(['﻿' + text], { type: 'text/plain;charset=utf-8' }); // BOM 确保 Windows 记事本不乱码
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast('📄 日志已导出 · ' + filename);
+  vibrate(20);
+}
+
 function formatDuration(s) {
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);
@@ -825,6 +890,7 @@ btnStart.addEventListener('click', start);
 btnPause.addEventListener('click', pause);
 btnReset.addEventListener('click', reset);
 btnClearAll.addEventListener('click', clearAllRecords);
+btnExport.addEventListener('click', exportTxt);
 
 // 点击计时器区域：手动记录
 timerDisplay.addEventListener('click', () => {
