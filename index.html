@@ -485,6 +485,34 @@
   .lt-complete-btn:active { transform: scale(.95); }
   .lt-complete-btn:disabled { background: var(--border); color: var(--muted); }
 
+  /* ── Rules Page ── */
+  .rules-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 20px;
+  }
+  .rule-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .rule-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .rule-text {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+  .rule-text b {
+    color: var(--text);
+  }
+
   /* ── Note Input ── */
   .note-area { margin-bottom: 12px; }
   .note-area input {
@@ -1106,6 +1134,7 @@
     <button class="exchange-entry" id="btnGoNotes" style="background:linear-gradient(135deg, rgba(129,140,248,.15), rgba(129,140,248,.05));border-color:rgba(129,140,248,.3);color:var(--accent2);">📝 更多</button>
     <button class="exchange-entry" id="btnGoStats" style="background:linear-gradient(135deg, rgba(74,222,128,.15), rgba(74,222,128,.05));border-color:rgba(74,222,128,.3);color:var(--success);">📊 统计</button>
     <button class="exchange-entry" id="btnGoLottery" style="background:linear-gradient(135deg, rgba(244,114,182,.15), rgba(244,114,182,.05));border-color:rgba(244,114,182,.3);color:#f472b6;">🎰 抽奖</button>
+    <button class="exchange-entry" id="btnGoRules" style="background:linear-gradient(135deg, rgba(148,163,184,.15), rgba(148,163,184,.05));border-color:rgba(148,163,184,.3);color:var(--muted);">📖 规则</button>
   </div>
 
   <!-- 时间设置 -->
@@ -1336,6 +1365,115 @@
   </div>
 </div>
 <!-- ═══════════ /抽奖页面 ═══════════ -->
+
+<!-- ═══════════ 规则页面 ═══════════ -->
+<div class="container page" id="pageRules">
+  <div class="exchange-header">
+    <button class="back-btn" id="btnRulesBack">← 返回</button>
+    <h2>📖 规则说明</h2>
+    <div style="width:56px;"></div>
+  </div>
+
+  <div class="rules-content">
+    <div class="rule-section">
+      <div class="rule-title">⏱ 计时规则</div>
+      <div class="rule-text">
+        • 设置倒计时时间（或选择预设），点击「开始」计时<br>
+        • 计时中可暂停/继续，重置会清零<br>
+        • 倒计时归零自动记录学习时长<br>
+        • 长按计时器区域可手动记录已学习时长<br>
+        • 支持键盘快捷键：空格=开始/暂停，R=重置
+      </div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-title">💰 积分规则</div>
+      <div class="rule-text">
+        • <b>1分钟学习 = 5积分</b><br>
+        • 1积分 = ¥0.01（1分钱）<br>
+        • 日学5小时 ≈ 1500分 ≈ ¥15<br>
+        • 周学35小时 ≈ 10500分 ≈ ¥105<br>
+        • 最少一次获得5积分
+      </div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-title">🔥 连击倍率</div>
+      <div class="rule-text">
+        • 过去3天每天学满<b>4小时</b>，触发 <b>x1.5 倍率</b><br>
+        • 倍率触发后，当天所有积分 ×1.5<br>
+        • 任意一天不足4小时，倍率恢复 x1.0<br>
+        • 倍率在积分卡片实时显示
+      </div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-title">⭐ 称号等级</div>
+      <div class="rule-text">
+        🌰 种子选手（0-249）<br>
+        🌱 学习新芽（250-999）<br>
+        🌿 学习达人（1000-2999）<br>
+        🔥 学习高手（3000-7499）<br>
+        ⭐ 学习大师（7500-14999）<br>
+        💎 学习传说（15000-24999）<br>
+        👑 无敌学习王（25000+）
+      </div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-title">🎁 积分兑换</div>
+      <div class="rule-text">
+        • 积分可兑换实物奖励（零食、文具、裙子等）<br>
+        • 兑换后积分立即扣除<br>
+        • 💝 <b>特别兑换</b>：可自定义想要的东西<br>
+        • 特别兑换需要密码，且当日积分清零<br>
+        • 兑换记录可在兑换页面查看
+      </div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-title">🎰 每周抽奖</div>
+      <div class="rule-text">
+        • 每周日刷新，免费<b>1次</b>抽取机会<br>
+        • 抽取随机任务，难度越高奖励越多<br>
+        • 完成任务后点「领取奖励」获得积分<br>
+        • 密码可增加抽取次数（最多5次/次）<br>
+        • 密码可重置本周抽奖
+      </div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-title">🏷 标签统计</div>
+      <div class="rule-text">
+        • 计时前可选择学习科目标签（数学/英语等）<br>
+        • 支持自定义标签<br>
+        • 📊 统计页面按标签汇总学习时长<br>
+        • 彩色直方图直观展示各科学习情况
+      </div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-title">☁️ 云同步</div>
+      <div class="rule-text">
+        • 标题旁 ☁️ 图标设置 GitHub Token<br>
+        • 数据自动同步到 GitHub，多设备互通<br>
+        • 打开页面自动拉取最新数据<br>
+        • 学习记录变化后3秒自动推送<br>
+        • 也可用 📤导出/📥导入 JSON 文件手动同步
+      </div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-title">🔐 密码管理</div>
+      <div class="rule-text">
+        • 默认密码：<b>1234</b>（可在设置中修改）<br>
+        • 密码用于：编辑积分、特别兑换、增加抽奖次数<br>
+        • 积分卡片右上角 🔧 进入管理
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ═══════════ /规则页面 ═══════════ -->
 
 <!-- ═══════════ 密码弹窗 ═══════════ -->
 <div class="modal-overlay hidden" id="modalPassword">
@@ -2842,6 +2980,7 @@ function switchTo(page) {
   document.getElementById('pageNotes').classList.remove('page-active');
   document.getElementById('pageStats').classList.remove('page-active');
   document.getElementById('pageLottery').classList.remove('page-active');
+  document.getElementById('pageRules').classList.remove('page-active');
 
   if (page === 'exchange') {
     pageExchange.classList.add('page-active');
@@ -2857,6 +2996,8 @@ function switchTo(page) {
   } else if (page === 'lottery') {
     document.getElementById('pageLottery').classList.add('page-active');
     renderLotteryPage();
+  } else if (page === 'rules') {
+    document.getElementById('pageRules').classList.add('page-active');
   } else {
     pageMain.classList.add('page-active');
     renderPoints();
@@ -2873,6 +3014,8 @@ btnBack.addEventListener('click', () => switchTo('main'));
 document.getElementById('btnNotesBack').addEventListener('click', () => switchTo('main'));
 document.getElementById('btnStatsBack').addEventListener('click', () => switchTo('main'));
 document.getElementById('btnLotteryBack').addEventListener('click', () => switchTo('main'));
+document.getElementById('btnRulesBack').addEventListener('click', () => switchTo('main'));
+document.getElementById('btnGoRules').addEventListener('click', () => switchTo('rules'));
 
 // ── 抽奖事件 ──
 document.getElementById('btnDraw').addEventListener('click', drawLottery);
