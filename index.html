@@ -2123,12 +2123,20 @@ function updateSyncBadge() {
   if (!token) {
     badge.textContent = '☁️';
     badge.title = '云同步未配置，点击设置';
-    badge.style.opacity = '0.5';
+    badge.style.color = '#666';
   } else {
     badge.textContent = '☁️✓';
     badge.title = '云同步已开启，点击管理';
-    badge.style.opacity = '1';
+    badge.style.color = '#4ade80';
   }
+}
+
+// 可靠的 UTF-8 → Base64 编码
+function utf8ToBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  bytes.forEach(b => binary += String.fromCharCode(b));
+  return btoa(binary);
 }
 
 // 打包所有数据
@@ -2136,7 +2144,6 @@ function packSyncData() {
   return {
     version: 1,
     updatedAt: Date.now(),
-    device: navigator.userAgent.slice(0, 60),
     points: loadPoints(),
     records: loadRecords(),
     exHistory: loadExHistory(),
@@ -2154,7 +2161,6 @@ function unpackSyncData(data, mode) {
     saveExHistory(data.exHistory || []);
     if (data.password) setPassword(data.password);
   } else {
-    // 智能合并：积分取最大值
     const cur = loadPoints();
     const merged = {
       total: Math.max(cur.total, data.points?.total || 0),
@@ -2162,12 +2168,10 @@ function unpackSyncData(data, mode) {
     };
     savePoints(merged);
 
-    // 记录合并去重
     const allR = [...(data.records || []), ...loadRecords()];
     const seenR = new Set();
     saveRecords(allR.filter(r => seenR.has(r.id) ? false : (seenR.add(r.id), true)));
 
-    // 兑换历史合并
     const allE = [...(data.exHistory || []), ...loadExHistory()];
     const seenE = new Set();
     saveExHistory(allE.filter(h => seenE.has(h.id) ? false : (seenE.add(h.id), true)));
@@ -2175,17 +2179,16 @@ function unpackSyncData(data, mode) {
   return true;
 }
 
-// 从 GitHub 拉取数据
+// 从 GitHub 拉取数据（raw URL 是公开的，不需要 token）
 async function pullFromGitHub() {
-  const token = getSyncToken();
-  if (!token) return null;
   try {
-    const resp = await fetch(SYNC_RAW_URL + '?t=' + Date.now(), {
-      headers: { 'Authorization': 'token ' + token, 'Cache-Control': 'no-cache' }
-    });
-    if (!resp.ok) return null; // 文件可能还不存在
-    return await resp.json();
-  } catch (_) {
+    const resp = await fetch(SYNC_RAW_URL + '?t=' + Date.now(), { cache: 'no-store' });
+    if (!resp.ok) return null;
+    const text = await resp.text();
+    if (!text || text.trim().startsWith('<!DOCTYPE')) return null;
+    return JSON.parse(text);
+  } catch (e) {
+    console.error('[Sync] pull error:', e.message);
     return null;
   }
 }
@@ -2196,23 +2199,25 @@ async function pushToGitHub() {
   if (!token) return false;
   try {
     const content = JSON.stringify(packSyncData(), null, 2);
-    const base64 = btoa(unescape(encodeURIComponent(content)));
+    const base64 = utf8ToBase64(content);
 
     // 先获取当前文件 SHA
     let sha = null;
     try {
       const getResp = await fetch(SYNC_API_URL, {
-        headers: { 'Authorization': 'token ' + token }
+        headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' }
       });
       if (getResp.ok) {
         const info = await getResp.json();
         sha = info.sha;
       }
-    } catch (_) {}
+    } catch (e) {
+      console.error('[Sync] get sha error:', e.message);
+    }
 
     // PUT 更新
     const body = {
-      message: '☁️ 自动同步数据 [' + new Date().toLocaleString('zh-CN') + ']',
+      message: '☁️ sync: ' + new Date().toLocaleString('zh-CN'),
       content: base64,
     };
     if (sha) body.sha = sha;
@@ -2220,19 +2225,27 @@ async function pushToGitHub() {
     const putResp = await fetch(SYNC_API_URL, {
       method: 'PUT',
       headers: {
-        'Authorization': 'token ' + token,
+        'Authorization': 'Bearer ' + token,
         'Content-Type': 'application/json',
+        'Accept': 'application/vnd.github+json',
       },
       body: JSON.stringify(body),
     });
 
-    return putResp.ok;
-  } catch (_) {
+    if (!putResp.ok) {
+      const errBody = await putResp.text();
+      console.error('[Sync] push failed:', putResp.status, errBody.slice(0, 200));
+      return false;
+    }
+    console.log('[Sync] push OK');
+    return true;
+  } catch (e) {
+    console.error('[Sync] push error:', e.message);
     return false;
   }
 }
 
-// 同步流程：先拉取远端 → 合并 → 再推送
+// 同步流程：拉远端 → 合并 → 推本地
 async function doSync(silent) {
   const token = getSyncToken();
   if (!token) {
@@ -2242,35 +2255,48 @@ async function doSync(silent) {
 
   const badge = document.getElementById('syncBadge');
   badge.textContent = '☁️↻';
+  badge.style.color = '#fbbf24';
 
+  // 先拉远端
   const remote = await pullFromGitHub();
   if (remote && remote.updatedAt) {
     const local = packSyncData();
-    if (remote.updatedAt > local.updatedAt + 5000) {
-      // 远端更新 → 合并
+    if (remote.updatedAt > local.updatedAt + 3000) {
       unpackSyncData(remote, 'merge');
       renderPoints();
       renderRecords();
+      console.log('[Sync] pulled remote data, merged');
       if (!silent) showToast('☁️ 已从云端同步最新数据');
     }
   }
 
-  // 推送本地到云端
+  // 推本地到云端
   const ok = await pushToGitHub();
   if (ok) {
     badge.textContent = '☁️✓';
+    badge.style.color = '#4ade80';
     if (!silent) showToast('☁️ 同步成功');
   } else {
     badge.textContent = '☁️✗';
-    if (!silent) showToast('☁️ 同步失败，请检查 Token');
+    badge.style.color = '#f87171';
+    if (!silent) showToast('☁️ 同步失败，请检查 Token 权限');
   }
 }
 
-// 自动后台同步（不显示 toast）
-function autoSync() {
+// 启动时自动拉取
+async function autoSync() {
   const token = getSyncToken();
   if (!token) return;
-  doSync(true).catch(() => {});
+  const remote = await pullFromGitHub();
+  if (remote && remote.updatedAt) {
+    const local = packSyncData();
+    if (remote.updatedAt > local.updatedAt + 3000) {
+      unpackSyncData(remote, 'merge');
+      renderPoints();
+      renderRecords();
+      console.log('[Sync] auto-loaded from cloud');
+    }
+  }
 }
 
 // 防抖同步：数据变更后延迟 3 秒自动推送
@@ -2279,7 +2305,10 @@ function scheduleAutoSync() {
   const token = getSyncToken();
   if (!token) return;
   clearTimeout(syncDebounce);
-  syncDebounce = setTimeout(() => doSync(true), 3000);
+  syncDebounce = setTimeout(async () => {
+    await pushToGitHub();
+    updateSyncBadge();
+  }, 3000);
 }
 
 // ── Init ──
