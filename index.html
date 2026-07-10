@@ -880,6 +880,11 @@
       <button class="clear-all" id="btnClearAll" style="margin-top:0;flex:1;">🗑 清空全部记录</button>
       <button class="clear-all" id="btnExport" style="margin-top:0;flex:1;border-color:var(--accent);color:var(--accent);">📄 导出 TXT</button>
     </div>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button class="clear-all" id="btnExportData" style="margin-top:0;flex:1;border-color:var(--success);color:var(--success);">📤 导出数据</button>
+      <button class="clear-all" id="btnImportData" style="margin-top:0;flex:1;border-color:var(--accent2);color:var(--accent2);">📥 导入数据</button>
+    </div>
+    <input type="file" id="importFileInput" accept=".json" style="display:none;">
   </div>
 </div>
 <!-- ═══════════ /主页面 ═══════════ -->
@@ -1646,6 +1651,106 @@ function exportTxt() {
   showToast('📄 日志已导出 · ' + filename);
   vibrate(20);
 }
+
+// ── 数据导入导出（跨设备同步）──
+function exportAllData() {
+  const data = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    points: loadPoints(),
+    records: loadRecords(),
+    exHistory: loadExHistory(),
+    password: getPassword(),
+  };
+
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob(['﻿' + json], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '丫丫计时器_数据备份_' + new Date().toLocaleDateString('zh-CN').replace(/\//g, '-') + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast('📤 数据已导出（含积分+记录+兑换历史）');
+  vibrate(20);
+}
+
+function importAllData(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.version) throw new Error('无效的数据文件');
+
+      // 合并还是覆盖？询问用户
+      const mode = confirm('点击「确定」= 覆盖现有数据\n点击「取消」= 合并（保留两边数据）');
+
+      if (mode) {
+        // 覆盖模式
+        savePoints(data.points || { total: 0, today: 0 });
+        saveRecords(data.records || []);
+        saveExHistory(data.exHistory || []);
+        if (data.password) setPassword(data.password);
+      } else {
+        // 合并模式：保留现有数据，导入的数据追加进去
+        const curPoints = loadPoints();
+        const curRecords = loadRecords();
+        const curExHistory = loadExHistory();
+
+        // 积分取最大值
+        const mergedPoints = {
+          total: Math.max(curPoints.total, data.points?.total || 0),
+          today: Math.max(curPoints.today, data.points?.today || 0),
+        };
+        savePoints(mergedPoints);
+
+        // 记录合并去重
+        const allRecords = [...(data.records || []), ...curRecords];
+        const seenIds = new Set();
+        const uniqueRecords = allRecords.filter(r => {
+          if (seenIds.has(r.id)) return false;
+          seenIds.add(r.id);
+          return true;
+        });
+        saveRecords(uniqueRecords);
+
+        // 兑换历史合并
+        const allEx = [...(data.exHistory || []), ...curExHistory];
+        const seenExIds = new Set();
+        const uniqueEx = allEx.filter(h => {
+          if (seenExIds.has(h.id)) return false;
+          seenExIds.add(h.id);
+          return true;
+        });
+        saveExHistory(uniqueEx);
+      }
+
+      // 刷新界面
+      renderPoints();
+      renderRecords();
+      showToast('📥 数据导入成功！');
+      vibrate([30, 50, 30]);
+    } catch (err) {
+      showToast('❌ 数据文件格式错误');
+      vibrate([100, 50, 100]);
+    }
+  };
+  reader.readAsText(file);
+}
+
+document.getElementById('btnExportData').addEventListener('click', exportAllData);
+document.getElementById('btnImportData').addEventListener('click', () => {
+  document.getElementById('importFileInput').click();
+});
+document.getElementById('importFileInput').addEventListener('change', (e) => {
+  if (e.target.files[0]) {
+    importAllData(e.target.files[0]);
+    e.target.value = ''; // 清空以便重复选择同一文件
+  }
+});
 
 function formatDuration(s) {
   const h = Math.floor(s / 3600);
