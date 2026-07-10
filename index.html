@@ -400,6 +400,371 @@
     #btnExport:hover { border-color: var(--accent2); color: var(--accent2); background: rgba(129,140,248,.08); }
   }
 
+  /* ── Page Switching ── */
+  .page { display: none; }
+  .page.page-active { display: flex; }
+
+  /* ── Exchange Page ── */
+  .exchange-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0;
+  }
+  .exchange-header h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    text-align: center;
+  }
+  .back-btn {
+    width: 56px;
+    height: 40px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .back-btn:active { background: var(--accent); color: #0f172a; }
+
+  .exchange-balance {
+    background: linear-gradient(135deg, #1a2040 0%, #2a1050 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+  }
+  .eb-label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 4px;
+  }
+  .eb-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--warn);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .exchange-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .ex-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+  }
+  .ex-icon {
+    font-size: 1.8rem;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+  .ex-info { flex: 1; min-width: 0; }
+  .ex-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .ex-cost {
+    font-size: 0.78rem;
+    color: var(--warn);
+    margin-top: 2px;
+  }
+  .ex-btn {
+    padding: 10px 18px;
+    background: var(--accent);
+    color: #0f172a;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ex-btn:active { transform: scale(0.95); }
+  .ex-btn:disabled {
+    background: var(--border);
+    color: var(--muted);
+    cursor: not-allowed;
+  }
+
+  /* ── 特别兑换 ── */
+  .special-exchange {
+    background: linear-gradient(135deg, #2a1050 0%, #1a0530 100%);
+    border: 1px dashed rgba(251,191,36,.4);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+  }
+  .se-header {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #f9a8d4;
+    margin-bottom: 6px;
+  }
+  .se-desc {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+  .special-exchange input {
+    height: 44px;
+    padding: 0 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 16px;
+    outline: none;
+  }
+  .special-exchange input:focus { border-color: #f9a8d4; }
+  .special-exchange input::placeholder { color: var(--muted); font-size: 0.85rem; }
+  .se-btn {
+    height: 44px;
+    padding: 0 18px;
+    background: linear-gradient(135deg, #f9a8d4, #e879a0);
+    color: #1a0530;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .se-btn:active { transform: scale(0.95); }
+
+  /* 积分卡片中的兑换入口按钮 */
+  .points-card {
+    position: relative;
+  }
+  .exchange-entry {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px 0;
+    background: linear-gradient(135deg, rgba(251,191,36,.15), rgba(251,191,36,.05));
+    border: 1px solid rgba(251,191,36,.3);
+    border-radius: 8px;
+    color: var(--warn);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+    letter-spacing: .02em;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .exchange-entry:active {
+    background: var(--warn);
+    color: #0f172a;
+  }
+
+  /* ── Modal Overlay ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.7);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn .2s ease;
+  }
+  .modal-overlay.hidden { display: none; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 20px;
+    width: 100%;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  .modal-box h3 { font-size: 1rem; color: var(--text); }
+  .modal-box .hint { font-size: 0.78rem; color: var(--muted); }
+
+  .modal-box input[type="password"],
+  .modal-box input[type="number"] {
+    width: 100%;
+    height: 48px;
+    padding: 0 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 18px;
+    text-align: center;
+    outline: none;
+    letter-spacing: .08em;
+  }
+  .modal-box input:focus { border-color: var(--accent); }
+
+  .modal-btns {
+    display: flex;
+    gap: 8px;
+  }
+  .modal-btns button {
+    flex: 1;
+    height: 44px;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .modal-btns button:active { transform: scale(0.96); }
+
+  .btn-cancel { background: var(--border); color: var(--text); }
+  .btn-confirm { background: var(--accent); color: #0f172a; }
+  .btn-danger { background: var(--danger); color: #fff; }
+
+  .pts-adjust-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .pts-adjust-row button {
+    height: 48px;
+    width: 48px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 1.3rem;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .pts-adjust-row button:active { background: var(--accent); color: #0f172a; }
+  .pts-adjust-row .pts-val {
+    flex: 1;
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--warn);
+  }
+
+  /* 积分卡片中的小编辑按钮 */
+  .edit-pts-btn {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    background: none;
+    border: none;
+    font-size: 0.85rem;
+    cursor: pointer;
+    opacity: 0.5;
+    padding: 4px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .edit-pts-btn:active { opacity: 1; }
+
+  /* ── Celebration Modal ── */
+  .celebration-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.75);
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn .3s ease;
+  }
+  .celebration-overlay.hidden { display: none; }
+
+  .celebration-box {
+    background: linear-gradient(145deg, #1e1b4b 0%, #312e81 30%, #4c1d95 60%, #831843 100%);
+    border: 2px solid rgba(251,191,36,.4);
+    border-radius: 20px;
+    padding: 32px 24px;
+    width: 100%;
+    max-width: 340px;
+    text-align: center;
+    animation: celebBounce .5s cubic-bezier(.34,1.56,.64,1) forwards;
+    box-shadow: 0 0 60px rgba(251,191,36,.25);
+  }
+  @keyframes celebBounce {
+    0%   { transform: scale(.3); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .celebration-box .celeb-emoji {
+    font-size: 3.5rem;
+    animation: celebFloat 1.5s ease-in-out infinite;
+  }
+  @keyframes celebFloat {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-12px); }
+  }
+
+  .celebration-box .celeb-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #fbbf24;
+    margin: 8px 0 4px;
+    letter-spacing: .04em;
+  }
+  .celebration-box .celeb-sub {
+    font-size: 1rem;
+    color: #f9a8d4;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .celebration-box .celeb-heart {
+    font-size: 0.9rem;
+    color: #fb7185;
+    margin-bottom: 20px;
+  }
+
+  .celebration-box .celeb-btn {
+    width: 100%;
+    height: 48px;
+    border-radius: 24px;
+    border: none;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #1e1b4b;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: .04em;
+    transition: all .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .celebration-box .celeb-btn:active { transform: scale(.95); }
+
   /* ── Toast ── */
   .toast {
     position: fixed;
@@ -433,7 +798,8 @@
 </head>
 <body>
 
-<div class="container">
+<!-- ═══════════ 主页面 ═══════════ -->
+<div class="container page page-active" id="pageMain">
   <h1>👑 丫丫无敌大王计时器</h1>
 
   <!-- 计时显示 -->
@@ -443,7 +809,8 @@
   </div>
 
   <!-- 积分卡片 -->
-  <div class="points-card">
+  <div class="points-card" style="flex-wrap:wrap;">
+    <button class="edit-pts-btn" id="btnEditPoints" title="管理积分">🔧</button>
     <div class="points-item">
       <span class="p-value" id="totalPoints">0</span>
       <span class="p-label">🏆 总积分</span>
@@ -456,6 +823,7 @@
       <span class="p-rank" id="rankText">🌱 学习新芽</span>
       <span class="p-label">⭐ 称号</span>
     </div>
+    <button class="exchange-entry" id="btnGoExchange">🎁 积分兑换</button>
   </div>
 
   <!-- 时间设置 -->
@@ -514,6 +882,109 @@
     </div>
   </div>
 </div>
+<!-- ═══════════ /主页面 ═══════════ -->
+
+<!-- ═══════════ 积分兑换页面 ═══════════ -->
+<div class="container page" id="pageExchange">
+  <div class="exchange-header">
+    <button class="back-btn" id="btnBack">← 返回</button>
+    <h2>🎁 积分兑换</h2>
+    <div style="width:56px;"></div>
+  </div>
+
+  <!-- 可用积分 -->
+  <div class="exchange-balance">
+    <span class="eb-label">可用积分</span>
+    <span class="eb-value" id="exPoints">0</span>
+    <span style="display:block;font-size:0.85rem;color:var(--accent);margin-top:4px;" id="exMoney">≈ ¥0.00</span>
+    <span style="display:block;font-size:0.7rem;color:var(--muted);margin-top:2px;">💰 1分钟学习 = 5积分 | 1积分 = ¥0.01</span>
+  </div>
+
+  <!-- 兑换列表 -->
+  <div class="exchange-list" id="exchangeList">
+    <!-- JS 动态渲染 -->
+  </div>
+
+  <!-- 特别兑换 -->
+  <div class="special-exchange" id="specialExchange">
+    <div class="se-header">💝 特别兑换</div>
+    <p class="se-desc">输入你最想要的东西，老公来买单~<br>（需要密码，<b>当日积分将全部清零</b>）</p>
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="seInput" placeholder="我想要…" maxlength="30" enterkeyhint="done" style="flex:1;">
+      <button class="se-btn" id="btnSpecialExchange">🎁 兑换</button>
+    </div>
+  </div>
+
+  <!-- 兑换记录 -->
+  <div class="records" style="margin-top:4px;" id="exHistoryCard">
+    <div class="records-header">
+      <h3>📜 兑换记录</h3>
+      <span class="stats" id="exHistoryCount">共 0 条</span>
+    </div>
+    <ul class="record-list" id="exHistoryList">
+      <li class="empty-hint">还没有兑换记录哦~</li>
+    </ul>
+  </div>
+</div>
+<!-- ═══════════ /积分兑换页面 ═══════════ -->
+
+<!-- ═══════════ 密码弹窗 ═══════════ -->
+<div class="modal-overlay hidden" id="modalPassword">
+  <div class="modal-box">
+    <h3>🔐 请输入管理密码</h3>
+    <p class="hint">默认密码：1234</p>
+    <input type="password" id="pwdInput" placeholder="输入密码" maxlength="20" enterkeyhint="done">
+    <div class="modal-btns">
+      <button class="btn-cancel" id="btnPwdCancel">取消</button>
+      <button class="btn-confirm" id="btnPwdConfirm">确认</button>
+    </div>
+    <button style="background:none;border:none;color:var(--muted);font-size:0.7rem;cursor:pointer;margin-top:-8px;" id="btnChangePwd">修改密码</button>
+  </div>
+</div>
+
+<!-- ═══════════ 积分编辑弹窗 ═══════════ -->
+<div class="modal-overlay hidden" id="modalEditPoints">
+  <div class="modal-box">
+    <h3>✏️ 调整积分</h3>
+    <div class="pts-adjust-row">
+      <button id="btnPtsMinus">−</button>
+      <span class="pts-val" id="ptsEditVal">0</span>
+      <button id="btnPtsPlus">+</button>
+    </div>
+    <p class="hint">点击 + / − 每次增减 10 分，当前积分：<b id="ptsCurrent" style="color:var(--warn);">0</b></p>
+    <div class="modal-btns">
+      <button class="btn-cancel" id="btnEditCancel">取消</button>
+      <button class="btn-confirm" id="btnEditSave">保存修改</button>
+    </div>
+    <div class="modal-btns" style="margin-top:-8px;">
+      <button class="btn-danger" id="btnEditZero" style="flex:1;">归零积分</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 修改密码弹窗 ═══════════ -->
+<div class="modal-overlay hidden" id="modalChangePwd">
+  <div class="modal-box">
+    <h3>🔑 修改密码</h3>
+    <input type="password" id="oldPwdInput" placeholder="旧密码" maxlength="20">
+    <input type="password" id="newPwdInput" placeholder="新密码" maxlength="20" enterkeyhint="done">
+    <div class="modal-btns">
+      <button class="btn-cancel" id="btnChPwdCancel">取消</button>
+      <button class="btn-confirm" id="btnChPwdConfirm">确认修改</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 庆祝弹窗 ═══════════ -->
+<div class="celebration-overlay hidden" id="celebrationOverlay">
+  <div class="celebration-box">
+    <div class="celeb-emoji">🎉</div>
+    <div class="celeb-title">丫丫你真棒！</div>
+    <div class="celeb-sub">继续加油</div>
+    <div class="celeb-heart">爱你哟~ 💖</div>
+    <button class="celeb-btn" id="btnCelebClose">✨ 好的！✨</button>
+  </div>
+</div>
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
@@ -537,11 +1008,208 @@ const btnExport    = document.getElementById('btnExport');
 const totalPointsEl = document.getElementById('totalPoints');
 const todayPointsEl = document.getElementById('todayPoints');
 const rankTextEl    = document.getElementById('rankText');
+const pageMain      = document.getElementById('pageMain');
+const pageExchange  = document.getElementById('pageExchange');
+const btnGoExchange = document.getElementById('btnGoExchange');
+const btnBack       = document.getElementById('btnBack');
+const exPoints      = document.getElementById('exPoints');
 const toast        = document.getElementById('toast');
 
 const STORAGE_KEY = 'exam_timer_records';
 const POINTS_KEY = 'yaya_timer_points';
+const PWD_KEY = 'yaya_timer_pwd';
 const ALARM_DURATION = 8000;
+
+// ── Celebration DOM ──
+const celebrationOverlay = document.getElementById('celebrationOverlay');
+const btnCelebClose      = document.getElementById('btnCelebClose');
+
+function showCelebration() {
+  celebrationOverlay.classList.remove('hidden');
+}
+
+// ── Password Modal DOM ──
+const modalPassword  = document.getElementById('modalPassword');
+const modalEditPts   = document.getElementById('modalEditPoints');
+const modalChangePwd = document.getElementById('modalChangePwd');
+const pwdInput       = document.getElementById('pwdInput');
+const ptsEditVal     = document.getElementById('ptsEditVal');
+const ptsCurrent     = document.getElementById('ptsCurrent');
+
+// ── Password ──
+let passwordCallback = null; // 密码验证成功后的回调
+
+function getPassword() {
+  return localStorage.getItem(PWD_KEY) || '1234';
+}
+
+function setPassword(newPwd) {
+  localStorage.setItem(PWD_KEY, newPwd);
+}
+
+function hideAllModals() {
+  celebrationOverlay.classList.add('hidden');
+  modalPassword.classList.add('hidden');
+  modalEditPts.classList.add('hidden');
+  modalChangePwd.classList.add('hidden');
+}
+
+// 打开密码验证弹窗（积分编辑）
+function openPasswordModal() {
+  if (isRunning && !isPaused) pause();
+  passwordCallback = 'editPoints';
+  hideAllModals();
+  pwdInput.value = '';
+  modalPassword.classList.remove('hidden');
+  setTimeout(() => pwdInput.focus(), 200);
+}
+
+// 打开密码验证弹窗（特别兑换）
+function openPasswordForSpecial() {
+  passwordCallback = 'specialExchange';
+  hideAllModals();
+  pwdInput.value = '';
+  modalPassword.classList.remove('hidden');
+  setTimeout(() => pwdInput.focus(), 200);
+}
+
+// 验证密码 → 根据回调执行不同操作
+function verifyPassword() {
+  const input = pwdInput.value.trim();
+  if (input === getPassword()) {
+    hideAllModals();
+    if (passwordCallback === 'specialExchange') {
+      doSpecialExchange();
+    } else {
+      openEditPointsModal();
+    }
+    passwordCallback = null;
+  } else {
+    showToast('❌ 密码错误');
+    vibrate([50, 100, 50]);
+  }
+}
+
+// ── 特别兑换 ──
+function doSpecialExchange() {
+  const input = document.getElementById('seInput').value.trim();
+  if (!input) {
+    showToast('⚠️ 请输入想要的东西');
+    return;
+  }
+
+  const p = loadPoints();
+  const todayPts = p.today;
+  if (todayPts <= 0) {
+    showToast('⚠️ 今天还没有获得积分哦');
+    return;
+  }
+
+  if (!confirm('确定要用今日全部 ' + todayPts + ' 积分兑换「' + input + '」吗？\n\n爸爸妈妈来买单~ 💝\n（兑换后今日积分清零）')) return;
+
+  // 扣除今日积分
+  p.total = Math.max(0, p.total - todayPts);
+  p.today = 0;
+  savePoints(p);
+
+  // 保存兑换记录
+  const now = new Date();
+  const history = loadExHistory();
+  history.unshift({
+    id: Date.now(),
+    icon: '💝',
+    name: input + '（特别兑换）',
+    points: todayPts,
+    priceYuan: 0,
+    date: now.toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit' })
+      + ' ' + now.toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' }),
+  });
+  saveExHistory(history);
+
+  // 刷新
+  document.getElementById('seInput').value = '';
+  renderPoints();
+  renderExchangeItems();
+  renderExHistory();
+  updateExBalance();
+  showToast('💝 特别兑换成功！「' + input + '」');
+  vibrate([50, 100, 50]);
+}
+
+// 积分编辑弹窗
+function openEditPointsModal() {
+  const p = loadPoints();
+  const delta = 0;
+  // 用闭包存储当前待修改的积分值
+  window._ptsEditDelta = 0;
+  ptsEditVal.textContent = '0';
+  ptsCurrent.textContent = p.total;
+  modalEditPts.classList.remove('hidden');
+}
+
+// 修改积分
+function adjustPoints(delta) {
+  window._ptsEditDelta = (window._ptsEditDelta || 0) + delta;
+  ptsEditVal.textContent = (window._ptsEditDelta >= 0 ? '+' : '') + window._ptsEditDelta;
+  const p = loadPoints();
+  ptsCurrent.textContent = p.total + window._ptsEditDelta;
+}
+
+function savePointsEdit() {
+  const delta = window._ptsEditDelta || 0;
+  if (delta === 0) {
+    hideAllModals();
+    return;
+  }
+  const p = loadPoints();
+  p.total = Math.max(0, p.total + delta);
+  // 同步 today 避免出现负数
+  if (p.total < p.today) p.today = p.total;
+  savePoints(p);
+  renderPoints();
+  hideAllModals();
+  if (delta > 0) {
+    showToast('✅ 积分 +' + delta);
+  } else {
+    showToast('✅ 积分 ' + delta);
+  }
+}
+
+function zeroPoints() {
+  if (!confirm('确定要将积分归零吗？此操作不可撤销。')) return;
+  const p = loadPoints();
+  p.total = 0;
+  p.today = 0;
+  savePoints(p);
+  renderPoints();
+  hideAllModals();
+  showToast('🔄 积分已归零');
+}
+
+// 修改密码弹窗
+function openChangePwdModal() {
+  hideAllModals();
+  document.getElementById('oldPwdInput').value = '';
+  document.getElementById('newPwdInput').value = '';
+  modalChangePwd.classList.remove('hidden');
+  setTimeout(() => document.getElementById('oldPwdInput').focus(), 200);
+}
+
+function confirmChangePwd() {
+  const oldPwd = document.getElementById('oldPwdInput').value.trim();
+  const newPwd = document.getElementById('newPwdInput').value.trim();
+  if (oldPwd !== getPassword()) {
+    showToast('❌ 旧密码错误');
+    return;
+  }
+  if (!newPwd || newPwd.length < 1) {
+    showToast('❌ 新密码不能为空');
+    return;
+  }
+  setPassword(newPwd);
+  hideAllModals();
+  showToast('🔑 密码已修改');
+}
 
 // ── State ──
 let totalSeconds = 25 * 60;
@@ -776,8 +1444,8 @@ function updateButtons() {
 
 // ── Points ──
 function loadPoints() {
-  try { return JSON.parse(localStorage.getItem(POINTS_KEY)) || { total: 0, today: 0, todayDate: '' }; }
-  catch (_) { return { total: 0, today: 0, todayDate: '' }; }
+  try { return JSON.parse(localStorage.getItem(POINTS_KEY)) || { total: 0, today: 0 }; }
+  catch (_) { return { total: 0, today: 0 }; }
 }
 
 function savePoints(p) {
@@ -785,26 +1453,19 @@ function savePoints(p) {
 }
 
 function getRank(total) {
-  if (total >= 5000) return { emoji: '👑', title: '无敌学习王' };
-  if (total >= 3000) return { emoji: '💎', title: '学习传说' };
-  if (total >= 1500) return { emoji: '⭐', title: '学习大师' };
-  if (total >= 600)  return { emoji: '🔥', title: '学习高手' };
-  if (total >= 200)  return { emoji: '🌿', title: '学习达人' };
-  if (total >= 50)   return { emoji: '🌱', title: '学习新芽' };
+  if (total >= 25000) return { emoji: '👑', title: '无敌学习王' };
+  if (total >= 15000) return { emoji: '💎', title: '学习传说' };
+  if (total >= 7500)  return { emoji: '⭐', title: '学习大师' };
+  if (total >= 3000)  return { emoji: '🔥', title: '学习高手' };
+  if (total >= 1000)  return { emoji: '🌿', title: '学习达人' };
+  if (total >= 250)   return { emoji: '🌱', title: '学习新芽' };
   return { emoji: '🌰', title: '种子选手' };
 }
 
 function awardPoints(seconds, note) {
-  // 1分钟 = 1积分，至少1分
-  const points = Math.max(1, Math.floor(seconds / 60));
+  // 1分钟 = 5积分（日学5h ≈ ¥15，周学35h ≈ ¥105）
+  const points = Math.max(5, Math.floor(seconds / 60) * 5);
   const p = loadPoints();
-  const today = new Date().toLocaleDateString('zh-CN');
-
-  // 跨天重置今日积分
-  if (p.todayDate !== today) {
-    p.today = 0;
-    p.todayDate = today;
-  }
 
   p.total += points;
   p.today += points;
@@ -815,14 +1476,6 @@ function awardPoints(seconds, note) {
 
 function renderPoints() {
   const p = loadPoints();
-  const today = new Date().toLocaleDateString('zh-CN');
-
-  // 跨天重置
-  if (p.todayDate !== today) {
-    p.today = 0;
-    p.todayDate = today;
-    savePoints(p);
-  }
 
   totalPointsEl.textContent = p.total;
   todayPointsEl.textContent = '+' + p.today;
@@ -875,6 +1528,9 @@ function autoRecord() {
   const earned = awardPoints(totalSeconds, note);
   spawnFlyPoints(earned);
   showToast('✅ 完成！+' + earned + '积分 · ' + formatDuration(totalSeconds));
+
+  // 庆祝弹窗
+  setTimeout(() => showCelebration(), 600);
 
   remaining = totalSeconds;
   isRunning = false;
@@ -1039,12 +1695,184 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+// ── Exchange Items ──
+const EXCHANGE_ITEMS = [
+  { id: 'candy',   icon: '🍬', name: '棒棒糖',     priceYuan: 1,   points: 100 },
+  { id: 'choco',   icon: '🍫', name: '巧克力',       priceYuan: 5,   points: 500 },
+  { id: 'ice',     icon: '🍦', name: '冰淇淋',       priceYuan: 8,   points: 800 },
+  { id: 'nail',    icon: '💅', name: '美甲贴',       priceYuan: 10,  points: 1000 },
+  { id: 'milktea', icon: '🧋', name: '奶茶',         priceYuan: 15,  points: 1500 },
+  { id: 'cake',    icon: '🍰', name: '小蛋糕',       priceYuan: 25,  points: 2500 },
+  { id: 'perfume', icon: '🌸', name: '香水小样',     priceYuan: 50,  points: 5000 },
+  { id: 'lipstick',icon: '💄', name: '口红',         priceYuan: 99,  points: 9900 },
+  { id: 'dress',   icon: '👗', name: '小裙子',       priceYuan: 199, points: 19900 },
+  { id: 'bag',     icon: '👜', name: '包包',         priceYuan: 299, points: 29900 },
+];
+
+const EX_HISTORY_KEY = 'yaya_exchange_history';
+
+function loadExHistory() {
+  try { return JSON.parse(localStorage.getItem(EX_HISTORY_KEY)) || []; }
+  catch (_) { return []; }
+}
+
+function saveExHistory(h) {
+  localStorage.setItem(EX_HISTORY_KEY, JSON.stringify(h));
+}
+
+function renderExchangeItems() {
+  const p = loadPoints();
+  const list = document.getElementById('exchangeList');
+
+  list.innerHTML = EXCHANGE_ITEMS.map(item => {
+    const canBuy = p.total >= item.points;
+    return `
+      <div class="ex-item">
+        <div class="ex-icon">${item.icon}</div>
+        <div class="ex-info">
+          <div class="ex-name">${item.name}</div>
+          <div class="ex-cost">${item.points} 积分 ≈ ¥${item.priceYuan.toFixed(2)}</div>
+        </div>
+        <button class="ex-btn" ${canBuy ? '' : 'disabled'}
+          data-id="${item.id}" ${canBuy ? '' : 'disabled'}>
+          ${canBuy ? '兑换' : '积分不足'}
+        </button>
+      </div>
+    `;
+  }).join('');
+
+  // 绑定兑换按钮
+  list.querySelectorAll('.ex-btn:not([disabled])').forEach(btn => {
+    btn.addEventListener('click', () => redeemItem(btn.dataset.id));
+  });
+}
+
+function redeemItem(itemId) {
+  const item = EXCHANGE_ITEMS.find(i => i.id === itemId);
+  if (!item) return;
+
+  const p = loadPoints();
+  if (p.total < item.points) {
+    showToast('⚠️ 积分不足，继续加油吧！');
+    return;
+  }
+
+  if (!confirm('确定要用 ' + item.points + ' 积分兑换「' + item.name + '」吗？\n（≈ ¥' + item.priceYuan.toFixed(2) + '）')) return;
+
+  // 扣除积分
+  p.total -= item.points;
+  if (p.today > p.total) p.today = p.total;
+  savePoints(p);
+
+  // 保存兑换记录
+  const now = new Date();
+  const history = loadExHistory();
+  history.unshift({
+    id: Date.now(),
+    icon: item.icon,
+    name: item.name,
+    points: item.points,
+    priceYuan: item.priceYuan,
+    date: now.toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit' })
+      + ' ' + now.toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' }),
+  });
+  saveExHistory(history);
+
+  // 刷新页面
+  renderPoints();
+  renderExchangeItems();
+  renderExHistory();
+  updateExBalance();
+  showToast('🎉 兑换成功！「' + item.name + '」');
+  vibrate([30, 50, 30]);
+}
+
+function updateExBalance() {
+  const p = loadPoints();
+  document.getElementById('exPoints').textContent = p.total;
+  document.getElementById('exMoney').textContent = '≈ ¥' + (p.total / 100).toFixed(2);
+}
+
+function renderExHistory() {
+  const history = loadExHistory();
+  document.getElementById('exHistoryCount').textContent = '共 ' + history.length + ' 条';
+  const list = document.getElementById('exHistoryList');
+
+  if (history.length === 0) {
+    list.innerHTML = '<li class="empty-hint">还没有兑换记录哦~</li>';
+    return;
+  }
+
+  list.innerHTML = history.map(h => `
+    <li class="record-item">
+      <div style="min-width:0;">
+        <div class="rec-note">${h.icon} ${h.name} · ${h.points}分 ≈ ¥${h.priceYuan.toFixed(2)}</div>
+        <div class="rec-date">${h.date}</div>
+      </div>
+    </li>
+  `).join('');
+}
+
+// ── Page Switching ──
+function switchTo(page) {
+  if (page === 'exchange') {
+    pageMain.classList.remove('page-active');
+    pageExchange.classList.add('page-active');
+    updateExBalance();
+    renderExchangeItems();
+    renderExHistory();
+    window.scrollTo(0, 0);
+  } else {
+    pageExchange.classList.remove('page-active');
+    pageMain.classList.add('page-active');
+    renderPoints();
+    window.scrollTo(0, 0);
+  }
+}
+
 // ── Events ──
+btnGoExchange.addEventListener('click', () => switchTo('exchange'));
+btnBack.addEventListener('click', () => switchTo('main'));
+
 btnStart.addEventListener('click', start);
 btnPause.addEventListener('click', pause);
 btnReset.addEventListener('click', reset);
 btnClearAll.addEventListener('click', clearAllRecords);
 btnExport.addEventListener('click', exportTxt);
+
+// ── 庆祝弹窗关闭 ──
+btnCelebClose.addEventListener('click', () => celebrationOverlay.classList.add('hidden'));
+
+// ── 特别兑换 ──
+document.getElementById('btnSpecialExchange').addEventListener('click', () => {
+  const input = document.getElementById('seInput').value.trim();
+  if (!input) { showToast('⚠️ 请输入想要的东西'); return; }
+  openPasswordForSpecial();
+});
+document.getElementById('seInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('btnSpecialExchange').click();
+});
+
+// ── 积分编辑入口 ──
+document.getElementById('btnEditPoints').addEventListener('click', openPasswordModal);
+
+// ── 密码弹窗事件 ──
+document.getElementById('btnPwdConfirm').addEventListener('click', verifyPassword);
+document.getElementById('btnPwdCancel').addEventListener('click', hideAllModals);
+document.getElementById('btnChangePwd').addEventListener('click', openChangePwdModal);
+pwdInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') verifyPassword(); });
+
+// ── 积分编辑弹窗事件 ──
+document.getElementById('btnPtsPlus').addEventListener('click', () => adjustPoints(10));
+document.getElementById('btnPtsMinus').addEventListener('click', () => adjustPoints(-10));
+document.getElementById('btnEditSave').addEventListener('click', savePointsEdit);
+document.getElementById('btnEditCancel').addEventListener('click', hideAllModals);
+document.getElementById('btnEditZero').addEventListener('click', zeroPoints);
+
+// ── 修改密码弹窗事件 ──
+document.getElementById('btnChPwdConfirm').addEventListener('click', confirmChangePwd);
+document.getElementById('btnChPwdCancel').addEventListener('click', hideAllModals);
+document.getElementById('newPwdInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') confirmChangePwd(); });
 
 // 点击计时器区域：手动记录
 timerDisplay.addEventListener('click', () => {
