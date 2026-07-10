@@ -6,10 +6,10 @@
 <meta name="theme-color" content="#0f172a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="备考计时器">
+<meta name="apple-mobile-web-app-title" content="丫丫无敌大王计时器">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
-<title>备考倒计时器</title>
+<title>丫丫无敌大王计时器</title>
 <style>
   :root {
     --bg: #0f172a;
@@ -101,6 +101,60 @@
     margin-top: 8px;
     font-size: clamp(0.8rem, 2.5vw, 0.95rem);
     color: var(--muted);
+  }
+
+  /* ---- Points Card ---- */
+  .points-card {
+    background: linear-gradient(135deg, #1e293b 0%, #1a2040 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+  }
+  .points-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .points-item .p-value {
+    font-size: clamp(1.3rem, 5vw, 1.8rem);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--warn);
+    line-height: 1.1;
+  }
+  .points-item .p-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .points-item .p-rank {
+    font-size: 0.75rem;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* 积分飞入动画 */
+  .points-fly {
+    position: fixed;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--warn);
+    pointer-events: none;
+    z-index: 1000;
+    animation: flyUp 1.2s ease-out forwards;
+    text-shadow: 0 0 12px rgba(251,191,36,.5);
+  }
+  @keyframes flyUp {
+    0%   { opacity: 1; transform: translateY(0) scale(1); }
+    60%  { opacity: 1; transform: translateY(-60px) scale(1.3); }
+    100% { opacity: 0; transform: translateY(-100px) scale(0.8); }
   }
 
   /* ---- Setter ---- */
@@ -380,12 +434,28 @@
 <body>
 
 <div class="container">
-  <h1>⏳ 备考倒计时器</h1>
+  <h1>👑 丫丫无敌大王计时器</h1>
 
   <!-- 计时显示 -->
   <div class="timer-display" id="timerDisplay">
     <div class="time" id="timeText">25:00</div>
     <div class="time-label" id="timeLabel">准备开始</div>
+  </div>
+
+  <!-- 积分卡片 -->
+  <div class="points-card">
+    <div class="points-item">
+      <span class="p-value" id="totalPoints">0</span>
+      <span class="p-label">🏆 总积分</span>
+    </div>
+    <div class="points-item">
+      <span class="p-value" id="todayPoints">0</span>
+      <span class="p-label">📅 今日获得</span>
+    </div>
+    <div class="points-item">
+      <span class="p-rank" id="rankText">🌱 学习新芽</span>
+      <span class="p-label">⭐ 称号</span>
+    </div>
   </div>
 
   <!-- 时间设置 -->
@@ -464,9 +534,13 @@ const noteInput    = document.getElementById('noteInput');
 const statsText    = document.getElementById('statsText');
 const btnClearAll  = document.getElementById('btnClearAll');
 const btnExport    = document.getElementById('btnExport');
+const totalPointsEl = document.getElementById('totalPoints');
+const todayPointsEl = document.getElementById('todayPoints');
+const rankTextEl    = document.getElementById('rankText');
 const toast        = document.getElementById('toast');
 
 const STORAGE_KEY = 'exam_timer_records';
+const POINTS_KEY = 'yaya_timer_points';
 const ALARM_DURATION = 8000;
 
 // ── State ──
@@ -700,6 +774,75 @@ function updateButtons() {
   }
 }
 
+// ── Points ──
+function loadPoints() {
+  try { return JSON.parse(localStorage.getItem(POINTS_KEY)) || { total: 0, today: 0, todayDate: '' }; }
+  catch (_) { return { total: 0, today: 0, todayDate: '' }; }
+}
+
+function savePoints(p) {
+  localStorage.setItem(POINTS_KEY, JSON.stringify(p));
+}
+
+function getRank(total) {
+  if (total >= 5000) return { emoji: '👑', title: '无敌学习王' };
+  if (total >= 3000) return { emoji: '💎', title: '学习传说' };
+  if (total >= 1500) return { emoji: '⭐', title: '学习大师' };
+  if (total >= 600)  return { emoji: '🔥', title: '学习高手' };
+  if (total >= 200)  return { emoji: '🌿', title: '学习达人' };
+  if (total >= 50)   return { emoji: '🌱', title: '学习新芽' };
+  return { emoji: '🌰', title: '种子选手' };
+}
+
+function awardPoints(seconds, note) {
+  // 1分钟 = 1积分，至少1分
+  const points = Math.max(1, Math.floor(seconds / 60));
+  const p = loadPoints();
+  const today = new Date().toLocaleDateString('zh-CN');
+
+  // 跨天重置今日积分
+  if (p.todayDate !== today) {
+    p.today = 0;
+    p.todayDate = today;
+  }
+
+  p.total += points;
+  p.today += points;
+  savePoints(p);
+  renderPoints();
+  return points;
+}
+
+function renderPoints() {
+  const p = loadPoints();
+  const today = new Date().toLocaleDateString('zh-CN');
+
+  // 跨天重置
+  if (p.todayDate !== today) {
+    p.today = 0;
+    p.todayDate = today;
+    savePoints(p);
+  }
+
+  totalPointsEl.textContent = p.total;
+  todayPointsEl.textContent = '+' + p.today;
+
+  const rank = getRank(p.total);
+  rankTextEl.textContent = rank.emoji + ' ' + rank.title;
+}
+
+// 积分飞入动画
+function spawnFlyPoints(points) {
+  const el = document.createElement('div');
+  el.className = 'points-fly';
+  el.textContent = '+' + points + ' ⚡';
+  // 随机水平位置
+  el.style.left = (20 + Math.random() * 60) + '%';
+  el.style.top = '40%';
+  document.body.appendChild(el);
+  el.addEventListener('animationend', () => el.remove());
+}
+
 // ── Records ──
 function loadRecords() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
@@ -727,7 +870,11 @@ function autoRecord() {
   records.unshift(record);
   saveRecords(records);
   renderRecords();
-  showToast('✅ 已自动记录 · ' + formatDuration(totalSeconds));
+
+  // 积分奖励
+  const earned = awardPoints(totalSeconds, note);
+  spawnFlyPoints(earned);
+  showToast('✅ 完成！+' + earned + '积分 · ' + formatDuration(totalSeconds));
 
   remaining = totalSeconds;
   isRunning = false;
@@ -759,7 +906,10 @@ function manualRecord() {
   records.unshift(record);
   saveRecords(records);
   renderRecords();
-  showToast('📝 已记录 · ' + formatDuration(elapsed));
+
+  const earned = awardPoints(elapsed, note);
+  spawnFlyPoints(earned);
+  showToast('📝 已记录 · +' + earned + '积分 · ' + formatDuration(elapsed));
 }
 
 function deleteRecord(id) {
@@ -794,12 +944,16 @@ function exportTxt() {
   // 构建 TXT 内容
   const lines = [];
   lines.push('═══════════════════════════════════════');
-  lines.push('        📋 备考学习日志');
+  lines.push('     👑 丫丫无敌大王 · 学习日志');
   lines.push('═══════════════════════════════════════');
   lines.push('');
+  const p = loadPoints();
+  const rank = getRank(p.total);
   lines.push('  导出时间：' + dateStr + ' ' + timeStr);
   lines.push('  记录总数：' + records.length + ' 条');
   lines.push('  总学习时长：' + formatDuration(totalSec));
+  lines.push('  🏆 总积分：' + p.total + '（今日 +' + p.today + '）');
+  lines.push('  ⭐ 称号：' + rank.emoji + ' ' + rank.title);
   lines.push('');
   lines.push('───────────────────────────────────────');
   lines.push('');
@@ -812,13 +966,13 @@ function exportTxt() {
   });
 
   lines.push('───────────────────────────────────────');
-  lines.push('  导出完毕 — 继续加油！💪');
+  lines.push('  丫丫无敌大王 — 继续加油！💪👑');
   lines.push('═══════════════════════════════════════');
 
   const text = lines.join('\n');
 
-  // 生成文件名：备考日志_2024-01-15.txt
-  const filename = '备考日志_' + now.toLocaleDateString('zh-CN', {
+  // 生成文件名：丫丫学习日志_2024-01-15.txt
+  const filename = '丫丫学习日志_' + now.toLocaleDateString('zh-CN', {
     year:'numeric', month:'2-digit', day:'2-digit'
   }).replace(/\//g, '-') + '.txt';
 
@@ -962,6 +1116,7 @@ totalSeconds = remaining;
 updateDisplay();
 updateButtons();
 renderRecords();
+renderPoints();
 </script>
 
 </body>
