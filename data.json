@@ -1,35 +1,13 @@
 {
   "version": 1,
-  "updatedAt": 1783717795143,
+  "updatedAt": 1783717805341,
   "points": {
     "total": 0,
     "today": 0,
     "claimedRanks": [],
     "lifetime": 10
   },
-  "records": [
-    {
-      "id": 1783678626790,
-      "date": "2026/07/10 18:17",
-      "duration": 0,
-      "note": "无备注",
-      "tag": "无标签"
-    },
-    {
-      "id": 1783678577022,
-      "date": "2026/07/10 18:16",
-      "duration": 60,
-      "note": "无备注",
-      "tag": "无标签"
-    },
-    {
-      "id": 1783677230579,
-      "date": "2026/07/10 17:53",
-      "duration": 60,
-      "note": "无备注",
-      "tag": "数学"
-    }
-  ],
+  "records": [],
   "exHistory": [
     {
       "id": 1783677121208,
