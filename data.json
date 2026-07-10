@@ -1,30 +1,25 @@
 {
   "version": 1,
-  "updatedAt": 1783673572011,
+  "updatedAt": 1783674051501,
   "points": {
     "total": 245,
     "today": 15
   },
-  "records": [
+  "records": [],
+  "exHistory": [],
+  "notes": [
     {
-      "id": 1783673538878,
-      "date": "2026/07/10 16:52",
-      "duration": 60,
-      "note": "æ å¤æ³¨"
+      "title": "考研英语",
+      "link": "https://pan.baidu.com/s/1Kt-4SOJIRFB-W9A7F9dxwg?pwd=37xi",
+      "desc": "",
+      "date": 1783674048494
     },
     {
-      "id": 1783673241769,
-      "date": "2026/07/10 16:47",
-      "duration": 60,
-      "note": "æ å¤æ³¨"
-    },
-    {
-      "id": 1783673082096,
-      "date": "2026/07/10 16:44",
-      "duration": 60,
-      "note": "æ å¤æ³¨"
+      "title": "2027海绵全程",
+      "link": "https://pan.baidu.com/s/1vzg9GIMeqhna1qrR_msrCQ?pwd=597h",
+      "desc": "",
+      "date": 1783674017567
     }
   ],
-  "exHistory": [],
   "password": "1234"
 }
