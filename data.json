@@ -1,13 +1,20 @@
 {
   "version": 1,
-  "updatedAt": 1783678580022,
+  "updatedAt": 1783678629797,
   "points": {
-    "total": 40,
-    "today": 10,
+    "total": 45,
+    "today": 15,
     "claimedRanks": [],
-    "lifetime": 5
+    "lifetime": 10
   },
   "records": [
+    {
+      "id": 1783678626790,
+      "date": "2026/07/10 18:17",
+      "duration": 0,
+      "note": "无备注",
+      "tag": "无标签"
+    },
     {
       "id": 1783678577022,
       "date": "2026/07/10 18:16",
