@@ -1,12 +1,21 @@
 {
   "version": 1,
-  "updatedAt": 1783677049513,
+  "updatedAt": 1783677074299,
   "points": {
-    "total": 255,
+    "total": 155,
     "today": 25
   },
   "records": [],
-  "exHistory": [],
+  "exHistory": [
+    {
+      "id": 1783677071295,
+      "icon": "🍬",
+      "name": "棒棒糖",
+      "points": 100,
+      "priceYuan": 1,
+      "date": "2026/07/10 17:51"
+    }
+  ],
   "notes": [
     {
       "title": "数学",
