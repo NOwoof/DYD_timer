@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": 1783674426540,
+  "updatedAt": 1783674540058,
   "points": {
     "total": 250,
     "today": 20
@@ -14,19 +14,5 @@
     }
   ],
   "exHistory": [],
-  "notes": [
-    {
-      "title": "考研英语",
-      "link": "https://pan.baidu.com/s/1Kt-4SOJIRFB-W9A7F9dxwg?pwd=37xi",
-      "desc": "",
-      "date": 1783674301925
-    },
-    {
-      "title": "2027海绵全程",
-      "link": "https://pan.baidu.com/s/1vzg9GIMeqhna1qrR_msrCQ?pwd=597h",
-      "desc": "",
-      "date": 1783674017567
-    }
-  ],
   "password": "1234"
 }
