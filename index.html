@@ -1098,6 +1098,10 @@
       <span class="p-rank" id="rankText">🌱 学习新芽</span>
       <span class="p-label">⭐ 称号</span>
     </div>
+    <div class="points-item">
+      <span class="p-value" id="streakMult" style="color:var(--accent);">x1.0</span>
+      <span class="p-label">🔥 积分倍率</span>
+    </div>
     <button class="exchange-entry" id="btnGoExchange">🎁 积分兑换</button>
     <button class="exchange-entry" id="btnGoNotes" style="background:linear-gradient(135deg, rgba(129,140,248,.15), rgba(129,140,248,.05));border-color:rgba(129,140,248,.3);color:var(--accent2);">📝 更多</button>
     <button class="exchange-entry" id="btnGoStats" style="background:linear-gradient(135deg, rgba(74,222,128,.15), rgba(74,222,128,.05));border-color:rgba(74,222,128,.3);color:var(--success);">📊 统计</button>
@@ -1902,13 +1906,21 @@ function getRank(total) {
 
 function awardPoints(seconds, note) {
   // 1分钟 = 5积分（日学5h ≈ ¥15，周学35h ≈ ¥105）
-  const points = Math.max(5, Math.floor(seconds / 60) * 5);
-  const p = loadPoints();
+  let points = Math.max(5, Math.floor(seconds / 60) * 5);
 
+  // 连击倍率：前3天均≥4h → 1.5倍
+  const mult = getStreakMultiplier();
+  points = Math.floor(points * mult);
+
+  // 记录每日学习时间
+  addDailyTime(seconds);
+
+  const p = loadPoints();
   p.total += points;
   p.today += points;
   savePoints(p);
   renderPoints();
+  updateStreakDisplay();
   return points;
 }
 
@@ -1920,6 +1932,8 @@ function renderPoints() {
 
   const rank = getRank(p.total);
   rankTextEl.textContent = rank.emoji + ' ' + rank.title;
+
+  updateStreakDisplay();
 }
 
 // 积分飞入动画
@@ -2268,7 +2282,73 @@ const EXCHANGE_ITEMS = [
 
 const EX_HISTORY_KEY = 'yaya_exchange_history';
 const NOTES_KEY = 'yaya_notes';
+const DAILY_KEY = 'yaya_daily_time';
 let selectedTag = '无标签';
+
+// ── 每日学习追踪 & 连击倍率 ──
+function loadDaily() {
+  try { return JSON.parse(localStorage.getItem(DAILY_KEY)) || {}; }
+  catch (_) { return {}; }
+}
+function saveDaily(d) {
+  localStorage.setItem(DAILY_KEY, JSON.stringify(d));
+}
+
+function getTodayStr() {
+  return new Date().toLocaleDateString('zh-CN');
+}
+
+function addDailyTime(seconds) {
+  const d = loadDaily();
+  const today = getTodayStr();
+  d[today] = (d[today] || 0) + seconds;
+  // 只保留最近30天
+  const keys = Object.keys(d).sort();
+  while (keys.length > 30) { delete d[keys.shift()]; }
+  saveDaily(d);
+}
+
+function getStreakMultiplier() {
+  const d = loadDaily();
+  const now = new Date();
+  // 检查过去3个完整天（昨天、前天、大前天）
+  let streak = 0;
+  for (let i = 1; i <= 3; i++) {
+    const dt = new Date(now);
+    dt.setDate(now.getDate() - i);
+    const key = dt.toLocaleDateString('zh-CN');
+    const sec = d[key] || 0;
+    if (sec >= 14400) { // 4小时 = 14400秒
+      streak++;
+    } else {
+      break;
+    }
+  }
+  return streak >= 3 ? 1.5 : 1.0;
+}
+
+function updateStreakDisplay() {
+  const mult = getStreakMultiplier();
+  const el = document.getElementById('streakMult');
+  if (mult > 1) {
+    el.textContent = 'x' + mult.toFixed(1) + ' 🔥';
+    el.style.color = '#f97316';
+  } else {
+    // 检查进度
+    const d = loadDaily();
+    const now = new Date();
+    let curStreak = 0;
+    for (let i = 1; i <= 3; i++) {
+      const dt = new Date(now);
+      dt.setDate(now.getDate() - i);
+      const key = dt.toLocaleDateString('zh-CN');
+      if ((d[key] || 0) >= 14400) curStreak++;
+      else break;
+    }
+    el.textContent = 'x1.0 (' + curStreak + '/3天)';
+    el.style.color = 'var(--accent)';
+  }
+}
 
 function loadExHistory() {
   try { return JSON.parse(localStorage.getItem(EX_HISTORY_KEY)) || []; }
