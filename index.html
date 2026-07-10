@@ -2166,14 +2166,21 @@ function applyRemoteData(data) {
   setLastSyncAt(data.updatedAt || Date.now());
 }
 
-// 从 GitHub 拉取
+// 从 GitHub API 拉取（不走 CDN 缓存，实时）
 async function pullFromGitHub() {
+  const token = getSyncToken();
+  if (!token) return null;
   try {
-    const resp = await fetch(SYNC_RAW_URL + '?t=' + Date.now(), { cache: 'no-store' });
+    const resp = await fetch(SYNC_API_URL + '?t=' + Date.now(), {
+      headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' },
+      cache: 'no-store',
+    });
     if (!resp.ok) return null;
-    const text = await resp.text();
-    if (!text || text.trim().startsWith('<!DOCTYPE')) return null;
-    return JSON.parse(text);
+    const info = await resp.json();
+    if (!info.content) return null;
+    // GitHub API 返回 base64 编码的内容
+    const json = atob(info.content.replace(/\s/g, ''));
+    return JSON.parse(json);
   } catch (e) {
     console.error('[Sync] pull error:', e.message);
     return null;
