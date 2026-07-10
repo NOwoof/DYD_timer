@@ -510,6 +510,93 @@
     cursor: not-allowed;
   }
 
+  /* ── Notes Page ── */
+  .notes-add-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .notes-add-card input {
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 16px;
+    outline: none;
+  }
+  .notes-add-card input:focus { border-color: var(--accent2); }
+  .notes-add-card input::placeholder { color: var(--muted); font-size: 0.85rem; }
+  .notes-add-btn {
+    height: 44px;
+    background: var(--accent2);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .notes-add-btn:active { transform: scale(0.97); }
+
+  .notes-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .note-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+  }
+  .note-card .note-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent);
+    word-break: break-all;
+  }
+  .note-card .note-link {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--accent2);
+    margin-top: 4px;
+    word-break: break-all;
+    text-decoration: none;
+  }
+  .note-card .note-desc {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .note-card .note-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .note-card .note-actions button {
+    flex: 1;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 0.78rem;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .note-card .note-actions button:active { background: var(--border); }
+  .note-card .note-actions .note-del { color: var(--danger); border-color: rgba(248,113,113,.3); }
+
   /* ── 特别兑换 ── */
   .special-exchange {
     background: linear-gradient(135deg, #2a1050 0%, #1a0530 100%);
@@ -824,6 +911,7 @@
       <span class="p-label">⭐ 称号</span>
     </div>
     <button class="exchange-entry" id="btnGoExchange">🎁 积分兑换</button>
+    <button class="exchange-entry" id="btnGoNotes" style="background:linear-gradient(135deg, rgba(129,140,248,.15), rgba(129,140,248,.05));border-color:rgba(129,140,248,.3);color:var(--accent2);">📝 更多</button>
   </div>
 
   <!-- 时间设置 -->
@@ -932,6 +1020,29 @@
   </div>
 </div>
 <!-- ═══════════ /积分兑换页面 ═══════════ -->
+
+<!-- ═══════════ 更多 · 记事本页面 ═══════════ -->
+<div class="container page" id="pageNotes">
+  <div class="exchange-header">
+    <button class="back-btn" id="btnNotesBack">← 返回</button>
+    <h2>📝 资料收藏</h2>
+    <div style="width:56px;"></div>
+  </div>
+
+  <!-- 添加笔记 -->
+  <div class="notes-add-card">
+    <input type="text" id="noteTitleInput" placeholder="标题（如：数学视频）" maxlength="40" enterkeyhint="next">
+    <input type="url" id="noteLinkInput" placeholder="链接（如：https://...）" maxlength="500" enterkeyhint="next">
+    <input type="text" id="noteDescInput" placeholder="备注（可选）" maxlength="80" enterkeyhint="done">
+    <button class="notes-add-btn" id="btnAddNote">➕ 添加收藏</button>
+  </div>
+
+  <!-- 笔记列表 -->
+  <div class="notes-list" id="notesList">
+    <li class="empty-hint">还没有收藏的资料~</li>
+  </div>
+</div>
+<!-- ═══════════ /更多页面 ═══════════ -->
 
 <!-- ═══════════ 密码弹窗 ═══════════ -->
 <div class="modal-overlay hidden" id="modalPassword">
@@ -1688,6 +1799,7 @@ function exportAllData() {
     points: loadPoints(),
     records: loadRecords(),
     exHistory: loadExHistory(),
+    notes: loadNotes(),
     password: getPassword(),
   };
 
@@ -1721,6 +1833,7 @@ function importAllData(file) {
         savePoints(data.points || { total: 0, today: 0 });
         saveRecords(data.records || []);
         saveExHistory(data.exHistory || []);
+        saveNotes(data.notes || []);
         if (data.password) setPassword(data.password);
       } else {
         // 合并模式：保留现有数据，导入的数据追加进去
@@ -1754,6 +1867,18 @@ function importAllData(file) {
           return true;
         });
         saveExHistory(uniqueEx);
+
+        // 笔记合并去重
+        const curNotes = loadNotes();
+        const allNotes = [...(data.notes || []), ...curNotes];
+        const seenNoteDates = new Set();
+        const uniqueNotes = allNotes.filter(n => {
+          const key = n.date + '|' + n.link;
+          if (seenNoteDates.has(key)) return false;
+          seenNoteDates.add(key);
+          return true;
+        });
+        saveNotes(uniqueNotes);
       }
 
       // 刷新界面
@@ -1843,6 +1968,7 @@ const EXCHANGE_ITEMS = [
 ];
 
 const EX_HISTORY_KEY = 'yaya_exchange_history';
+const NOTES_KEY = 'yaya_notes';
 
 function loadExHistory() {
   try { return JSON.parse(localStorage.getItem(EX_HISTORY_KEY)) || []; }
@@ -1947,26 +2073,131 @@ function renderExHistory() {
   `).join('');
 }
 
+// ── Notes ──
+function loadNotes() {
+  try { return JSON.parse(localStorage.getItem(NOTES_KEY)) || []; }
+  catch (_) { return []; }
+}
+
+function saveNotes(notes) {
+  localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+}
+
+function renderNotes() {
+  const notes = loadNotes();
+  const list = document.getElementById('notesList');
+
+  if (notes.length === 0) {
+    list.innerHTML = '<li class="empty-hint">还没有收藏的资料~</li>';
+    return;
+  }
+
+  list.innerHTML = notes.map((n, i) => `
+    <li class="note-card">
+      <a class="note-title" href="${escapeHtml(n.link)}" target="_blank" rel="noopener">${escapeHtml(n.title) || '无标题'}</a>
+      ${n.link ? '<a class="note-link" href="' + escapeHtml(n.link) + '" target="_blank" rel="noopener">🔗 ' + escapeHtml(n.link) + '</a>' : ''}
+      ${n.desc ? '<div class="note-desc">' + escapeHtml(n.desc) + '</div>' : ''}
+      <div class="note-actions">
+        <button class="note-edit" data-idx="${i}">✏️ 编辑</button>
+        <button class="note-del" data-idx="${i}">🗑 删除</button>
+      </div>
+    </li>
+  `).join('');
+
+  // 编辑
+  list.querySelectorAll('.note-edit').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx);
+      const notes = loadNotes();
+      const n = notes[idx];
+      document.getElementById('noteTitleInput').value = n.title;
+      document.getElementById('noteLinkInput').value = n.link;
+      document.getElementById('noteDescInput').value = n.desc || '';
+      // 删除旧条目，等待用户重新添加
+      notes.splice(idx, 1);
+      saveNotes(notes);
+      renderNotes();
+      showToast('📝 已加载到编辑区，修改后点添加');
+    });
+  });
+
+  // 删除
+  list.querySelectorAll('.note-del').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx);
+      let notes = loadNotes();
+      notes.splice(idx, 1);
+      saveNotes(notes);
+      renderNotes();
+      showToast('🗑 已删除');
+      scheduleAutoSync();
+    });
+  });
+
+  // 链接点击
+  list.querySelectorAll('.note-title, .note-link').forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.open(a.href, '_blank');
+    });
+  });
+}
+
+function addNote() {
+  const title = document.getElementById('noteTitleInput').value.trim();
+  const link = document.getElementById('noteLinkInput').value.trim();
+  const desc = document.getElementById('noteDescInput').value.trim();
+
+  if (!title && !link) {
+    showToast('⚠️ 标题和链接至少填一个');
+    return;
+  }
+
+  const notes = loadNotes();
+  notes.unshift({ title, link, desc, date: Date.now() });
+  saveNotes(notes);
+  renderNotes();
+
+  // 清空输入
+  document.getElementById('noteTitleInput').value = '';
+  document.getElementById('noteLinkInput').value = '';
+  document.getElementById('noteDescInput').value = '';
+
+  showToast('✅ 已收藏');
+  scheduleAutoSync();
+}
+
 // ── Page Switching ──
 function switchTo(page) {
+  // 隐藏所有页面
+  pageMain.classList.remove('page-active');
+  pageExchange.classList.remove('page-active');
+  document.getElementById('pageNotes').classList.remove('page-active');
+
   if (page === 'exchange') {
-    pageMain.classList.remove('page-active');
     pageExchange.classList.add('page-active');
     updateExBalance();
     renderExchangeItems();
     renderExHistory();
-    window.scrollTo(0, 0);
+  } else if (page === 'notes') {
+    document.getElementById('pageNotes').classList.add('page-active');
+    renderNotes();
   } else {
-    pageExchange.classList.remove('page-active');
     pageMain.classList.add('page-active');
     renderPoints();
-    window.scrollTo(0, 0);
   }
+  window.scrollTo(0, 0);
 }
 
 // ── Events ──
 btnGoExchange.addEventListener('click', () => switchTo('exchange'));
+document.getElementById('btnGoNotes').addEventListener('click', () => switchTo('notes'));
 btnBack.addEventListener('click', () => switchTo('main'));
+document.getElementById('btnNotesBack').addEventListener('click', () => switchTo('main'));
+document.getElementById('btnAddNote').addEventListener('click', addNote);
+document.getElementById('noteDescInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') addNote();
+});
 
 btnStart.addEventListener('click', start);
 btnPause.addEventListener('click', pause);
@@ -2152,6 +2383,7 @@ function packSyncData(ts) {
     points: loadPoints(),
     records: loadRecords(),
     exHistory: loadExHistory(),
+    notes: loadNotes(),
     password: getPassword(),
   };
 }
@@ -2162,6 +2394,7 @@ function applyRemoteData(data) {
   savePoints(data.points || { total: 0, today: 0 });
   saveRecords(data.records || []);
   saveExHistory(data.exHistory || []);
+  saveNotes(data.notes || []);
   if (data.password) setPassword(data.password);
   setLastSyncAt(data.updatedAt || Date.now());
 }
