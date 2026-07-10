@@ -1,25 +1,11 @@
 {
   "version": 1,
-  "updatedAt": 1783675441852,
+  "updatedAt": 1783675470152,
   "points": {
     "total": 255,
     "today": 25
   },
-  "records": [
-    {
-      "id": 1783675357655,
-      "date": "2026/07/10 17:22",
-      "duration": 60,
-      "note": "无备注",
-      "tag": "数学"
-    },
-    {
-      "id": 1783674423537,
-      "date": "2026/07/10 17:07",
-      "duration": 60,
-      "note": "数学"
-    }
-  ],
+  "records": [],
   "exHistory": [],
   "notes": [
     {
