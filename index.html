@@ -399,6 +399,92 @@
     font-weight: 700;
   }
 
+  /* ── Lottery ── */
+  .lottery-status {
+    background: linear-gradient(135deg, #1a0530 0%, #2a1050 50%, #1e1b4b 100%);
+    border: 1px solid rgba(244,114,182,.3);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+  }
+  .lottery-wheel {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f472b6, #e879a0, #fbbf24);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: wheelPulse 2s ease-in-out infinite;
+  }
+  @keyframes wheelPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(244,114,182,.4); }
+    50% { box-shadow: 0 0 40px rgba(244,114,182,.7); }
+  }
+  .wheel-text { font-size: 2.2rem; }
+  .wheel-sub { font-size: 0.65rem; color: #4a044e; font-weight: 700; margin-top: 2px; }
+  .lottery-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    margin-bottom: 14px;
+    color: #f9a8d4;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .lottery-draw-btn {
+    width: 100%;
+    height: 48px;
+    border-radius: 24px;
+    border: none;
+    background: linear-gradient(135deg, #f472b6, #e879a0);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: .04em;
+    transition: all .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .lottery-draw-btn:active { transform: scale(.95); }
+  .lottery-draw-btn:disabled {
+    background: var(--border);
+    color: var(--muted);
+    cursor: not-allowed;
+  }
+
+  .lottery-task {
+    background: var(--card);
+    border: 2px solid #f472b6;
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+  }
+  .lottery-task.hidden { display: none; }
+  .lt-header { font-size: 0.8rem; color: var(--muted); margin-bottom: 8px; }
+  .lt-icon { font-size: 3rem; margin-bottom: 8px; }
+  .lt-name { font-size: 1.2rem; font-weight: 800; color: #fbbf24; margin-bottom: 4px; }
+  .lt-desc { font-size: 0.85rem; color: var(--text); margin-bottom: 8px; }
+  .lt-reward { font-size: 1rem; font-weight: 700; color: var(--success); margin-bottom: 4px; }
+  .lt-diff { font-size: 0.75rem; color: var(--muted); margin-bottom: 14px; }
+  .lt-complete-btn {
+    width: 100%;
+    height: 44px;
+    border-radius: 8px;
+    border: none;
+    background: var(--success);
+    color: #0f172a;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .lt-complete-btn:active { transform: scale(.95); }
+  .lt-complete-btn:disabled { background: var(--border); color: var(--muted); }
+
   /* ── Note Input ── */
   .note-area { margin-bottom: 12px; }
   .note-area input {
@@ -1015,6 +1101,7 @@
     <button class="exchange-entry" id="btnGoExchange">🎁 积分兑换</button>
     <button class="exchange-entry" id="btnGoNotes" style="background:linear-gradient(135deg, rgba(129,140,248,.15), rgba(129,140,248,.05));border-color:rgba(129,140,248,.3);color:var(--accent2);">📝 更多</button>
     <button class="exchange-entry" id="btnGoStats" style="background:linear-gradient(135deg, rgba(74,222,128,.15), rgba(74,222,128,.05));border-color:rgba(74,222,128,.3);color:var(--success);">📊 统计</button>
+    <button class="exchange-entry" id="btnGoLottery" style="background:linear-gradient(135deg, rgba(244,114,182,.15), rgba(244,114,182,.05));border-color:rgba(244,114,182,.3);color:#f472b6;">🎰 抽奖</button>
   </div>
 
   <!-- 时间设置 -->
@@ -1198,6 +1285,54 @@
 </div>
 <!-- ═══════════ /统计页面 ═══════════ -->
 
+<!-- ═══════════ 抽奖页面 ═══════════ -->
+<div class="container page" id="pageLottery">
+  <div class="exchange-header">
+    <button class="back-btn" id="btnLotteryBack">← 返回</button>
+    <h2>🎰 每周抽奖</h2>
+    <div style="width:56px;"></div>
+  </div>
+
+  <!-- 抽奖状态 -->
+  <div class="lottery-status" id="lotteryStatus">
+    <div class="lottery-wheel" id="lotteryWheel">
+      <div class="wheel-text">🎰</div>
+      <div class="wheel-sub">点击抽取</div>
+    </div>
+    <div class="lottery-info">
+      <span id="lotteryRemaining">本周剩余：1次</span>
+      <span style="font-size:0.7rem;color:var(--muted);">每周日刷新</span>
+    </div>
+    <button class="lottery-draw-btn" id="btnDraw">🎲 抽取任务</button>
+  </div>
+
+  <!-- 当前任务 -->
+  <div class="lottery-task hidden" id="lotteryTaskCard">
+    <div class="lt-header">📋 本周特殊任务</div>
+    <div class="lt-icon" id="ltIcon">🎯</div>
+    <div class="lt-name" id="ltName"></div>
+    <div class="lt-desc" id="ltDesc"></div>
+    <div class="lt-reward" id="ltReward"></div>
+    <div class="lt-diff" id="ltDiff"></div>
+    <button class="lt-complete-btn hidden" id="btnCompleteTask">✅ 完成任务领取奖励</button>
+  </div>
+
+  <!-- 设置（需密码） -->
+  <div style="display:flex;gap:8px;margin-top:4px;">
+    <button class="clear-all" id="btnLotteryExtra" style="flex:1;">🔑 增加抽取次数</button>
+    <button class="clear-all" id="btnLotteryReset" style="flex:1;">🔄 重置本周</button>
+  </div>
+
+  <!-- 抽取记录 -->
+  <div class="records">
+    <div class="records-header"><h3>📜 抽奖记录</h3></div>
+    <ul class="record-list" id="lotteryHistoryList">
+      <li class="empty-hint">还没有抽奖记录~</li>
+    </ul>
+  </div>
+</div>
+<!-- ═══════════ /抽奖页面 ═══════════ -->
+
 <!-- ═══════════ 密码弹窗 ═══════════ -->
 <div class="modal-overlay hidden" id="modalPassword">
   <div class="modal-box">
@@ -1368,18 +1503,26 @@ function openPasswordForSpecial() {
 // 验证密码 → 根据回调执行不同操作
 function verifyPassword() {
   const input = pwdInput.value.trim();
-  if (input === getPassword()) {
-    hideAllModals();
-    if (passwordCallback === 'specialExchange') {
-      doSpecialExchange();
-    } else {
-      openEditPointsModal();
-    }
-    passwordCallback = null;
-  } else {
+  if (input !== getPassword()) {
     showToast('❌ 密码错误');
     vibrate([50, 100, 50]);
+    return;
   }
+  hideAllModals();
+  if (passwordCallback === 'specialExchange') {
+    doSpecialExchange();
+  } else if (passwordCallback === 'extraDraws') {
+    doExtraDraws();
+  } else if (passwordCallback === 'resetLottery') {
+    const l = loadLottery();
+    l.drawsUsed = 0; l.maxDraws = 1; l.currentTask = null; l.taskCompleted = false;
+    saveLottery(l);
+    renderLotteryPage();
+    showToast('🔄 本周抽奖已重置');
+  } else {
+    openEditPointsModal();
+  }
+  passwordCallback = null;
 }
 
 // ── 特别兑换 ──
@@ -2330,6 +2473,193 @@ function renderStatsPage() {
   }).join('');
 }
 
+// ── Lottery ──
+const LOTTERY_KEY = 'yaya_lottery';
+const LOTTERY_TASKS = [
+  // 简单 (⭐⭐)
+  { icon: '📖', name: '连续学习3天', desc: '本周任意连续3天，每天至少学习30分钟', reward: 200, diff: '⭐⭐ 简单' },
+  { icon: '✍️', name: '完成5次计时', desc: '本周累计完成5次计时学习', reward: 150, diff: '⭐⭐ 简单' },
+  { icon: '🎧', name: '专注2小时', desc: '单次计时达到2小时不间断', reward: 300, diff: '⭐⭐ 简单' },
+  { icon: '📝', name: '做一套试卷', desc: '完成一套完整试卷并批改', reward: 250, diff: '⭐⭐ 简单' },
+  // 中等 (⭐⭐⭐)
+  { icon: '🔥', name: '日学5小时', desc: '一天内累计学习达到5小时', reward: 800, diff: '⭐⭐⭐ 中等' },
+  { icon: '🏃', name: '早起学习', desc: '连续3天早上8点前开始学习', reward: 500, diff: '⭐⭐⭐ 中等' },
+  { icon: '📚', name: '周学20小时', desc: '本周累计学习时间达到20小时', reward: 1000, diff: '⭐⭐⭐ 中等' },
+  { icon: '🎯', name: '挑战3小时', desc: '单次计时达到3小时不间断', reward: 600, diff: '⭐⭐⭐ 中等' },
+  // 困难 (⭐⭐⭐⭐⭐)
+  { icon: '💪', name: '周学35小时', desc: '本周累计学习时间达到35小时', reward: 2500, diff: '⭐⭐⭐⭐⭐ 困难' },
+  { icon: '🏆', name: '全勤7天', desc: '本周每天都有学习记录', reward: 1500, diff: '⭐⭐⭐⭐⭐ 困难' },
+  { icon: '🌟', name: '日学8小时', desc: '一天内累计学习达到8小时', reward: 2000, diff: '⭐⭐⭐⭐⭐ 困难' },
+  { icon: '👑', name: '挑战5小时', desc: '单次计时达到5小时不间断', reward: 3000, diff: '⭐⭐⭐⭐⭐ 困难' },
+];
+
+function loadLottery() {
+  try {
+    const d = JSON.parse(localStorage.getItem(LOTTERY_KEY));
+    const def = { weekId: '', drawsUsed: 0, maxDraws: 1, currentTask: null, taskCompleted: false, history: [] };
+    return d ? Object.assign(def, d) : def;
+  } catch (_) {
+    return { weekId: '', drawsUsed: 0, maxDraws: 1, currentTask: null, taskCompleted: false, history: [] };
+  }
+}
+
+function saveLottery(l) {
+  localStorage.setItem(LOTTERY_KEY, JSON.stringify(l));
+}
+
+function getWeekId() {
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun
+  // 本周日的日期作为 weekId
+  const sun = new Date(now);
+  sun.setDate(now.getDate() - day);
+  return sun.toLocaleDateString('zh-CN');
+}
+
+function checkWeekReset() {
+  const l = loadLottery();
+  const weekId = getWeekId();
+  if (l.weekId !== weekId) {
+    l.weekId = weekId;
+    l.drawsUsed = 0;
+    l.maxDraws = 1;
+    l.currentTask = null;
+    l.taskCompleted = false;
+    saveLottery(l);
+  }
+  return l;
+}
+
+function renderLotteryPage() {
+  const l = checkWeekReset();
+  const remaining = l.maxDraws - l.drawsUsed;
+
+  document.getElementById('lotteryRemaining').textContent = remaining > 0
+    ? '本周剩余：' + remaining + '次'
+    : '本周次数已用完';
+
+  const btn = document.getElementById('btnDraw');
+  if (l.taskCompleted) {
+    btn.textContent = '✅ 任务已完成';
+    btn.disabled = true;
+  } else if (l.currentTask) {
+    btn.textContent = '🎲 重新抽取（剩余' + remaining + '次）';
+    btn.disabled = remaining <= 0;
+  } else {
+    btn.textContent = remaining > 0 ? '🎲 抽取任务' : '本周次数已用完';
+    btn.disabled = remaining <= 0;
+  }
+
+  // 显示当前任务
+  const card = document.getElementById('lotteryTaskCard');
+  const completeBtn = document.getElementById('btnCompleteTask');
+  if (l.currentTask) {
+    card.classList.remove('hidden');
+    document.getElementById('ltIcon').textContent = l.currentTask.icon;
+    document.getElementById('ltName').textContent = l.currentTask.name;
+    document.getElementById('ltDesc').textContent = l.currentTask.desc;
+    document.getElementById('ltReward').textContent = '🎁 奖励：+' + l.currentTask.reward + ' 积分';
+    document.getElementById('ltDiff').textContent = '难度：' + l.currentTask.diff;
+    completeBtn.classList.toggle('hidden', l.taskCompleted);
+    completeBtn.disabled = l.taskCompleted;
+    if (l.taskCompleted) completeBtn.textContent = '✅ 奖励已领取';
+  } else {
+    card.classList.add('hidden');
+  }
+
+  // 历史
+  renderLotteryHistory();
+}
+
+function drawLottery() {
+  const l = checkWeekReset();
+  if (l.drawsUsed >= l.maxDraws) {
+    showToast('⚠️ 本周抽取次数已用完');
+    return;
+  }
+  if (l.taskCompleted) {
+    showToast('⚠️ 本周任务已完成，请等待下周');
+    return;
+  }
+
+  // 随机抽取（避免与上次重复）
+  let pool = LOTTERY_TASKS;
+  if (l.currentTask) {
+    pool = LOTTERY_TASKS.filter(t => t.name !== l.currentTask.name);
+  }
+  const task = pool[Math.floor(Math.random() * pool.length)];
+
+  l.currentTask = task;
+  l.taskCompleted = false;
+  l.drawsUsed++;
+  l.history.unshift({
+    date: new Date().toLocaleDateString('zh-CN'),
+    task: task.name,
+    reward: task.reward,
+    completed: false,
+  });
+  saveLottery(l);
+  renderLotteryPage();
+  showToast('🎉 抽中：「' + task.name + '」');
+  vibrate([30, 50, 30, 50, 30]);
+}
+
+function completeTask() {
+  const l = loadLottery();
+  if (!l.currentTask || l.taskCompleted) return;
+
+  if (!confirm('确定已完成任务「' + l.currentTask.name + '」并领取奖励吗？')) return;
+
+  l.taskCompleted = true;
+  // 发放奖励
+  const p = loadPoints();
+  p.total += l.currentTask.reward;
+  p.today += l.currentTask.reward;
+  savePoints(p);
+  renderPoints();
+
+  // 更新历史
+  if (l.history.length > 0) l.history[0].completed = true;
+  saveLottery(l);
+  renderLotteryPage();
+  showToast('🎉 恭喜！获得 +' + l.currentTask.reward + ' 积分');
+  spawnFlyPoints(l.currentTask.reward);
+  scheduleAutoSync();
+}
+
+function addExtraDraws() {
+  openPasswordModal();
+  passwordCallback = 'extraDraws';
+}
+
+function doExtraDraws() {
+  const n = prompt('增加几次抽取机会？（输入数字，最多5次）', '1');
+  const num = parseInt(n) || 1;
+  if (num < 1 || num > 5) { showToast('⚠️ 请输入1-5之间的数字'); return; }
+  const l = loadLottery();
+  l.maxDraws += num;
+  saveLottery(l);
+  renderLotteryPage();
+  showToast('✅ 已增加 ' + num + ' 次抽取机会');
+}
+
+function renderLotteryHistory() {
+  const l = loadLottery();
+  const list = document.getElementById('lotteryHistoryList');
+  if (l.history.length === 0) {
+    list.innerHTML = '<li class="empty-hint">还没有抽奖记录~</li>';
+    return;
+  }
+  list.innerHTML = l.history.map(h => `
+    <li class="record-item">
+      <div style="min-width:0;">
+        <div class="rec-note">🎯 ${escapeHtml(h.task)} · +${h.reward}分</div>
+        <div class="rec-date">${h.date} ${h.completed ? '✅ 已完成' : '⏳ 进行中'}</div>
+      </div>
+    </li>
+  `).join('');
+}
+
 // ── Notes ──
 function loadNotes() {
   try { return JSON.parse(localStorage.getItem(NOTES_KEY)) || []; }
@@ -2431,6 +2761,7 @@ function switchTo(page) {
   pageExchange.classList.remove('page-active');
   document.getElementById('pageNotes').classList.remove('page-active');
   document.getElementById('pageStats').classList.remove('page-active');
+  document.getElementById('pageLottery').classList.remove('page-active');
 
   if (page === 'exchange') {
     pageExchange.classList.add('page-active');
@@ -2443,6 +2774,9 @@ function switchTo(page) {
   } else if (page === 'stats') {
     document.getElementById('pageStats').classList.add('page-active');
     renderStatsPage();
+  } else if (page === 'lottery') {
+    document.getElementById('pageLottery').classList.add('page-active');
+    renderLotteryPage();
   } else {
     pageMain.classList.add('page-active');
     renderPoints();
@@ -2454,9 +2788,21 @@ function switchTo(page) {
 btnGoExchange.addEventListener('click', () => switchTo('exchange'));
 document.getElementById('btnGoNotes').addEventListener('click', () => switchTo('notes'));
 document.getElementById('btnGoStats').addEventListener('click', () => switchTo('stats'));
+document.getElementById('btnGoLottery').addEventListener('click', () => switchTo('lottery'));
 btnBack.addEventListener('click', () => switchTo('main'));
 document.getElementById('btnNotesBack').addEventListener('click', () => switchTo('main'));
 document.getElementById('btnStatsBack').addEventListener('click', () => switchTo('main'));
+document.getElementById('btnLotteryBack').addEventListener('click', () => switchTo('main'));
+
+// ── 抽奖事件 ──
+document.getElementById('btnDraw').addEventListener('click', drawLottery);
+document.getElementById('btnCompleteTask').addEventListener('click', completeTask);
+document.getElementById('btnLotteryExtra').addEventListener('click', addExtraDraws);
+document.getElementById('btnLotteryReset').addEventListener('click', () => {
+  if (!confirm('确定重置本周抽奖吗？（需要密码确认）')) return;
+  openPasswordModal();
+  passwordCallback = 'resetLottery';
+});
 document.getElementById('btnAddNote').addEventListener('click', addNote);
 document.getElementById('noteDescInput').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') addNote();
