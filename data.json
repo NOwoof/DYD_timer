@@ -1,12 +1,20 @@
 {
   "version": 1,
-  "updatedAt": 1783677079799,
+  "updatedAt": 1783677124209,
   "points": {
-    "total": 55,
-    "today": 25
+    "total": 30,
+    "today": 0
   },
   "records": [],
   "exHistory": [
+    {
+      "id": 1783677121208,
+      "icon": "💝",
+      "name": "你（特别兑换）",
+      "points": 25,
+      "priceYuan": 0,
+      "date": "2026/07/10 17:52"
+    },
     {
       "id": 1783677076796,
       "icon": "🍬",
