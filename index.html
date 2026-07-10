@@ -2411,8 +2411,11 @@ async function pullFromGitHub() {
     if (!resp.ok) return null;
     const info = await resp.json();
     if (!info.content) return null;
-    // GitHub API 返回 base64 编码的内容
-    const json = atob(info.content.replace(/\s/g, ''));
+    // GitHub API 返回 base64 → UTF-8 字节 → 字符串
+    const binary = atob(info.content.replace(/\s/g, ''));
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const json = new TextDecoder('utf-8').decode(bytes);
     return JSON.parse(json);
   } catch (e) {
     console.error('[Sync] pull error:', e.message);
