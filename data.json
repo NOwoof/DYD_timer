@@ -1,10 +1,11 @@
 {
   "version": 1,
-  "updatedAt": 1783669932298,
-  "device": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) Apple",
+  "updatedAt": 1783669937159,
+  "device": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
   "points": {
-    "total": 0,
-    "today": 0
+    "total": 20,
+    "today": 0,
+    "todayDate": "2026/7/10"
   },
   "records": [],
   "exHistory": [],
