@@ -297,6 +297,108 @@
     color: var(--accent);
   }
 
+  /* ── Tags ── */
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .tag-btn {
+    padding: 6px 12px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--muted);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tag-btn:active { transform: scale(0.95); }
+  .tag-btn.active {
+    background: var(--accent);
+    color: #0f172a;
+    border-color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* ── Chart ── */
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .chart-card h3 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .chart-area { display: flex; flex-direction: column; gap: 10px; }
+  .chart-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .chart-bar-label {
+    width: 50px;
+    font-size: 0.75rem;
+    color: var(--text);
+    text-align: right;
+    flex-shrink: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .chart-bar-track {
+    flex: 1;
+    height: 24px;
+    background: var(--bg);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+  .chart-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width .5s ease;
+    min-width: 4px;
+  }
+  .chart-bar-time {
+    width: 52px;
+    font-size: 0.72rem;
+    color: var(--muted);
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .chart-colors-0 { background: var(--accent); }
+  .chart-colors-1 { background: var(--accent2); }
+  .chart-colors-2 { background: var(--success); }
+  .chart-colors-3 { background: var(--warn); }
+  .chart-colors-4 { background: #f472b6; }
+  .chart-colors-5 { background: #fb923c; }
+  .chart-colors-6 { background: #a78bfa; }
+  .chart-colors-7 { background: #34d399; }
+
+  .tag-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background: var(--bg);
+    border-radius: 8px;
+    font-size: 0.82rem;
+    margin-bottom: 6px;
+  }
+  .tag-detail-row .td-time {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
   /* ── Note Input ── */
   .note-area { margin-bottom: 12px; }
   .note-area input {
@@ -912,6 +1014,7 @@
     </div>
     <button class="exchange-entry" id="btnGoExchange">🎁 积分兑换</button>
     <button class="exchange-entry" id="btnGoNotes" style="background:linear-gradient(135deg, rgba(129,140,248,.15), rgba(129,140,248,.05));border-color:rgba(129,140,248,.3);color:var(--accent2);">📝 更多</button>
+    <button class="exchange-entry" id="btnGoStats" style="background:linear-gradient(135deg, rgba(74,222,128,.15), rgba(74,222,128,.05));border-color:rgba(74,222,128,.3);color:var(--success);">📊 统计</button>
   </div>
 
   <!-- 时间设置 -->
@@ -961,6 +1064,17 @@
     <div class="note-area">
       <input type="text" id="noteInput" placeholder="备注（如：数学第三章、英语单词…）" maxlength="60" enterkeyhint="done">
     </div>
+    <div class="tag-row" id="tagRow">
+      <button class="tag-btn active" data-tag="无标签">📚 无标签</button>
+      <button class="tag-btn" data-tag="数学">📐 数学</button>
+      <button class="tag-btn" data-tag="英语">📖 英语</button>
+      <button class="tag-btn" data-tag="语文">📝 语文</button>
+      <button class="tag-btn" data-tag="科学">🔬 科学</button>
+      <button class="tag-btn" data-tag="编程">💻 编程</button>
+      <button class="tag-btn" data-tag="艺术">🎨 艺术</button>
+      <button class="tag-btn custom-tag" id="btnCustomTag">✏️ 自定义</button>
+    </div>
+    <input type="text" id="customTagInput" placeholder="输入自定义标签…" maxlength="10" style="display:none;width:100%;height:36px;padding:0 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;margin-top:6px;outline:none;" enterkeyhint="done">
     <ul class="record-list" id="recordList">
       <li class="empty-hint">还没有记录，开始计时吧 ✍️</li>
     </ul>
@@ -1043,6 +1157,46 @@
   </div>
 </div>
 <!-- ═══════════ /更多页面 ═══════════ -->
+
+<!-- ═══════════ 统计页面 ═══════════ -->
+<div class="container page" id="pageStats">
+  <div class="exchange-header">
+    <button class="back-btn" id="btnStatsBack">← 返回</button>
+    <h2>📊 学习统计</h2>
+    <div style="width:56px;"></div>
+  </div>
+
+  <!-- 总览 -->
+  <div class="points-card">
+    <div class="points-item">
+      <span class="p-value" id="statsTotalTime">0h</span>
+      <span class="p-label">⏱ 总时长</span>
+    </div>
+    <div class="points-item">
+      <span class="p-value" id="statsTotalSessions">0</span>
+      <span class="p-label">📋 总次数</span>
+    </div>
+    <div class="points-item">
+      <span class="p-value" id="statsTopTag">-</span>
+      <span class="p-label">🏅 最多科目</span>
+    </div>
+  </div>
+
+  <!-- 直方图 -->
+  <div class="chart-card" id="chartCard">
+    <h3>📊 各科学习时长</h3>
+    <div class="chart-area" id="chartArea">
+      <p class="empty-hint">还没有学习记录~</p>
+    </div>
+  </div>
+
+  <!-- 各科明细 -->
+  <div class="records" id="tagDetailCard">
+    <div class="records-header"><h3>📋 科目明细</h3></div>
+    <div id="tagDetailList"></div>
+  </div>
+</div>
+<!-- ═══════════ /统计页面 ═══════════ -->
 
 <!-- ═══════════ 密码弹窗 ═══════════ -->
 <div class="modal-overlay hidden" id="modalPassword">
@@ -1658,6 +1812,7 @@ function autoRecord() {
     date: dateStr + ' ' + timeStr,
     duration: totalSeconds,
     note,
+    tag: selectedTag,
   };
 
   const records = loadRecords();
@@ -1699,6 +1854,7 @@ function manualRecord() {
     date: dateStr + ' ' + timeStr,
     duration: elapsed,
     note,
+    tag: selectedTag,
   };
 
   const records = loadRecords();
@@ -1928,7 +2084,7 @@ function renderRecords() {
   recordList.innerHTML = records.map(r => `
     <li class="record-item">
       <div style="min-width:0;">
-        <div class="rec-note">${escapeHtml(r.note)}</div>
+        <div class="rec-note">${escapeHtml(r.note)} ${r.tag && r.tag !== '无标签' ? '<span style="font-size:0.65rem;background:var(--accent);color:#0f172a;padding:1px 6px;border-radius:8px;margin-left:2px;">' + escapeHtml(r.tag) + '</span>' : ''}</div>
         <div class="rec-date">${r.date}</div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
@@ -1969,6 +2125,7 @@ const EXCHANGE_ITEMS = [
 
 const EX_HISTORY_KEY = 'yaya_exchange_history';
 const NOTES_KEY = 'yaya_notes';
+let selectedTag = '无标签';
 
 function loadExHistory() {
   try { return JSON.parse(localStorage.getItem(EX_HISTORY_KEY)) || []; }
@@ -2073,6 +2230,106 @@ function renderExHistory() {
   `).join('');
 }
 
+// ── Tags ──
+document.querySelectorAll('.tag-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.id === 'btnCustomTag') {
+      const input = document.getElementById('customTagInput');
+      input.style.display = 'block';
+      input.focus();
+      return;
+    }
+    document.getElementById('customTagInput').style.display = 'none';
+    document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedTag = btn.dataset.tag;
+  });
+});
+
+document.getElementById('customTagInput').addEventListener('blur', function() {
+  const val = this.value.trim();
+  if (val) {
+    selectedTag = val;
+    document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('btnCustomTag').classList.add('active');
+    document.getElementById('btnCustomTag').textContent = '✏️ ' + val;
+  } else {
+    this.style.display = 'none';
+  }
+});
+document.getElementById('customTagInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { this.blur(); }
+});
+
+// ── Stats & Chart ──
+function getTagStats() {
+  const records = loadRecords();
+  const map = {};
+  let totalSec = 0;
+  records.forEach(r => {
+    const tag = r.tag || '无标签';
+    if (!map[tag]) map[tag] = 0;
+    map[tag] += r.duration || 0;
+    totalSec += r.duration || 0;
+  });
+  // 排序
+  const entries = Object.entries(map).sort((a, b) => b[1] - a[1]);
+  return { entries, totalSec, totalSessions: records.length };
+}
+
+function renderStatsPage() {
+  const { entries, totalSec, totalSessions } = getTagStats();
+
+  // 总览
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  document.getElementById('statsTotalTime').textContent = h > 0 ? h + 'h ' + m + 'm' : m + 'm';
+  document.getElementById('statsTotalSessions').textContent = totalSessions;
+  document.getElementById('statsTopTag').textContent = entries.length > 0 ? entries[0][0] : '-';
+
+  // 直方图
+  const chartArea = document.getElementById('chartArea');
+  if (entries.length === 0) {
+    chartArea.innerHTML = '<p class="empty-hint">还没有学习记录~</p>';
+    document.getElementById('tagDetailList').innerHTML = '';
+    return;
+  }
+
+  const maxTime = entries[0][1];
+  // 调色板
+  const colors = ['chart-colors-0','chart-colors-1','chart-colors-2','chart-colors-3','chart-colors-4','chart-colors-5','chart-colors-6','chart-colors-7'];
+
+  chartArea.innerHTML = entries.map(([tag, sec], i) => {
+    const pct = Math.max(5, Math.round((sec / maxTime) * 100));
+    const hh = Math.floor(sec / 3600);
+    const mm = Math.floor((sec % 3600) / 60);
+    const timeStr = hh > 0 ? hh + 'h' + mm + 'm' : mm + 'm';
+    return `
+      <div class="chart-bar-row">
+        <div class="chart-bar-label">${escapeHtml(tag)}</div>
+        <div class="chart-bar-track">
+          <div class="chart-bar-fill ${colors[i % colors.length]}" style="width:${pct}%;"></div>
+        </div>
+        <div class="chart-bar-time">${timeStr}</div>
+      </div>
+    `;
+  }).join('');
+
+  // 科目明细
+  const detail = document.getElementById('tagDetailList');
+  detail.innerHTML = entries.map(([tag, sec]) => {
+    const hh = Math.floor(sec / 3600);
+    const mm = Math.floor((sec % 3600) / 60);
+    const timeStr = hh > 0 ? hh + '小时 ' + mm + '分钟' : mm + '分钟';
+    return `
+      <div class="tag-detail-row">
+        <span>${escapeHtml(tag)}</span>
+        <span class="td-time">${timeStr}</span>
+      </div>
+    `;
+  }).join('');
+}
+
 // ── Notes ──
 function loadNotes() {
   try { return JSON.parse(localStorage.getItem(NOTES_KEY)) || []; }
@@ -2173,6 +2430,7 @@ function switchTo(page) {
   pageMain.classList.remove('page-active');
   pageExchange.classList.remove('page-active');
   document.getElementById('pageNotes').classList.remove('page-active');
+  document.getElementById('pageStats').classList.remove('page-active');
 
   if (page === 'exchange') {
     pageExchange.classList.add('page-active');
@@ -2182,6 +2440,9 @@ function switchTo(page) {
   } else if (page === 'notes') {
     document.getElementById('pageNotes').classList.add('page-active');
     renderNotes();
+  } else if (page === 'stats') {
+    document.getElementById('pageStats').classList.add('page-active');
+    renderStatsPage();
   } else {
     pageMain.classList.add('page-active');
     renderPoints();
@@ -2192,8 +2453,10 @@ function switchTo(page) {
 // ── Events ──
 btnGoExchange.addEventListener('click', () => switchTo('exchange'));
 document.getElementById('btnGoNotes').addEventListener('click', () => switchTo('notes'));
+document.getElementById('btnGoStats').addEventListener('click', () => switchTo('stats'));
 btnBack.addEventListener('click', () => switchTo('main'));
 document.getElementById('btnNotesBack').addEventListener('click', () => switchTo('main'));
+document.getElementById('btnStatsBack').addEventListener('click', () => switchTo('main'));
 document.getElementById('btnAddNote').addEventListener('click', addNote);
 document.getElementById('noteDescInput').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') addNote();
