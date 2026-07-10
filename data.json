@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": 1783674561084,
+  "updatedAt": 1783674713809,
   "points": {
     "total": 250,
     "today": 20
@@ -14,5 +14,6 @@
     }
   ],
   "exHistory": [],
+  "notes": [],
   "password": "1234"
 }
