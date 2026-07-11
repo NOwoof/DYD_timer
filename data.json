@@ -1,15 +1,22 @@
 {
   "version": 1,
-  "updatedAt": 1783771765931,
+  "updatedAt": 1783772075536,
   "points": {
-    "total": 635,
-    "today": 485,
+    "total": 660,
+    "today": 510,
     "claimedRanks": [
       "学习新芽"
     ],
-    "lifetime": 495
+    "lifetime": 520
   },
   "records": [
+    {
+      "id": 1783772072529,
+      "date": "2026/07/11 20:14",
+      "duration": 300,
+      "note": "无备注",
+      "tag": "数学"
+    },
     {
       "id": 1783771762925,
       "date": "2026/07/11 20:09",
