@@ -1,13 +1,20 @@
 {
   "version": 1,
-  "updatedAt": 1783735696285,
+  "updatedAt": 1783735727178,
   "points": {
-    "total": 275,
-    "today": 125,
+    "total": 280,
+    "today": 130,
     "claimedRanks": [],
-    "lifetime": 135
+    "lifetime": 140
   },
   "records": [
+    {
+      "id": 1783735724168,
+      "date": "2026/07/11 10:08",
+      "duration": 0,
+      "note": "无备注",
+      "tag": "数学"
+    },
     {
       "id": 1783735693274,
       "date": "2026/07/11 10:08",
