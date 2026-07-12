@@ -2671,17 +2671,18 @@ function setQmsgKey(key) {
 
 async function sendToQQ(msg) {
   const key = getQmsgKey();
-  if (!key) return false;
+  if (!key) return { ok: false, error: '未配置 Key' };
   try {
     const resp = await fetch('https://qmsg.zendee.cn/api/v2/send', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'key=' + encodeURIComponent(key) + '&type=2&msg=' + encodeURIComponent(msg)
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: key, type: 2, msg: msg })
     });
     const data = await resp.json();
-    return data.code === 0;
-  } catch (_) {
-    return false;
+    if (data.code === 0) return { ok: true };
+    return { ok: false, error: data.reason || ('code=' + data.code) };
+  } catch (e) {
+    return { ok: false, error: e.message || '网络请求失败，可能是跨域限制' };
   }
 }
 
@@ -2721,11 +2722,11 @@ async function tellHer() {
     return;
   }
   const msg = buildQQMessage();
-  const ok = await sendToQQ(msg);
-  if (ok) {
+  const result = await sendToQQ(msg);
+  if (result.ok) {
     showToast('🐧 QQ 通知已发送');
   } else {
-    showToast('❌ 发送失败，请检查 Key 是否正确');
+    showToast('❌ ' + (result.error || '发送失败'));
   }
 }
 
@@ -3368,11 +3369,11 @@ document.getElementById('btnSaveQmsg').addEventListener('click', async () => {
   if (!key) { showToast('⚠️ 请输入 Qmsg酱 Key'); return; }
   setQmsgKey(key);
   showToast('💾 已保存，正在测试…');
-  const ok = await sendToQQ('🐧 丫丫计时器 QQ 通知已连接成功！🎉');
-  if (ok) {
+  const result = await sendToQQ('🐧 丫丫计时器 QQ 通知已连接成功！🎉');
+  if (result.ok) {
     showToast('✅ 测试成功！QQ 通知已连通');
   } else {
-    showToast('❌ 测试失败，请检查 Key 是否正确');
+    showToast('❌ ' + (result.error || '发送失败，请检查 Key'));
   }
 });
 document.getElementById('btnAddNote').addEventListener('click', addNote);
