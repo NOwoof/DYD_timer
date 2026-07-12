@@ -3026,7 +3026,15 @@ function updateStreakDisplay() {
   const GOAL = 14400; // 4小时 = 14400秒
   const d = loadDaily();
   const todayKey = getTodayStr();
-  const todaySec = d[todayKey] || 0;
+
+  // 今日时长：优先 daily 数据，回退到 records 计算
+  let todaySec = d[todayKey] || 0;
+  if (!todaySec) {
+    const records = loadRecords();
+    records.forEach(r => {
+      if (r.date && r.date.startsWith(todayKey)) todaySec += r.duration || 0;
+    });
+  }
   const todayMin = Math.floor(todaySec / 60);
   const todayH = Math.floor(todayMin / 60);
   const todayRem = todayMin % 60;
@@ -3934,6 +3942,7 @@ function packSyncData(ts) {
     records: loadRecords(),
     exHistory: loadExHistory(),
     notes: loadNotes(),
+    daily: loadDaily(),
     lottery: loadLottery(),
     password: getPassword(),
   };
@@ -3946,9 +3955,25 @@ function applyRemoteData(data) {
   saveRecords(data.records || []);
   saveExHistory(data.exHistory || []);
   saveNotes(data.notes || []);
+  if (data.daily) saveDaily(data.daily);
   if (data.lottery) saveLottery(data.lottery);
   if (data.password) setPassword(data.password);
   setLastSyncAt(data.updatedAt || Date.now());
+  // 确保 daily 数据与 records 一致
+  rebuildDailyFromRecords();
+}
+
+// 从 records 重建每日时长数据（重置后重新计算）
+function rebuildDailyFromRecords() {
+  const records = loadRecords();
+  const d = {};
+  records.forEach(r => {
+    if (r.date && r.duration) {
+      const dateKey = r.date.split(' ')[0]; // "2026/07/12" 部分
+      d[dateKey] = (d[dateKey] || 0) + r.duration;
+    }
+  });
+  saveDaily(d);
 }
 
 // 从 GitHub API 拉取（不走 CDN 缓存，实时）
