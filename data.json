@@ -1,17 +1,24 @@
 {
   "version": 1,
-  "updatedAt": 1783849597258,
+  "updatedAt": 1783849719071,
   "points": {
-    "total": 1240,
-    "today": 5,
+    "total": 1245,
+    "today": 10,
     "claimedRanks": [
       "学习新芽"
     ],
-    "lifetime": 900,
-    "todayStudy": 5,
+    "lifetime": 905,
+    "todayStudy": 10,
     "todayReward": 0
   },
   "records": [
+    {
+      "id": 1783849716058,
+      "date": "2026/07/12 17:48",
+      "duration": 64,
+      "note": "正计时",
+      "tag": "数学"
+    },
     {
       "id": 1783849594252,
       "date": "2026/07/12 17:46",
@@ -188,7 +195,7 @@
     }
   ],
   "daily": {
-    "2026/07/12": 3374,
+    "2026/07/12": 3438,
     "2026/07/11": 6000
   },
   "lottery": {
