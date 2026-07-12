@@ -1,0 +1,23 @@
+{
+  "name": "丫丫无敌大王计时器",
+  "short_name": "丫丫计时器",
+  "description": "丫丫无敌大王专用计时器，支持积分和学习记录",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230f172a' width='100' height='100' rx='20'/><text x='50' y='68' text-anchor='middle' font-size='52'>👑</text></svg>",
+      "sizes": "100x100",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%230f172a' width='512' height='512' rx='80'/><text x='256' y='320' text-anchor='middle' font-size='260'>👑</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

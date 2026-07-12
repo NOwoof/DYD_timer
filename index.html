@@ -1,0 +1,3799 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="丫丫无敌大王计时器">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<title>丫丫无敌大王计时器</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --danger: #f87171;
+    --success: #4ade80;
+    --warn: #fbbf24;
+    --border: #334155;
+    --radius: 12px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-top: env(safe-area-inset-top, 0px);
+  }
+
+/* ── 主题：早晨 ── */
+body[data-theme="morning"] {
+  --bg: #fef9ef;
+  --card: #fff8e7;
+  --text: #3d2e0a;
+  --muted: #8b7355;
+  --accent: #f59e0b;
+  --accent2: #d97706;
+  --danger: #ef4444;
+  --success: #22c55e;
+  --warn: #eab308;
+  --border: #e5d5b0;
+}
+body[data-theme="morning"] .timer-display:active { background: #fef3c7; }
+body[data-theme="morning"] .points-card {
+  background: linear-gradient(135deg, #fff8e7 0%, #fef3c7 100%);
+}
+body[data-theme="morning"] .lottery-status {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 50%, #fef9ef 100%);
+  border-color: rgba(245,158,11,.3);
+}
+body[data-theme="morning"] .exchange-balance {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+body[data-theme="morning"] .special-exchange {
+  background: linear-gradient(135deg, #fde68a 0%, #fef3c7 100%);
+}
+body[data-theme="morning"] .celebration-box {
+  background: linear-gradient(145deg, #fef3c7 0%, #fde68a 30%, #fbbf24 60%, #f59e0b 100%);
+}
+
+/* ── 主题：下午 ── */
+body[data-theme="afternoon"] {
+  --bg: #f0f9ff;
+  --card: #e0f2fe;
+  --text: #0c2d48;
+  --muted: #5b7d9a;
+  --accent: #0ea5e9;
+  --accent2: #0284c7;
+  --danger: #ef4444;
+  --success: #16a34a;
+  --warn: #eab308;
+  --border: #b8d8f0;
+}
+body[data-theme="afternoon"] .timer-display:active { background: #c8e6f5; }
+body[data-theme="afternoon"] .points-card {
+  background: linear-gradient(135deg, #e0f2fe 0%, #d0e8fa 100%);
+}
+body[data-theme="afternoon"] .lottery-status {
+  background: linear-gradient(135deg, #d0e8fa 0%, #b0d8f8 50%, #e0f2fe 100%);
+  border-color: rgba(14,165,233,.3);
+}
+body[data-theme="afternoon"] .exchange-balance {
+  background: linear-gradient(135deg, #d0e8fa 0%, #b0d8f8 100%);
+}
+body[data-theme="afternoon"] .special-exchange {
+  background: linear-gradient(135deg, #b0d8f8 0%, #d0e8fa 100%);
+}
+body[data-theme="afternoon"] .celebration-box {
+  background: linear-gradient(145deg, #d0e8fa 0%, #7dd3fc 30%, #38bdf8 60%, #0ea5e9 100%);
+}
+
+/* ── 主题：傍晚 ── */
+body[data-theme="evening"] {
+  --bg: #fdf2f8;
+  --card: #fce7f3;
+  --text: #3d0a1e;
+  --muted: #9a5b7d;
+  --accent: #e879a0;
+  --accent2: #db2777;
+  --danger: #ef4444;
+  --success: #22c55e;
+  --warn: #f59e0b;
+  --border: #f0c8d8;
+}
+body[data-theme="evening"] .timer-display:active { background: #fad1e3; }
+body[data-theme="evening"] .points-card {
+  background: linear-gradient(135deg, #fce7f3 0%, #fad1e3 100%);
+}
+body[data-theme="evening"] .lottery-status {
+  background: linear-gradient(135deg, #fad1e3 0%, #f5a0c0 50%, #fce7f3 100%);
+  border-color: rgba(232,121,160,.3);
+}
+body[data-theme="evening"] .exchange-balance {
+  background: linear-gradient(135deg, #fad1e3 0%, #f5a0c0 100%);
+}
+body[data-theme="evening"] .special-exchange {
+  background: linear-gradient(135deg, #f5a0c0 0%, #fad1e3 100%);
+}
+body[data-theme="evening"] .celebration-box {
+  background: linear-gradient(145deg, #fad1e3 0%, #f5a0c0 30%, #e879a0 60%, #db2777 100%);
+}
+
+/* ── 主题：夜晚（默认深色）── */
+body[data-theme="night"] {
+  --bg: #0f172a;
+  --card: #1e293b;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --accent: #38bdf8;
+  --accent2: #818cf8;
+  --danger: #f87171;
+  --success: #4ade80;
+  --warn: #fbbf24;
+  --border: #334155;
+}
+body[data-theme="night"] .timer-display:active { background: #1a2538; }
+body[data-theme="night"] .points-card {
+  background: linear-gradient(135deg, #1e293b 0%, #1a2040 100%);
+}
+body[data-theme="night"] .lottery-status {
+  background: linear-gradient(135deg, #1a0530 0%, #2a1050 50%, #1e1b4b 100%);
+  border-color: rgba(244,114,182,.3);
+}
+body[data-theme="night"] .exchange-balance {
+  background: linear-gradient(135deg, #1a2040 0%, #2a1050 100%);
+}
+body[data-theme="night"] .special-exchange {
+  background: linear-gradient(135deg, #2a1050 0%, #1a0530 100%);
+}
+body[data-theme="night"] .celebration-box {
+  background: linear-gradient(145deg, #1e1b4b 0%, #312e81 30%, #4c1d95 60%, #831843 100%);
+}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { height: 100%; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100%;
+    min-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: calc(20px + var(--safe-top)) 16px calc(24px + var(--safe-bottom)) 16px;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* ---- Header ---- */
+  h1 {
+    text-align: center;
+    font-size: clamp(1.2rem, 4vw, 1.5rem);
+    font-weight: 700;
+    letter-spacing: .04em;
+    color: var(--text);
+    padding: 4px 0;
+  }
+
+  /* ── Theme Switcher ── */
+  .theme-switcher {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 4px 0;
+  }
+  .theme-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--card);
+    font-size: 1.3rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .theme-btn:active { transform: scale(0.9); }
+  .theme-btn.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(56,189,248,.3);
+    background: var(--accent);
+  }
+  body[data-theme="morning"] .theme-btn.active { box-shadow: 0 0 12px rgba(245,158,11,.4); }
+  body[data-theme="afternoon"] .theme-btn.active { box-shadow: 0 0 12px rgba(14,165,233,.4); }
+  body[data-theme="evening"] .theme-btn.active { box-shadow: 0 0 12px rgba(232,121,160,.4); }
+
+  @media (hover: hover) {
+    .theme-btn:hover { border-color: var(--accent); transform: scale(1.08); }
+  }
+
+  /* ---- Timer Display ---- */
+  .timer-display {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: clamp(24px, 5vw, 40px) 16px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color .3s, box-shadow .3s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .timer-display:active { background: #1a2538; }
+
+  .timer-display.warning { border-color: var(--warn); box-shadow: 0 0 24px rgba(251,191,36,.15); }
+  .timer-display.timeout { border-color: var(--danger); animation: pulse 1s infinite; }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 16px rgba(248,113,113,.2); }
+    50%      { box-shadow: 0 0 40px rgba(248,113,113,.5); }
+  }
+
+  .time {
+    font-size: clamp(3.5rem, 14vw, 6rem);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .04em;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .warning .time { color: var(--warn); }
+  .timeout .time { color: var(--danger); }
+
+  .time-label {
+    margin-top: 8px;
+    font-size: clamp(0.8rem, 2.5vw, 0.95rem);
+    color: var(--muted);
+  }
+
+  /* ---- Points Card ---- */
+  .points-card {
+    background: linear-gradient(135deg, #1e293b 0%, #1a2040 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+  }
+  .points-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .points-item .p-value {
+    font-size: clamp(1.3rem, 5vw, 1.8rem);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--warn);
+    line-height: 1.1;
+  }
+  .points-item .p-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .points-item .p-rank {
+    font-size: 0.75rem;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* 积分飞入动画 */
+  .points-fly {
+    position: fixed;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--warn);
+    pointer-events: none;
+    z-index: 1000;
+    animation: flyUp 1.2s ease-out forwards;
+    text-shadow: 0 0 12px rgba(251,191,36,.5);
+  }
+  @keyframes flyUp {
+    0%   { opacity: 1; transform: translateY(0) scale(1); }
+    60%  { opacity: 1; transform: translateY(-60px) scale(1.3); }
+    100% { opacity: 0; transform: translateY(-100px) scale(0.8); }
+  }
+
+  /* ---- Setter ---- */
+  .setter {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+
+  .setter h3 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .input-group label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .input-group input {
+    width: clamp(56px, 16vw, 72px);
+    height: 44px;
+    padding: 6px;
+    text-align: center;
+    font-size: 16px; /* 16px prevents iOS auto-zoom */
+    font-weight: 600;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    outline: none;
+    transition: border .15s;
+  }
+  .input-group input:focus { border-color: var(--accent); }
+
+  .sep {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--muted);
+    padding: 0 2px;
+    margin-top: 12px;
+  }
+
+  .presets {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    justify-content: center;
+  }
+  .preset-btn {
+    padding: 10px 16px;
+    font-size: clamp(0.78rem, 2.5vw, 0.85rem);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .15s;
+    min-height: 40px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .preset-btn:active { background: var(--accent); color: #0f172a; border-color: var(--accent); }
+
+  @media (hover: hover) {
+    .preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+  }
+
+  /* ---- Actions ---- */
+  .actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 14px 12px;
+    font-size: clamp(0.9rem, 3vw, 1rem);
+    font-weight: 700;
+    border-radius: var(--radius);
+    border: none;
+    cursor: pointer;
+    transition: all .15s;
+    letter-spacing: .02em;
+    min-height: 52px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-start  { background: var(--accent); color: #0f172a; }
+  .btn-pause  { background: var(--warn); color: #0f172a; }
+  .btn-reset  { background: var(--border); color: var(--text); }
+
+  @media (hover: hover) {
+    .btn-start:hover  { filter: brightness(1.1); }
+    .btn-pause:hover  { filter: brightness(1.1); }
+    .btn-reset:hover  { background: #475569; }
+  }
+
+  /* ---- Records ---- */
+  .records {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+
+  .records-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .records-header h3 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+  }
+  .records-header .stats {
+    font-size: 0.78rem;
+    color: var(--accent);
+  }
+
+  /* ── Tags ── */
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .tag-btn {
+    padding: 6px 12px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--muted);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tag-btn:active { transform: scale(0.95); }
+  .tag-btn.active {
+    background: var(--accent);
+    color: #0f172a;
+    border-color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* ── Chart ── */
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .chart-card h3 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .chart-area { display: flex; flex-direction: column; gap: 10px; }
+  .chart-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .chart-bar-label {
+    width: 50px;
+    font-size: 0.75rem;
+    color: var(--text);
+    text-align: right;
+    flex-shrink: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .chart-bar-track {
+    flex: 1;
+    height: 24px;
+    background: var(--bg);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+  .chart-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width .5s ease;
+    min-width: 4px;
+  }
+  .chart-bar-time {
+    width: 52px;
+    font-size: 0.72rem;
+    color: var(--muted);
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .chart-colors-0 { background: var(--accent); }
+  .chart-colors-1 { background: var(--accent2); }
+  .chart-colors-2 { background: var(--success); }
+  .chart-colors-3 { background: var(--warn); }
+  .chart-colors-4 { background: #f472b6; }
+  .chart-colors-5 { background: #fb923c; }
+  .chart-colors-6 { background: #a78bfa; }
+  .chart-colors-7 { background: #34d399; }
+
+  .tag-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background: var(--bg);
+    border-radius: 8px;
+    font-size: 0.82rem;
+    margin-bottom: 6px;
+  }
+  .tag-detail-row .td-time {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* ── Lottery ── */
+  .lottery-status {
+    background: linear-gradient(135deg, #1a0530 0%, #2a1050 50%, #1e1b4b 100%);
+    border: 1px solid rgba(244,114,182,.3);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+  }
+  .lottery-wheel {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f472b6, #e879a0, #fbbf24);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: wheelPulse 2s ease-in-out infinite;
+  }
+  @keyframes wheelPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(244,114,182,.4); }
+    50% { box-shadow: 0 0 40px rgba(244,114,182,.7); }
+  }
+  .wheel-text { font-size: 2.2rem; }
+  .wheel-sub { font-size: 0.65rem; color: #4a044e; font-weight: 700; margin-top: 2px; }
+  .lottery-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    margin-bottom: 14px;
+    color: #f9a8d4;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .lottery-draw-btn {
+    width: 100%;
+    height: 48px;
+    border-radius: 24px;
+    border: none;
+    background: linear-gradient(135deg, #f472b6, #e879a0);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: .04em;
+    transition: all .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .lottery-draw-btn:active { transform: scale(.95); }
+  .lottery-draw-btn:disabled {
+    background: var(--border);
+    color: var(--muted);
+    cursor: not-allowed;
+  }
+
+  .lottery-task {
+    background: var(--card);
+    border: 2px solid #f472b6;
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+  }
+  .lottery-task.hidden { display: none; }
+  .lt-header { font-size: 0.8rem; color: var(--muted); margin-bottom: 8px; }
+  .lt-icon { font-size: 3rem; margin-bottom: 8px; }
+  .lt-name { font-size: 1.2rem; font-weight: 800; color: #fbbf24; margin-bottom: 4px; }
+  .lt-desc { font-size: 0.85rem; color: var(--text); margin-bottom: 8px; }
+  .lt-reward { font-size: 1rem; font-weight: 700; color: var(--success); margin-bottom: 4px; }
+  .lt-diff { font-size: 0.75rem; color: var(--muted); margin-bottom: 14px; }
+  .lt-complete-btn {
+    width: 100%;
+    height: 44px;
+    border-radius: 8px;
+    border: none;
+    background: var(--success);
+    color: #0f172a;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .lt-complete-btn:active { transform: scale(.95); }
+  .lt-complete-btn:disabled { background: var(--border); color: var(--muted); }
+
+  /* ── Rules Page ── */
+  .rules-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 20px;
+  }
+  .rule-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .rule-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .rule-text {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+  .rule-text b {
+    color: var(--text);
+  }
+
+  /* ── Note Input ── */
+  .note-area { margin-bottom: 12px; }
+  .note-area input {
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 16px; /* 16px prevents iOS auto-zoom */
+    outline: none;
+  }
+  .note-area input:focus { border-color: var(--accent2); }
+  .note-area input::placeholder { color: var(--muted); font-size: 0.85rem; }
+
+  .record-list {
+    list-style: none;
+    max-height: 260px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .record-list::-webkit-scrollbar { width: 3px; }
+  .record-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .record-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: var(--bg);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    gap: 8px;
+  }
+  .record-item .rec-date { color: var(--muted); font-size: 0.75rem; }
+  .record-item .rec-duration {
+    color: var(--accent);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+  .record-item .rec-note {
+    color: var(--text);
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.85rem;
+  }
+  .record-item .rec-del {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 1.1rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .record-item .rec-del:active { background: rgba(248,113,113,.2); }
+
+  @media (hover: hover) {
+    .record-item .rec-del:hover { background: rgba(248,113,113,.15); }
+  }
+
+  .empty-hint {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    padding: 24px 0;
+  }
+
+  .clear-all {
+    margin-top: 12px;
+    width: 100%;
+    height: 44px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .clear-all:active { border-color: var(--danger); color: var(--danger); }
+
+  @media (hover: hover) {
+    .clear-all:hover { border-color: var(--danger); color: var(--danger); }
+    #btnExport:hover { border-color: var(--accent2); color: var(--accent2); background: rgba(129,140,248,.08); }
+  }
+
+  /* ── Page Switching ── */
+  .page { display: none; }
+  .page.page-active { display: flex; }
+
+  /* ── Exchange Page ── */
+  .exchange-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0;
+  }
+  .exchange-header h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    text-align: center;
+  }
+  .back-btn {
+    width: 56px;
+    height: 40px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .back-btn:active { background: var(--accent); color: #0f172a; }
+
+  .exchange-balance {
+    background: linear-gradient(135deg, #1a2040 0%, #2a1050 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+  }
+  .eb-label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 4px;
+  }
+  .eb-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--warn);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .exchange-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .ex-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+  }
+  .ex-icon {
+    font-size: 1.8rem;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+  .ex-info { flex: 1; min-width: 0; }
+  .ex-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .ex-cost {
+    font-size: 0.78rem;
+    color: var(--warn);
+    margin-top: 2px;
+  }
+  .ex-btn {
+    padding: 10px 18px;
+    background: var(--accent);
+    color: #0f172a;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ex-btn:active { transform: scale(0.95); }
+  .ex-btn:disabled {
+    background: var(--border);
+    color: var(--muted);
+    cursor: not-allowed;
+  }
+
+  /* ── Notes Page ── */
+  .notes-add-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .notes-add-card input {
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 16px;
+    outline: none;
+  }
+  .notes-add-card input:focus { border-color: var(--accent2); }
+  .notes-add-card input::placeholder { color: var(--muted); font-size: 0.85rem; }
+  .notes-add-btn {
+    height: 44px;
+    background: var(--accent2);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .notes-add-btn:active { transform: scale(0.97); }
+
+  .notes-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .note-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+  }
+  .note-card .note-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent);
+    word-break: break-all;
+  }
+  .note-card .note-link {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--accent2);
+    margin-top: 4px;
+    word-break: break-all;
+    text-decoration: none;
+  }
+  .note-card .note-desc {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .note-card .note-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .note-card .note-actions button {
+    flex: 1;
+    height: 34px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 0.78rem;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .note-card .note-actions button:active { background: var(--border); }
+  .note-card .note-actions .note-del { color: var(--danger); border-color: rgba(248,113,113,.3); }
+
+  /* ── 特别兑换 ── */
+  .special-exchange {
+    background: linear-gradient(135deg, #2a1050 0%, #1a0530 100%);
+    border: 1px dashed rgba(251,191,36,.4);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+  }
+  .se-header {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #f9a8d4;
+    margin-bottom: 6px;
+  }
+  .se-desc {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+  .special-exchange input {
+    height: 44px;
+    padding: 0 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 16px;
+    outline: none;
+  }
+  .special-exchange input:focus { border-color: #f9a8d4; }
+  .special-exchange input::placeholder { color: var(--muted); font-size: 0.85rem; }
+  .se-btn {
+    height: 44px;
+    padding: 0 18px;
+    background: linear-gradient(135deg, #f9a8d4, #e879a0);
+    color: #1a0530;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .se-btn:active { transform: scale(0.95); }
+
+  /* 积分卡片中的兑换入口按钮 */
+  .points-card {
+    position: relative;
+  }
+  .exchange-entry {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px 0;
+    background: linear-gradient(135deg, rgba(251,191,36,.15), rgba(251,191,36,.05));
+    border: 1px solid rgba(251,191,36,.3);
+    border-radius: 8px;
+    color: var(--warn);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+    letter-spacing: .02em;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .exchange-entry:active {
+    background: var(--warn);
+    color: #0f172a;
+  }
+
+  /* ── Modal Overlay ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.7);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn .2s ease;
+  }
+  .modal-overlay.hidden { display: none; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 20px;
+    width: 100%;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  .modal-box h3 { font-size: 1rem; color: var(--text); }
+  .modal-box .hint { font-size: 0.78rem; color: var(--muted); }
+
+  .modal-box input[type="password"],
+  .modal-box input[type="number"] {
+    width: 100%;
+    height: 48px;
+    padding: 0 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 18px;
+    text-align: center;
+    outline: none;
+    letter-spacing: .08em;
+  }
+  .modal-box input:focus { border-color: var(--accent); }
+
+  .modal-btns {
+    display: flex;
+    gap: 8px;
+  }
+  .modal-btns button {
+    flex: 1;
+    height: 44px;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .modal-btns button:active { transform: scale(0.96); }
+
+  .btn-cancel { background: var(--border); color: var(--text); }
+  .btn-confirm { background: var(--accent); color: #0f172a; }
+  .btn-danger { background: var(--danger); color: #fff; }
+
+  .pts-adjust-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .pts-adjust-row button {
+    height: 48px;
+    width: 48px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 1.3rem;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .pts-adjust-row button:active { background: var(--accent); color: #0f172a; }
+  .pts-adjust-row .pts-val {
+    flex: 1;
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--warn);
+  }
+
+  /* 积分卡片中的小编辑按钮 */
+  .edit-pts-btn {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    background: none;
+    border: none;
+    font-size: 0.85rem;
+    cursor: pointer;
+    opacity: 0.5;
+    padding: 4px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .edit-pts-btn:active { opacity: 1; }
+
+  /* ── Celebration Modal ── */
+  .celebration-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.75);
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn .3s ease;
+  }
+  .celebration-overlay.hidden { display: none; }
+
+  .celebration-box {
+    background: linear-gradient(145deg, #1e1b4b 0%, #312e81 30%, #4c1d95 60%, #831843 100%);
+    border: 2px solid rgba(251,191,36,.4);
+    border-radius: 20px;
+    padding: 32px 24px;
+    width: 100%;
+    max-width: 340px;
+    text-align: center;
+    animation: celebBounce .5s cubic-bezier(.34,1.56,.64,1) forwards;
+    box-shadow: 0 0 60px rgba(251,191,36,.25);
+  }
+  @keyframes celebBounce {
+    0%   { transform: scale(.3); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .celebration-box .celeb-emoji {
+    font-size: 3.5rem;
+    animation: celebFloat 1.5s ease-in-out infinite;
+  }
+  @keyframes celebFloat {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-12px); }
+  }
+
+  .celebration-box .celeb-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #fbbf24;
+    margin: 8px 0 4px;
+    letter-spacing: .04em;
+  }
+  .celebration-box .celeb-sub {
+    font-size: 1rem;
+    color: #f9a8d4;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .celebration-box .celeb-heart {
+    font-size: 0.9rem;
+    color: #fb7185;
+    margin-bottom: 20px;
+  }
+
+  .celebration-box .celeb-btn {
+    width: 100%;
+    height: 48px;
+    border-radius: 24px;
+    border: none;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #1e1b4b;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: .04em;
+    transition: all .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .celebration-box .celeb-btn:active { transform: scale(.95); }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: calc(24px + var(--safe-bottom));
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--accent2);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 24px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    z-index: 999;
+    pointer-events: none;
+    transition: transform .3s ease;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── Small screen adjustments ── */
+  @media (max-width: 360px) {
+    body { padding: 12px 10px calc(16px + var(--safe-bottom)); }
+    .container { gap: 12px; }
+    .timer-display { padding: 20px 12px; }
+    .setter { padding: 12px; }
+    .records { padding: 12px; }
+    .btn { padding: 13px 8px; min-height: 48px; }
+    .preset-btn { padding: 8px 12px; min-height: 36px; font-size: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ 主页面 ═══════════ -->
+<div class="container page page-active" id="pageMain">
+  <h1>👑 丫丫无敌大王计时器 <span id="syncBadge" style="font-size:0.55rem;vertical-align:middle;cursor:pointer;" title="点击设置云同步">☁️</span></h1>
+
+  <!-- 主题切换 -->
+  <div class="theme-switcher" id="themeSwitcher">
+    <button class="theme-btn" data-theme="morning" title="🌅 早晨">🌅</button>
+    <button class="theme-btn" data-theme="afternoon" title="☀️ 下午">☀️</button>
+    <button class="theme-btn" data-theme="evening" title="🌇 傍晚">🌇</button>
+    <button class="theme-btn" data-theme="night" title="🌙 夜晚">🌙</button>
+  </div>
+
+  <!-- 计时显示 -->
+  <div class="timer-display" id="timerDisplay">
+    <div class="time" id="timeText">25:00</div>
+    <div class="time-label" id="timeLabel">准备开始</div>
+  </div>
+
+  <!-- 积分卡片 -->
+  <div class="points-card" style="flex-wrap:wrap;">
+    <button class="edit-pts-btn" id="btnEditPoints" title="管理积分">🔧</button>
+    <div class="points-item">
+      <span class="p-value" id="totalPoints">0</span>
+      <span class="p-label">🏆 总积分</span>
+    </div>
+    <div class="points-item">
+      <span class="p-value" id="todayPoints">0</span>
+      <span class="p-label">📅 今日获得</span>
+    </div>
+    <div class="points-item">
+      <span class="p-rank" id="rankText">🌱 学习新芽</span>
+      <span class="p-label">⭐ 称号</span>
+    </div>
+    <div class="points-item">
+      <span class="p-value" id="streakMult" style="color:var(--accent);">x1.0</span>
+      <span class="p-label">🔥 积分倍率</span>
+    </div>
+    <button class="exchange-entry" id="btnGoExchange">🎁 积分兑换</button>
+    <button class="exchange-entry" id="btnGoNotes" style="background:linear-gradient(135deg, rgba(129,140,248,.15), rgba(129,140,248,.05));border-color:rgba(129,140,248,.3);color:var(--accent2);">📝 更多</button>
+    <button class="exchange-entry" id="btnGoStats" style="background:linear-gradient(135deg, rgba(74,222,128,.15), rgba(74,222,128,.05));border-color:rgba(74,222,128,.3);color:var(--success);">📊 统计</button>
+    <button class="exchange-entry" id="btnGoLottery" style="background:linear-gradient(135deg, rgba(244,114,182,.15), rgba(244,114,182,.05));border-color:rgba(244,114,182,.3);color:#f472b6;">🎰 抽奖</button>
+    <button class="exchange-entry" id="btnGoRules" style="background:linear-gradient(135deg, rgba(148,163,184,.15), rgba(148,163,184,.05));border-color:rgba(148,163,184,.3);color:var(--muted);">📖 规则</button>
+  </div>
+
+  <!-- 时间设置 -->
+  <div class="setter">
+    <h3>⚙️ 设置倒计时</h3>
+    <div class="input-row">
+      <div class="input-group">
+        <label>小时</label>
+        <input type="number" id="inputH" value="0" min="0" max="99" inputmode="numeric" pattern="[0-9]*">
+      </div>
+      <span class="sep">:</span>
+      <div class="input-group">
+        <label>分钟</label>
+        <input type="number" id="inputM" value="25" min="0" max="59" inputmode="numeric" pattern="[0-9]*">
+      </div>
+      <span class="sep">:</span>
+      <div class="input-group">
+        <label>秒</label>
+        <input type="number" id="inputS" value="0" min="0" max="59" inputmode="numeric" pattern="[0-9]*">
+      </div>
+    </div>
+    <div class="presets">
+      <button class="preset-btn" data-h="0" data-m="5"  data-s="0">5 分钟</button>
+      <button class="preset-btn" data-h="0" data-m="15" data-s="0">15 分钟</button>
+      <button class="preset-btn" data-h="0" data-m="25" data-s="0">25 分钟</button>
+      <button class="preset-btn" data-h="0" data-m="45" data-s="0">45 分钟</button>
+      <button class="preset-btn" data-h="1" data-m="0"  data-s="0">1 小时</button>
+      <button class="preset-btn" data-h="1" data-m="30" data-s="0">1.5 小时</button>
+      <button class="preset-btn" data-h="2" data-m="0"  data-s="0">2 小时</button>
+      <button class="preset-btn" data-h="3" data-m="0"  data-s="0">3 小时</button>
+    </div>
+  </div>
+
+  <!-- 操作按钮 -->
+  <div class="actions">
+    <button class="btn btn-start" id="btnStart">▶ 开始</button>
+    <button class="btn btn-pause" id="btnPause">⏸ 暂停</button>
+    <button class="btn btn-reset" id="btnReset">↺ 重置</button>
+  </div>
+
+  <!-- 记录区域 -->
+  <div class="records">
+    <div class="records-header">
+      <h3>📋 学习记录</h3>
+      <span class="stats" id="statsText">共 0 条</span>
+    </div>
+    <div class="note-area">
+      <input type="text" id="noteInput" placeholder="备注（如：数学第三章、英语单词…）" maxlength="60" enterkeyhint="done">
+    </div>
+    <div class="tag-row" id="tagRow">
+      <button class="tag-btn active" data-tag="无标签">📚 无标签</button>
+      <button class="tag-btn" data-tag="数学">📐 数学</button>
+      <button class="tag-btn" data-tag="英语">📖 英语</button>
+      <button class="tag-btn" data-tag="语文">📝 语文</button>
+      <button class="tag-btn" data-tag="科学">🔬 科学</button>
+      <button class="tag-btn" data-tag="编程">💻 编程</button>
+      <button class="tag-btn" data-tag="艺术">🎨 艺术</button>
+      <button class="tag-btn custom-tag" id="btnCustomTag">✏️ 自定义</button>
+    </div>
+    <input type="text" id="customTagInput" placeholder="输入自定义标签…" maxlength="10" style="display:none;width:100%;height:36px;padding:0 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;margin-top:6px;outline:none;" enterkeyhint="done">
+    <ul class="record-list" id="recordList">
+      <li class="empty-hint">还没有记录，开始计时吧 ✍️</li>
+    </ul>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="clear-all" id="btnClearAll" style="margin-top:0;flex:1;">🗑 清空全部记录</button>
+      <button class="clear-all" id="btnExport" style="margin-top:0;flex:1;border-color:var(--accent);color:var(--accent);">📄 导出 TXT</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button class="clear-all" id="btnExportData" style="margin-top:0;flex:1;border-color:var(--success);color:var(--success);">📤 导出数据</button>
+      <button class="clear-all" id="btnImportData" style="margin-top:0;flex:1;border-color:var(--accent2);color:var(--accent2);">📥 导入数据</button>
+    </div>
+    <input type="file" id="importFileInput" accept=".json" style="display:none;">
+  </div>
+</div>
+<!-- ═══════════ /主页面 ═══════════ -->
+
+<!-- ═══════════ 积分兑换页面 ═══════════ -->
+<div class="container page" id="pageExchange">
+  <div class="exchange-header">
+    <button class="back-btn" id="btnBack">← 返回</button>
+    <h2>🎁 积分兑换</h2>
+    <div style="width:56px;"></div>
+  </div>
+
+  <!-- 可用积分 -->
+  <div class="exchange-balance">
+    <span class="eb-label">可用积分</span>
+    <span class="eb-value" id="exPoints">0</span>
+    <span style="display:block;font-size:0.85rem;color:var(--accent);margin-top:4px;" id="exMoney">≈ ¥0.00</span>
+    <span style="display:block;font-size:0.7rem;color:var(--muted);margin-top:2px;">💰 1分钟学习 = 5积分 | 1积分 = ¥0.01</span>
+  </div>
+
+  <!-- 兑换列表 -->
+  <div class="exchange-list" id="exchangeList">
+    <!-- JS 动态渲染 -->
+  </div>
+
+  <!-- 特别兑换 -->
+  <div class="special-exchange" id="specialExchange">
+    <div class="se-header">💝 特别兑换</div>
+    <p class="se-desc">输入你最想要的东西，老公来买单~<br>（需要密码，<b>当日积分将全部清零</b>）</p>
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="seInput" placeholder="我想要…" maxlength="30" enterkeyhint="done" style="flex:1;">
+      <button class="se-btn" id="btnSpecialExchange">🎁 兑换</button>
+    </div>
+  </div>
+
+  <!-- 兑换记录 -->
+  <div class="records" style="margin-top:4px;" id="exHistoryCard">
+    <div class="records-header">
+      <h3>📜 兑换记录</h3>
+      <span class="stats" id="exHistoryCount">共 0 条</span>
+    </div>
+    <ul class="record-list" id="exHistoryList">
+      <li class="empty-hint">还没有兑换记录哦~</li>
+    </ul>
+  </div>
+</div>
+<!-- ═══════════ /积分兑换页面 ═══════════ -->
+
+<!-- ═══════════ 更多 · 记事本页面 ═══════════ -->
+<div class="container page" id="pageNotes">
+  <div class="exchange-header">
+    <button class="back-btn" id="btnNotesBack">← 返回</button>
+    <h2>📝 资料收藏</h2>
+    <div style="width:56px;"></div>
+  </div>
+
+  <!-- 发送设置 -->
+  <div class="notes-add-card" style="margin-bottom:4px;">
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:4px;">🐧 QQ 通知（学习完成后自动推送）</div>
+    <input type="text" id="qmsgKeyInput" placeholder="Qmsg酱 Key" maxlength="60" enterkeyhint="done">
+    <button class="notes-add-btn" id="btnSaveQmsg" style="background:linear-gradient(135deg, #12b7f5, #0d9bdf);">💾 保存并测试</button>
+    <p style="font-size:0.7rem;color:var(--muted);margin-top:6px;line-height:1.5;">
+      📌 使用方法：<br>
+      1. 打开 <a href="https://qmsg.zendee.cn" target="_blank" style="color:var(--accent);">qmsg.zendee.cn</a> 用 QQ 扫码登录<br>
+      2. 登录后复制你的 Key<br>
+      3. 粘贴到上方，点「保存并测试」
+    </p>
+  </div>
+
+  <!-- 添加笔记 -->
+  <div class="notes-add-card">
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:4px;">📝 添加资料收藏</div>
+    <input type="text" id="noteTitleInput" placeholder="标题（如：数学视频）" maxlength="40" enterkeyhint="next">
+    <input type="url" id="noteLinkInput" placeholder="链接（如：https://...）" maxlength="500" enterkeyhint="next">
+    <input type="text" id="noteDescInput" placeholder="备注（可选）" maxlength="80" enterkeyhint="done">
+    <button class="notes-add-btn" id="btnAddNote">➕ 添加收藏</button>
+  </div>
+
+  <!-- 笔记列表 -->
+  <div class="notes-list" id="notesList">
+    <li class="empty-hint">还没有收藏的资料~</li>
+  </div>
+</div>
+<!-- ═══════════ /更多页面 ═══════════ -->
+
+<!-- ═══════════ 统计页面 ═══════════ -->
+<div class="container page" id="pageStats">
+  <div class="exchange-header">
+    <button class="back-btn" id="btnStatsBack">← 返回</button>
+    <h2>📊 学习统计</h2>
+    <div style="width:56px;"></div>
+  </div>
+
+  <!-- 总览 -->
+  <div class="points-card">
+    <div class="points-item">
+      <span class="p-value" id="statsTotalTime">0h</span>
+      <span class="p-label">⏱ 总时长</span>
+    </div>
+    <div class="points-item">
+      <span class="p-value" id="statsTotalSessions">0</span>
+      <span class="p-label">📋 总次数</span>
+    </div>
+    <div class="points-item">
+      <span class="p-value" id="statsTopTag">-</span>
+      <span class="p-label">🏅 最多科目</span>
+    </div>
+  </div>
+
+  <!-- 直方图 -->
+  <div class="chart-card" id="chartCard">
+    <h3>📊 各科学习时长</h3>
+    <div class="chart-area" id="chartArea">
+      <p class="empty-hint">还没有学习记录~</p>
+    </div>
+  </div>
+
+  <!-- 各科明细 -->
+  <div class="records" id="tagDetailCard">
+    <div class="records-header"><h3>📋 科目明细</h3></div>
+    <div id="tagDetailList"></div>
+  </div>
+</div>
+<!-- ═══════════ /统计页面 ═══════════ -->
+
+<!-- ═══════════ 抽奖页面 ═══════════ -->
+<div class="container page" id="pageLottery">
+  <div class="exchange-header">
+    <button class="back-btn" id="btnLotteryBack">← 返回</button>
+    <h2>🎰 每周抽奖</h2>
+    <div style="width:56px;"></div>
+  </div>
+
+  <!-- 抽奖状态 -->
+  <div class="lottery-status" id="lotteryStatus">
+    <div class="lottery-wheel" id="lotteryWheel">
+      <div class="wheel-text">🎰</div>
+      <div class="wheel-sub">点击抽取</div>
+    </div>
+    <div class="lottery-info">
+      <span id="lotteryRemaining">本周剩余：1次</span>
+      <span style="font-size:0.7rem;color:var(--muted);">每周日刷新</span>
+    </div>
+    <button class="lottery-draw-btn" id="btnDraw">🎲 抽取任务</button>
+  </div>
+
+  <!-- 当前任务 -->
+  <div class="lottery-task hidden" id="lotteryTaskCard">
+    <div class="lt-header">📋 本周特殊任务</div>
+    <div class="lt-icon" id="ltIcon">🎯</div>
+    <div class="lt-name" id="ltName"></div>
+    <div class="lt-desc" id="ltDesc"></div>
+    <div class="lt-reward" id="ltReward"></div>
+    <div class="lt-diff" id="ltDiff"></div>
+    <button class="lt-complete-btn hidden" id="btnCompleteTask">✅ 完成任务领取奖励</button>
+  </div>
+
+  <!-- 设置（需密码） -->
+  <div style="display:flex;gap:8px;margin-top:4px;">
+    <button class="clear-all" id="btnLotteryExtra" style="flex:1;">🔑 增加抽取次数</button>
+    <button class="clear-all" id="btnLotteryReset" style="flex:1;">🔄 重置本周</button>
+  </div>
+
+  <!-- 抽取记录 -->
+  <div class="records">
+    <div class="records-header"><h3>📜 抽奖记录</h3></div>
+    <ul class="record-list" id="lotteryHistoryList">
+      <li class="empty-hint">还没有抽奖记录~</li>
+    </ul>
+  </div>
+</div>
+<!-- ═══════════ /抽奖页面 ═══════════ -->
+
+<!-- ═══════════ 规则页面 ═══════════ -->
+<div class="container page" id="pageRules">
+  <div class="exchange-header">
+    <button class="back-btn" id="btnRulesBack">← 返回</button>
+    <h2>📖 规则说明</h2>
+    <div style="width:56px;"></div>
+  </div>
+
+  <div class="rules-content">
+    <div class="rule-section">
+      <div class="rule-title">⏱ 计时规则</div>
+      <div class="rule-text">
+        • 设置倒计时时间（或选择预设），点击「开始」计时<br>
+        • 计时中可暂停/继续，重置会清零<br>
+        • 倒计时归零自动记录学习时长<br>
+        • 长按计时器区域可手动记录已学习时长<br>
+        • 支持键盘快捷键：空格=开始/暂停，R=重置
+      </div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-title">💰 积分规则</div>
+      <div class="rule-text">
+        • <b>1分钟学习 = 5积分</b><br>
+        • 1积分 = ¥0.01（1分钱）<br>
+        • 日学5小时 ≈ 1500分 ≈ ¥15<br>
+        • 周学35小时 ≈ 10500分 ≈ ¥105<br>
+        • 最少一次获得5积分
+      </div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-title">🔥 连击倍率</div>
+      <div class="rule-text">
+        • 过去3天每天学满<b>4小时</b>，触发 <b>x1.5 倍率</b><br>
+        • 倍率触发后，当天所有积分 ×1.5<br>
+        • 任意一天不足4小时，倍率恢复 x1.0<br>
+        • 倍率在积分卡片实时显示
+      </div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-title">⭐ 称号等级（基于终身学习积分，永不降级）</div>
+      <div class="rule-text">
+        🌰 种子选手（0-249）<br>
+        🌱 学习新芽（250-999）→ 升级奖励 <b>+100</b> 分<br>
+        🌿 学习达人（1000-2999）→ 升级奖励 <b>+300</b> 分<br>
+        🔥 学习高手（3000-7499）→ 升级奖励 <b>+500</b> 分<br>
+        ⭐ 学习大师（7500-14999）→ 升级奖励 <b>+1000</b> 分<br>
+        💎 学习传说（15000-24999）→ 升级奖励 <b>+2000</b> 分<br>
+        👑 无敌学习王（25000+）→ 升级奖励 <b>+5000</b> 分<br>
+        <br>• 等级仅由学习时长获得的积分累计<br>
+        • 积分兑换后等级不下降<br>
+        • 每个等级奖励仅领取一次
+      </div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-title">🎁 积分兑换</div>
+      <div class="rule-text">
+        • 积分可兑换实物奖励（零食、文具、裙子等）<br>
+        • 兑换后积分立即扣除<br>
+        • 💝 <b>特别兑换</b>：可自定义想要的东西<br>
+        • 特别兑换需要密码，且当日积分清零<br>
+        • 兑换记录可在兑换页面查看
+      </div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-title">🎰 每周抽奖</div>
+      <div class="rule-text">
+        • 每周日刷新，免费<b>1次</b>抽取机会<br>
+        • 抽取随机任务，难度越高奖励越多<br>
+        • 完成任务后点「领取奖励」获得积分<br>
+        • 密码可增加抽取次数（最多5次/次）<br>
+        • 密码可重置本周抽奖
+      </div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-title">🏷 标签统计</div>
+      <div class="rule-text">
+        • 计时前可选择学习科目标签（数学/英语等）<br>
+        • 支持自定义标签<br>
+        • 📊 统计页面按标签汇总学习时长<br>
+        • 彩色直方图直观展示各科学习情况
+      </div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-title">☁️ 云同步</div>
+      <div class="rule-text">
+        • 标题旁 ☁️ 图标设置 GitHub Token<br>
+        • 数据自动同步到 GitHub，多设备互通<br>
+        • 打开页面自动拉取最新数据<br>
+        • 学习记录变化后3秒自动推送<br>
+        • 也可用 📤导出/📥导入 JSON 文件手动同步
+      </div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-title">🔐 密码管理</div>
+      <div class="rule-text">
+        • 默认密码：<b>1234</b>（可在设置中修改）<br>
+        • 密码用于：编辑积分、特别兑换、增加抽奖次数<br>
+        • 积分卡片右上角 🔧 进入管理
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ═══════════ /规则页面 ═══════════ -->
+
+<!-- ═══════════ 密码弹窗 ═══════════ -->
+<div class="modal-overlay hidden" id="modalPassword">
+  <div class="modal-box">
+    <h3>🔐 请输入管理密码</h3>
+    <p class="hint">默认密码：1234</p>
+    <input type="password" id="pwdInput" placeholder="输入密码" maxlength="20" enterkeyhint="done">
+    <div class="modal-btns">
+      <button class="btn-cancel" id="btnPwdCancel">取消</button>
+      <button class="btn-confirm" id="btnPwdConfirm">确认</button>
+    </div>
+    <button style="background:none;border:none;color:var(--muted);font-size:0.7rem;cursor:pointer;margin-top:-8px;" id="btnChangePwd">修改密码</button>
+  </div>
+</div>
+
+<!-- ═══════════ 积分编辑弹窗 ═══════════ -->
+<div class="modal-overlay hidden" id="modalEditPoints">
+  <div class="modal-box">
+    <h3>✏️ 调整积分</h3>
+    <div class="pts-adjust-row">
+      <button id="btnPtsMinus">−</button>
+      <span class="pts-val" id="ptsEditVal">0</span>
+      <button id="btnPtsPlus">+</button>
+    </div>
+    <p class="hint">点击 + / − 每次增减 10 分，当前积分：<b id="ptsCurrent" style="color:var(--warn);">0</b></p>
+    <div class="modal-btns">
+      <button class="btn-cancel" id="btnEditCancel">取消</button>
+      <button class="btn-confirm" id="btnEditSave">保存修改</button>
+    </div>
+    <div class="modal-btns" style="margin-top:-8px;">
+      <button class="btn-danger" id="btnEditZero" style="flex:1;">归零积分</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 云同步设置弹窗 ═══════════ -->
+<div class="modal-overlay hidden" id="modalSync">
+  <div class="modal-box">
+    <h3>☁️ 云同步设置</h3>
+    <p class="hint" id="syncStatusText">未配置云同步</p>
+    <input type="password" id="syncTokenInput" placeholder="输入 GitHub Token" maxlength="100" style="font-size:14px;">
+    <p class="hint" style="font-size:0.68rem;line-height:1.5;">
+      1. 打开 <a href="https://github.com/settings/tokens" target="_blank" style="color:var(--accent);">github.com/settings/tokens</a><br>
+      2. 点 Generate new token (classic)<br>
+      3. 勾选 <b>repo</b> 权限，生成后粘贴到上方
+    </p>
+    <div class="modal-btns">
+      <button class="btn-cancel" id="btnSyncCancel">关闭</button>
+      <button class="btn-confirm" id="btnSyncSave">保存并同步</button>
+    </div>
+    <div class="modal-btns" style="margin-top:-8px;">
+      <button class="btn-danger" id="btnSyncDisable" style="flex:1;">关闭云同步</button>
+      <button class="btn-confirm" id="btnSyncNow" style="flex:1;">🔄 立即同步</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 修改密码弹窗 ═══════════ -->
+<div class="modal-overlay hidden" id="modalChangePwd">
+  <div class="modal-box">
+    <h3>🔑 修改密码</h3>
+    <input type="password" id="oldPwdInput" placeholder="旧密码" maxlength="20">
+    <input type="password" id="newPwdInput" placeholder="新密码" maxlength="20" enterkeyhint="done">
+    <div class="modal-btns">
+      <button class="btn-cancel" id="btnChPwdCancel">取消</button>
+      <button class="btn-confirm" id="btnChPwdConfirm">确认修改</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 庆祝弹窗 ═══════════ -->
+<div class="celebration-overlay hidden" id="celebrationOverlay">
+  <div class="celebration-box">
+    <div class="celeb-emoji">🎉</div>
+    <div class="celeb-title">丫丫你真棒！</div>
+    <div class="celeb-sub">继续加油</div>
+    <div class="celeb-heart">爱你哟~ 💖</div>
+    <button class="celeb-btn" id="btnCelebClose">✨ 好的！✨</button>
+    <button class="celeb-btn" id="btnCelebTell" style="background:linear-gradient(135deg, #f472b6, #e879a0);color:#fff;margin-top:8px;">💌 告诉她</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DOM ──
+const timerDisplay = document.getElementById('timerDisplay');
+const timeText     = document.getElementById('timeText');
+const timeLabel    = document.getElementById('timeLabel');
+const inputH       = document.getElementById('inputH');
+const inputM       = document.getElementById('inputM');
+const inputS       = document.getElementById('inputS');
+const btnStart     = document.getElementById('btnStart');
+const btnPause     = document.getElementById('btnPause');
+const btnReset     = document.getElementById('btnReset');
+const recordList   = document.getElementById('recordList');
+const noteInput    = document.getElementById('noteInput');
+const statsText    = document.getElementById('statsText');
+const btnClearAll  = document.getElementById('btnClearAll');
+const btnExport    = document.getElementById('btnExport');
+const totalPointsEl = document.getElementById('totalPoints');
+const todayPointsEl = document.getElementById('todayPoints');
+const rankTextEl    = document.getElementById('rankText');
+const pageMain      = document.getElementById('pageMain');
+const pageExchange  = document.getElementById('pageExchange');
+const btnGoExchange = document.getElementById('btnGoExchange');
+const btnBack       = document.getElementById('btnBack');
+const exPoints      = document.getElementById('exPoints');
+const toast        = document.getElementById('toast');
+
+const STORAGE_KEY = 'exam_timer_records';
+const POINTS_KEY = 'yaya_timer_points';
+const PWD_KEY = 'yaya_timer_pwd';
+const ALARM_DURATION = 8000;
+
+// ── Celebration DOM ──
+const celebrationOverlay = document.getElementById('celebrationOverlay');
+const btnCelebClose      = document.getElementById('btnCelebClose');
+
+function showCelebration() {
+  celebrationOverlay.classList.remove('hidden');
+}
+
+// ── Password Modal DOM ──
+const modalPassword  = document.getElementById('modalPassword');
+const modalEditPts   = document.getElementById('modalEditPoints');
+const modalChangePwd = document.getElementById('modalChangePwd');
+const pwdInput       = document.getElementById('pwdInput');
+const ptsEditVal     = document.getElementById('ptsEditVal');
+const ptsCurrent     = document.getElementById('ptsCurrent');
+
+// ── Password ──
+let passwordCallback = null; // 密码验证成功后的回调
+
+function getPassword() {
+  return localStorage.getItem(PWD_KEY) || '1234';
+}
+
+function setPassword(newPwd) {
+  localStorage.setItem(PWD_KEY, newPwd);
+}
+
+function hideAllModals() {
+  celebrationOverlay.classList.add('hidden');
+  modalPassword.classList.add('hidden');
+  modalEditPts.classList.add('hidden');
+  modalChangePwd.classList.add('hidden');
+}
+
+// 打开密码验证弹窗（积分编辑）
+function openPasswordModal() {
+  if (isRunning && !isPaused) pause();
+  passwordCallback = 'editPoints';
+  hideAllModals();
+  pwdInput.value = '';
+  modalPassword.classList.remove('hidden');
+  setTimeout(() => pwdInput.focus(), 200);
+}
+
+// 打开密码验证弹窗（特别兑换）
+function openPasswordForSpecial() {
+  passwordCallback = 'specialExchange';
+  hideAllModals();
+  pwdInput.value = '';
+  modalPassword.classList.remove('hidden');
+  setTimeout(() => pwdInput.focus(), 200);
+}
+
+// 验证密码 → 根据回调执行不同操作
+function verifyPassword() {
+  const input = pwdInput.value.trim();
+  if (input !== getPassword()) {
+    showToast('❌ 密码错误');
+    vibrate([50, 100, 50]);
+    return;
+  }
+  hideAllModals();
+  if (passwordCallback === 'specialExchange') {
+    doSpecialExchange();
+  } else if (passwordCallback === 'extraDraws') {
+    doExtraDraws();
+  } else if (passwordCallback === 'resetLottery') {
+    const l = loadLottery();
+    l.drawsUsed = 0; l.maxDraws = 1; l.currentTask = null; l.taskCompleted = false;
+    saveLottery(l);
+    renderLotteryPage();
+    showToast('🔄 本周抽奖已重置');
+  } else {
+    openEditPointsModal();
+  }
+  passwordCallback = null;
+}
+
+// ── 特别兑换 ──
+function doSpecialExchange() {
+  const input = document.getElementById('seInput').value.trim();
+  if (!input) {
+    showToast('⚠️ 请输入想要的东西');
+    return;
+  }
+
+  const p = loadPoints();
+  const todayPts = p.today;
+  if (todayPts <= 0) {
+    showToast('⚠️ 今天还没有获得积分哦');
+    return;
+  }
+
+  if (!confirm('确定要用今日全部 ' + todayPts + ' 积分兑换「' + input + '」吗？\n\n爸爸妈妈来买单~ 💝\n（兑换后今日积分清零）')) return;
+
+  // 扣除今日积分
+  p.total = Math.max(0, p.total - todayPts);
+  p.today = 0;
+  savePoints(p);
+
+  // 保存兑换记录
+  const now = new Date();
+  const history = loadExHistory();
+  history.unshift({
+    id: Date.now(),
+    icon: '💝',
+    name: input + '（特别兑换）',
+    points: todayPts,
+    priceYuan: 0,
+    date: now.toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit' })
+      + ' ' + now.toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' }),
+  });
+  saveExHistory(history);
+
+  // 刷新
+  document.getElementById('seInput').value = '';
+  renderPoints();
+  renderExchangeItems();
+  renderExHistory();
+  updateExBalance();
+  showToast('💝 特别兑换成功！「' + input + '」');
+  vibrate([50, 100, 50]);
+  scheduleAutoSync();
+}
+
+// 积分编辑弹窗
+function openEditPointsModal() {
+  const p = loadPoints();
+  const delta = 0;
+  // 用闭包存储当前待修改的积分值
+  window._ptsEditDelta = 0;
+  ptsEditVal.textContent = '0';
+  ptsCurrent.textContent = p.total;
+  modalEditPts.classList.remove('hidden');
+}
+
+// 修改积分
+function adjustPoints(delta) {
+  window._ptsEditDelta = (window._ptsEditDelta || 0) + delta;
+  ptsEditVal.textContent = (window._ptsEditDelta >= 0 ? '+' : '') + window._ptsEditDelta;
+  const p = loadPoints();
+  ptsCurrent.textContent = p.total + window._ptsEditDelta;
+}
+
+function savePointsEdit() {
+  const delta = window._ptsEditDelta || 0;
+  if (delta === 0) {
+    hideAllModals();
+    return;
+  }
+  const p = loadPoints();
+  p.total = Math.max(0, p.total + delta);
+  // 同步 today 避免出现负数
+  if (p.total < p.today) p.today = p.total;
+  savePoints(p);
+  renderPoints();
+  hideAllModals();
+  if (delta > 0) {
+    showToast('✅ 积分 +' + delta);
+  } else {
+    showToast('✅ 积分 ' + delta);
+  }
+  scheduleAutoSync();
+}
+
+function zeroPoints() {
+  if (!confirm('确定要将积分归零吗？（称号等级不受影响）')) return;
+  const p = loadPoints();
+  p.total = 0;
+  p.today = 0;
+  // lifetime 不重置，称号永不降级
+  savePoints(p);
+  renderPoints();
+  hideAllModals();
+  showToast('🔄 积分已归零（称号保留）');
+  scheduleAutoSync();
+}
+
+// 修改密码弹窗
+function openChangePwdModal() {
+  hideAllModals();
+  document.getElementById('oldPwdInput').value = '';
+  document.getElementById('newPwdInput').value = '';
+  modalChangePwd.classList.remove('hidden');
+  setTimeout(() => document.getElementById('oldPwdInput').focus(), 200);
+}
+
+function confirmChangePwd() {
+  const oldPwd = document.getElementById('oldPwdInput').value.trim();
+  const newPwd = document.getElementById('newPwdInput').value.trim();
+  if (oldPwd !== getPassword()) {
+    showToast('❌ 旧密码错误');
+    return;
+  }
+  if (!newPwd || newPwd.length < 1) {
+    showToast('❌ 新密码不能为空');
+    return;
+  }
+  setPassword(newPwd);
+  hideAllModals();
+  showToast('🔑 密码已修改');
+}
+
+// ── State ──
+let totalSeconds = 25 * 60;
+let remaining    = totalSeconds;
+let timerId      = null;
+let alarmId      = null;
+let isRunning    = false;
+let isPaused     = false;
+let wakeLock     = null;
+
+// ── Toast ──
+let toastTimer = null;
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+// ── Wake Lock (防锁屏) ──
+async function requestWakeLock() {
+  if ('wakeLock' in navigator && document.visibilityState === 'visible') {
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    } catch (_) { /* 用户拒绝或不支持 */ }
+  }
+}
+
+async function releaseWakeLock() {
+  if (wakeLock) {
+    try { await wakeLock.release(); } catch (_) {}
+    wakeLock = null;
+  }
+}
+
+// 页面恢复可见时重新获取 wakelock
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && isRunning && !isPaused) {
+    requestWakeLock();
+  }
+});
+
+// ── Vibration (移动端震动) ──
+function vibrate(pattern) {
+  if ('vibrate' in navigator) {
+    navigator.vibrate(pattern);
+  }
+}
+
+// ── Audio ──
+let audioCtx = null;
+function resumeAudio() {
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}
+
+function playAlarm() {
+  if (alarmId) return;
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    resumeAudio();
+
+    const playBeep = () => {
+      if (!isRunning) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+      osc.start(audioCtx.currentTime);
+      osc.stop(audioCtx.currentTime + 0.3);
+    };
+
+    const interval = 600;
+    const start = Date.now();
+    const beepLoop = () => {
+      if (!isRunning) { alarmId = null; return; }
+      if (Date.now() - start > ALARM_DURATION) { alarmId = null; return; }
+      playBeep();
+      vibrate(200);
+      alarmId = setTimeout(beepLoop, interval);
+    };
+    beepLoop();
+  } catch (_) {}
+}
+
+function stopAlarm() {
+  if (alarmId) { clearTimeout(alarmId); alarmId = null; }
+}
+
+// ── Display ──
+function formatTime(s) {
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (h > 0) {
+    return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+  }
+  return String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+}
+
+function updateDisplay() {
+  timeText.textContent = formatTime(remaining);
+  timerDisplay.classList.remove('warning', 'timeout');
+
+  if (remaining === 0 && isRunning) {
+    timerDisplay.classList.add('timeout');
+    timeLabel.textContent = '⏰ 时间到！';
+  } else if (remaining <= 60 && isRunning) {
+    timerDisplay.classList.add('warning');
+    timeLabel.textContent = '⚠️ 最后 1 分钟';
+  } else if (isRunning) {
+    timeLabel.textContent = '▶ 计时中…';
+  } else if (isPaused) {
+    timeLabel.textContent = '⏸ 已暂停';
+  } else {
+    timeLabel.textContent = '准备开始';
+  }
+}
+
+function readInput() {
+  let h = parseInt(inputH.value) || 0;
+  let m = parseInt(inputM.value) || 0;
+  let s = parseInt(inputS.value) || 0;
+  h = Math.max(0, Math.min(99, h));
+  m = Math.max(0, Math.min(59, m));
+  s = Math.max(0, Math.min(59, s));
+  inputH.value = h;
+  inputM.value = m;
+  inputS.value = s;
+  return h * 3600 + m * 60 + s;
+}
+
+function syncInputsFromRemaining() {
+  inputH.value = Math.floor(remaining / 3600);
+  inputM.value = Math.floor((remaining % 3600) / 60);
+  inputS.value = remaining % 60;
+}
+
+// ── Timer ──
+function tick() {
+  if (remaining > 0) {
+    remaining--;
+    updateDisplay();
+    syncInputsFromRemaining();
+  }
+  if (remaining === 0) {
+    stop();
+    isRunning = true;
+    updateDisplay();
+    playAlarm();
+    vibrate([500, 200, 500, 200, 500]);
+    autoRecord();
+    releaseWakeLock();
+  }
+}
+
+function start() {
+  if (isRunning && !isPaused) return;
+  if (remaining <= 0) reset();
+
+  if (!isPaused) {
+    remaining = readInput();
+    totalSeconds = remaining;
+  }
+
+  // 首次用户交互时解锁音频（iOS 要求）
+  resumeAudio();
+
+  isRunning = true;
+  isPaused = false;
+  stopAlarm();
+  updateDisplay();
+  timerId = setInterval(tick, 1000);
+  updateButtons();
+  requestWakeLock();
+  showToast('▶ 计时开始');
+}
+
+function pause() {
+  if (!isRunning || isPaused) return;
+  isPaused = true;
+  clearInterval(timerId);
+  timerId = null;
+  stopAlarm();
+  updateDisplay();
+  updateButtons();
+  releaseWakeLock();
+  showToast('⏸ 已暂停');
+}
+
+function reset() {
+  stop();
+  remaining = readInput();
+  totalSeconds = remaining;
+  isRunning = false;
+  isPaused = false;
+  stopAlarm();
+  updateDisplay();
+  updateButtons();
+  releaseWakeLock();
+  showToast('↺ 已重置');
+}
+
+function stop() {
+  clearInterval(timerId);
+  timerId = null;
+  isRunning = false;
+  isPaused = false;
+}
+
+function updateButtons() {
+  if (isRunning && !isPaused) {
+    btnStart.textContent = '▶ 计时中…';
+    btnStart.style.opacity = '0.6';
+    btnPause.textContent = '⏸ 暂停';
+  } else if (isPaused) {
+    btnStart.textContent = '▶ 继续';
+    btnStart.style.opacity = '1';
+    btnPause.textContent = '⏸ 已暂停';
+  } else {
+    btnStart.textContent = '▶ 开始';
+    btnStart.style.opacity = '1';
+    btnPause.textContent = '⏸ 暂停';
+  }
+}
+
+// ── Points ──
+function loadPoints() {
+  try { return JSON.parse(localStorage.getItem(POINTS_KEY)) || { total: 0, today: 0, lifetime: 0, claimedRanks: [] }; }
+  catch (_) { return { total: 0, today: 0, lifetime: 0, claimedRanks: [] }; }
+}
+
+function savePoints(p) {
+  localStorage.setItem(POINTS_KEY, JSON.stringify(p));
+}
+
+const RANK_LEVELS = [
+  { min: 25000, emoji: '👑', title: '无敌学习王', reward: 5000 },
+  { min: 15000, emoji: '💎', title: '学习传说',   reward: 2000 },
+  { min: 7500,  emoji: '⭐', title: '学习大师',   reward: 1000 },
+  { min: 3000,  emoji: '🔥', title: '学习高手',   reward: 500 },
+  { min: 1000,  emoji: '🌿', title: '学习达人',   reward: 300 },
+  { min: 250,   emoji: '🌱', title: '学习新芽',   reward: 100 },
+  { min: 0,     emoji: '🌰', title: '种子选手',   reward: 0 },
+];
+
+function getRank(lifetime) {
+  for (const r of RANK_LEVELS) {
+    if (lifetime >= r.min) return r;
+  }
+  return RANK_LEVELS[RANK_LEVELS.length - 1];
+}
+
+// 检查是否升级，返回新等级（如果有）
+function checkRankUp(oldLifetime, newLifetime) {
+  const oldRank = getRank(oldLifetime);
+  const newRank = getRank(newLifetime);
+  if (newRank.min > oldRank.min) return newRank;
+  return null;
+}
+
+function awardPoints(seconds, note) {
+  // 1分钟 = 5积分（日学5h ≈ ¥15，周学35h ≈ ¥105）
+  let points = Math.max(5, Math.floor(seconds / 60) * 5);
+
+  // 连击倍率：前3天均≥4h → 1.5倍
+  const mult = getStreakMultiplier();
+  points = Math.floor(points * mult);
+
+  // 记录每日学习时间
+  addDailyTime(seconds);
+
+  const p = loadPoints();
+  const oldLifetime = p.lifetime || 0;
+  p.total += points;
+  p.today += points;
+  p.lifetime = (p.lifetime || 0) + points; // 终身累计，只增不减
+  if (!p.claimedRanks) p.claimedRanks = [];
+
+  // 检查升级
+  const rankUp = checkRankUp(oldLifetime, p.lifetime);
+  if (rankUp && !p.claimedRanks.includes(rankUp.title)) {
+    // 升级奖励
+    p.total += rankUp.reward;
+    p.today += rankUp.reward;
+    p.lifetime += rankUp.reward;
+    p.claimedRanks.push(rankUp.title);
+    savePoints(p);
+    renderPoints();
+    updateStreakDisplay();
+    // 弹窗庆祝
+    setTimeout(() => showRankUpCelebration(rankUp), 500);
+    return points;
+  }
+
+  savePoints(p);
+  renderPoints();
+  updateStreakDisplay();
+  return points;
+}
+
+function showRankUpCelebration(rank) {
+  celebrationOverlay.classList.remove('hidden');
+  const box = document.querySelector('.celebration-box');
+  box.querySelector('.celeb-emoji').textContent = rank.emoji;
+  box.querySelector('.celeb-title').textContent = '🎉 称号升级！';
+  box.querySelector('.celeb-sub').textContent = rank.emoji + ' ' + rank.title;
+  box.querySelector('.celeb-heart').textContent = '升级奖励 +' + rank.reward + ' 积分！💖';
+}
+
+function renderPoints() {
+  const p = loadPoints();
+  if (!p.claimedRanks) p.claimedRanks = [];
+  savePoints(p);
+
+  totalPointsEl.textContent = p.total;
+  todayPointsEl.textContent = '+' + p.today;
+
+  const rank = getRank(p.lifetime || p.total);
+  rankTextEl.textContent = rank.emoji + ' ' + rank.title;
+
+  updateStreakDisplay();
+}
+
+// 积分飞入动画
+function spawnFlyPoints(points) {
+  const el = document.createElement('div');
+  el.className = 'points-fly';
+  el.textContent = '+' + points + ' ⚡';
+  // 随机水平位置
+  el.style.left = (20 + Math.random() * 60) + '%';
+  el.style.top = '40%';
+  document.body.appendChild(el);
+  el.addEventListener('animationend', () => el.remove());
+}
+
+// ── Records ──
+function loadRecords() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch (_) { return []; }
+}
+
+function saveRecords(records) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+}
+
+function autoRecord() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit' });
+  const timeStr = now.toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' });
+  const note = noteInput.value.trim() || '无备注';
+
+  const record = {
+    id: Date.now(),
+    date: dateStr + ' ' + timeStr,
+    duration: totalSeconds,
+    note,
+    tag: selectedTag,
+  };
+
+  const records = loadRecords();
+  records.unshift(record);
+  saveRecords(records);
+  renderRecords();
+
+  // 积分奖励
+  const earned = awardPoints(totalSeconds, note);
+  spawnFlyPoints(earned);
+  showToast('✅ 完成！+' + earned + '积分 · ' + formatDuration(totalSeconds));
+
+  // 庆祝弹窗
+  setTimeout(() => showCelebration(), 600);
+
+  // QQ 推送
+  autoNotify();
+
+  scheduleAutoSync();
+
+  remaining = totalSeconds;
+  isRunning = false;
+  isPaused = false;
+  stopAlarm();
+  updateDisplay();
+  updateButtons();
+}
+
+function manualRecord() {
+  if (totalSeconds === remaining) {
+    showToast('⚠️ 还没有开始计时');
+    return;
+  }
+  const elapsed = totalSeconds - remaining;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit' });
+  const timeStr = now.toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' });
+  const note = noteInput.value.trim() || '手动记录';
+
+  const record = {
+    id: Date.now(),
+    date: dateStr + ' ' + timeStr,
+    duration: elapsed,
+    note,
+    tag: selectedTag,
+  };
+
+  const records = loadRecords();
+  records.unshift(record);
+  saveRecords(records);
+  renderRecords();
+
+  const earned = awardPoints(elapsed, note);
+  spawnFlyPoints(earned);
+  showToast('📝 已记录 · +' + earned + '积分 · ' + formatDuration(elapsed));
+  scheduleAutoSync();
+}
+
+function deleteRecord(id) {
+  vibrate(30);
+  let records = loadRecords();
+  records = records.filter(r => r.id !== id);
+  saveRecords(records);
+  renderRecords();
+}
+
+function clearAllRecords() {
+  if (!confirm('确定要清空全部学习记录吗？此操作不可撤销。')) return;
+  saveRecords([]);
+  renderRecords();
+  showToast('🗑 记录已清空');
+}
+
+function exportTxt() {
+  const records = loadRecords();
+  if (records.length === 0) {
+    showToast('⚠️ 没有记录可以导出');
+    return;
+  }
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit' });
+  const timeStr = now.toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' });
+
+  // 计算总学习时长
+  const totalSec = records.reduce((sum, r) => sum + r.duration, 0);
+
+  // 构建 TXT 内容
+  const lines = [];
+  lines.push('═══════════════════════════════════════');
+  lines.push('     👑 丫丫无敌大王 · 学习日志');
+  lines.push('═══════════════════════════════════════');
+  lines.push('');
+  const p = loadPoints();
+  const rank = getRank(p.total);
+  lines.push('  导出时间：' + dateStr + ' ' + timeStr);
+  lines.push('  记录总数：' + records.length + ' 条');
+  lines.push('  总学习时长：' + formatDuration(totalSec));
+  lines.push('  🏆 总积分：' + p.total + '（今日 +' + p.today + '）');
+  lines.push('  ⭐ 称号：' + rank.emoji + ' ' + rank.title);
+  lines.push('');
+  lines.push('───────────────────────────────────────');
+  lines.push('');
+
+  records.forEach((r, i) => {
+    lines.push('【' + (i + 1) + '】' + r.date);
+    lines.push('    时长：' + formatDuration(r.duration));
+    lines.push('    备注：' + r.note);
+    lines.push('');
+  });
+
+  lines.push('───────────────────────────────────────');
+  lines.push('  丫丫无敌大王 — 继续加油！💪👑');
+  lines.push('═══════════════════════════════════════');
+
+  const text = lines.join('\n');
+
+  // 生成文件名：丫丫学习日志_2024-01-15.txt
+  const filename = '丫丫学习日志_' + now.toLocaleDateString('zh-CN', {
+    year:'numeric', month:'2-digit', day:'2-digit'
+  }).replace(/\//g, '-') + '.txt';
+
+  // 下载文件
+  const blob = new Blob(['﻿' + text], { type: 'text/plain;charset=utf-8' }); // BOM 确保 Windows 记事本不乱码
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast('📄 日志已导出 · ' + filename);
+  vibrate(20);
+}
+
+// ── 数据导入导出（跨设备同步）──
+function exportAllData() {
+  const data = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    points: loadPoints(),
+    records: loadRecords(),
+    exHistory: loadExHistory(),
+    notes: loadNotes(),
+    password: getPassword(),
+  };
+
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob(['﻿' + json], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '丫丫计时器_数据备份_' + new Date().toLocaleDateString('zh-CN').replace(/\//g, '-') + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast('📤 数据已导出（含积分+记录+兑换历史）');
+  vibrate(20);
+}
+
+function importAllData(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.version) throw new Error('无效的数据文件');
+
+      // 合并还是覆盖？询问用户
+      const mode = confirm('点击「确定」= 覆盖现有数据\n点击「取消」= 合并（保留两边数据）');
+
+      if (mode) {
+        // 覆盖模式
+        savePoints(data.points || { total: 0, today: 0 });
+        saveRecords(data.records || []);
+        saveExHistory(data.exHistory || []);
+        saveNotes(data.notes || []);
+        if (data.password) setPassword(data.password);
+      } else {
+        // 合并模式：保留现有数据，导入的数据追加进去
+        const curPoints = loadPoints();
+        const curRecords = loadRecords();
+        const curExHistory = loadExHistory();
+
+        // 积分取最大值，lifetime 永不降低
+        const mergedPoints = {
+          total: Math.max(curPoints.total, data.points?.total || 0),
+          today: Math.max(curPoints.today, data.points?.today || 0),
+          lifetime: Math.max(curPoints.lifetime || 0, data.points?.lifetime || 0),
+          claimedRanks: [...new Set([...(curPoints.claimedRanks || []), ...(data.points?.claimedRanks || [])])],
+        };
+        savePoints(mergedPoints);
+
+        // 记录合并去重
+        const allRecords = [...(data.records || []), ...curRecords];
+        const seenIds = new Set();
+        const uniqueRecords = allRecords.filter(r => {
+          if (seenIds.has(r.id)) return false;
+          seenIds.add(r.id);
+          return true;
+        });
+        saveRecords(uniqueRecords);
+
+        // 兑换历史合并
+        const allEx = [...(data.exHistory || []), ...curExHistory];
+        const seenExIds = new Set();
+        const uniqueEx = allEx.filter(h => {
+          if (seenExIds.has(h.id)) return false;
+          seenExIds.add(h.id);
+          return true;
+        });
+        saveExHistory(uniqueEx);
+
+        // 笔记合并去重
+        const curNotes = loadNotes();
+        const allNotes = [...(data.notes || []), ...curNotes];
+        const seenNoteDates = new Set();
+        const uniqueNotes = allNotes.filter(n => {
+          const key = n.date + '|' + n.link;
+          if (seenNoteDates.has(key)) return false;
+          seenNoteDates.add(key);
+          return true;
+        });
+        saveNotes(uniqueNotes);
+      }
+
+      // 刷新界面
+      renderPoints();
+      renderRecords();
+      showToast('📥 数据导入成功！');
+      vibrate([30, 50, 30]);
+    } catch (err) {
+      showToast('❌ 数据文件格式错误');
+      vibrate([100, 50, 100]);
+    }
+  };
+  reader.readAsText(file);
+}
+
+document.getElementById('btnExportData').addEventListener('click', exportAllData);
+document.getElementById('btnImportData').addEventListener('click', () => {
+  document.getElementById('importFileInput').click();
+});
+document.getElementById('importFileInput').addEventListener('change', (e) => {
+  if (e.target.files[0]) {
+    importAllData(e.target.files[0]);
+    e.target.value = ''; // 清空以便重复选择同一文件
+  }
+});
+
+function formatDuration(s) {
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  const parts = [];
+  if (h > 0) parts.push(h + 'h');
+  if (m > 0) parts.push(m + 'm');
+  if (sec > 0 || parts.length === 0) parts.push(sec + 's');
+  return parts.join(' ');
+}
+
+function renderRecords() {
+  const records = loadRecords();
+  statsText.textContent = '共 ' + records.length + ' 条';
+
+  if (records.length === 0) {
+    recordList.innerHTML = '<li class="empty-hint">还没有记录，开始计时吧 ✍️</li>';
+    return;
+  }
+
+  recordList.innerHTML = records.map(r => `
+    <li class="record-item">
+      <div style="min-width:0;">
+        <div class="rec-note">${escapeHtml(r.note)} ${r.tag && r.tag !== '无标签' ? '<span style="font-size:0.65rem;background:var(--accent);color:#0f172a;padding:1px 6px;border-radius:8px;margin-left:2px;">' + escapeHtml(r.tag) + '</span>' : ''}</div>
+        <div class="rec-date">${r.date}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <span class="rec-duration">${formatDuration(r.duration)}</span>
+        <button class="rec-del" data-id="${r.id}" title="删除">✕</button>
+      </div>
+    </li>
+  `).join('');
+
+  // 用事件委托绑定删除按钮
+  recordList.querySelectorAll('.rec-del').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteRecord(parseInt(btn.dataset.id));
+    });
+  });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ── Exchange Items ──
+const EXCHANGE_ITEMS = [
+  { id: 'candy',   icon: '🍬', name: '棒棒糖',     priceYuan: 1,   points: 100 },
+  { id: 'choco',   icon: '🍫', name: '巧克力',       priceYuan: 5,   points: 500 },
+  { id: 'ice',     icon: '🍦', name: '冰淇淋',       priceYuan: 8,   points: 800 },
+  { id: 'nail',    icon: '💅', name: '美甲贴',       priceYuan: 10,  points: 1000 },
+  { id: 'milktea', icon: '🧋', name: '奶茶',         priceYuan: 15,  points: 1500 },
+  { id: 'cake',    icon: '🍰', name: '小蛋糕',       priceYuan: 25,  points: 2500 },
+  { id: 'perfume', icon: '🌸', name: '香水小样',     priceYuan: 50,  points: 5000 },
+  { id: 'lipstick',icon: '💄', name: '口红',         priceYuan: 99,  points: 9900 },
+  { id: 'dress',   icon: '👗', name: '小裙子',       priceYuan: 199, points: 19900 },
+  { id: 'bag',     icon: '👜', name: '包包',         priceYuan: 299, points: 29900 },
+];
+
+const EX_HISTORY_KEY = 'yaya_exchange_history';
+const NOTES_KEY = 'yaya_notes';
+const DAILY_KEY = 'yaya_daily_time';
+const CONTACT_KEY = 'yaya_qmsg_key';
+let selectedTag = '无标签';
+
+// ── Qmsg酱 QQ 推送 ──
+function getQmsgKey() {
+  return localStorage.getItem(CONTACT_KEY) || '';
+}
+
+function setQmsgKey(key) {
+  localStorage.setItem(CONTACT_KEY, key);
+}
+
+async function sendToQQ(msg) {
+  const key = getQmsgKey();
+  if (!key) return { ok: false, error: '未配置 Key' };
+
+  const url = 'https://qmsg.zendee.cn/api/v2/send';
+  const body = JSON.stringify({ key: key, type: 2, msg: msg });
+  const headers = { 'Content-Type': 'application/json' };
+
+  // 第一手：直接请求
+  try {
+    const resp = await fetch(url, { method: 'POST', headers, body });
+    const data = await resp.json();
+    if (data.code === 0) return { ok: true };
+    return { ok: false, error: data.reason || ('code=' + data.code) };
+  } catch (_directErr) {
+    // 直连失败（大概率 CORS），走代理重试
+    console.warn('Qmsg 直连失败，尝试代理:', _directErr.message);
+  }
+
+  // 第二手：CORS 代理
+  const proxies = [
+    { url: 'https://corsproxy.io/?' + encodeURIComponent(url), post: true },
+  ];
+  for (const proxy of proxies) {
+    try {
+      const resp = await fetch(proxy.url, {
+        method: 'POST',
+        headers: { ...headers, 'x-corsproxy-api': 'post' },
+        body
+      });
+      const data = await resp.json();
+      if (data && data.code === 0) return { ok: true };
+      if (data && data.code !== undefined) {
+        return { ok: false, error: data.reason || ('code=' + data.code) };
+      }
+      // proxy 返回了非 Qmsg 格式，继续尝试下一个
+    } catch (_proxyErr) {
+      console.warn('代理尝试失败:', _proxyErr.message);
+    }
+  }
+
+  return { ok: false, error: '网络请求失败，请检查网络或尝试切换至 HTTPS 环境打开本页面' };
+}
+
+function buildLoveMessage() {
+  const p = loadPoints();
+  const records = loadRecords();
+  const today = new Date().toLocaleDateString('zh-CN');
+  // 今日学习时长
+  let todaySec = 0;
+  records.forEach(r => {
+    if (r.date && r.date.startsWith(today)) todaySec += r.duration || 0;
+  });
+  const h = Math.floor(todaySec / 3600);
+  const m = Math.floor((todaySec % 3600) / 60);
+  const timeStr = h > 0 ? h + '小时' + m + '分钟' : m + '分钟';
+  const rank = getRank(p.lifetime || p.total);
+
+  const templates = [
+    '💕 宝贝，我今天已经学了' + timeStr + '啦！为了我们的未来，我会继续加油的~',
+    '📚 刚完成' + timeStr + '的学习！想你的时候就来学习，这样时间过得快一点~',
+    '🌟 今日学习打卡：' + timeStr + '！等级：' + rank.emoji + rank.title + '。爱你哟~',
+    '💪 今天学了' + timeStr + '，离梦想又近了一步！都是为了你呀~',
+  ];
+  return templates[Math.floor(Math.random() * templates.length)];
+}
+
+async function tellHer() {
+  const key = getQmsgKey();
+  if (!key) {
+    // 未配置，复制到剪贴板
+    const msg = buildLoveMessage();
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(msg).then(() => {
+        showToast('📋 消息已复制，去发给她吧~');
+      });
+    }
+    return;
+  }
+  const msg = buildQQMessage();
+  const result = await sendToQQ(msg);
+  if (result.ok) {
+    showToast('🐧 QQ 通知已发送');
+  } else {
+    showToast('❌ ' + (result.error || '发送失败'));
+  }
+}
+
+function buildQQMessage() {
+  const p = loadPoints();
+  const records = loadRecords();
+  const today = new Date().toLocaleDateString('zh-CN');
+  let todaySec = 0;
+  records.forEach(r => {
+    if (r.date && r.date.startsWith(today)) todaySec += r.duration || 0;
+  });
+  const h = Math.floor(todaySec / 3600);
+  const m = Math.floor((todaySec % 3600) / 60);
+  const timeStr = h > 0 ? h + '小时' + m + '分钟' : m + '分钟';
+  const rank = getRank(p.lifetime || p.total);
+
+  const emojis = ['💕', '🌟', '💪', '📚', '✨', '🎯', '💖', '🔥'];
+  const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+
+  const now = new Date();
+  const timeLabel = now.toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' });
+
+  return `${emoji} 丫丫学习打卡\n\n📅 ${now.toLocaleDateString('zh-CN')} ${timeLabel}\n⏱ 今日已学：${timeStr}\n💰 今日积分：+${p.today}\n🏆 总积分：${p.total}\n⭐ 称号：${rank.emoji} ${rank.title}\n\n❤️ 继续加油！爱你哟~`;
+}
+
+// 计时完成时自动推送
+async function autoNotify() {
+  const key = getQmsgKey();
+  if (!key) return;
+  const msg = buildQQMessage();
+  await sendToQQ(msg);
+}
+
+// ── 每日学习追踪 & 连击倍率 ──
+function loadDaily() {
+  try { return JSON.parse(localStorage.getItem(DAILY_KEY)) || {}; }
+  catch (_) { return {}; }
+}
+function saveDaily(d) {
+  localStorage.setItem(DAILY_KEY, JSON.stringify(d));
+}
+
+function getTodayStr() {
+  return new Date().toLocaleDateString('zh-CN');
+}
+
+function addDailyTime(seconds) {
+  const d = loadDaily();
+  const today = getTodayStr();
+  d[today] = (d[today] || 0) + seconds;
+  // 只保留最近30天
+  const keys = Object.keys(d).sort();
+  while (keys.length > 30) { delete d[keys.shift()]; }
+  saveDaily(d);
+}
+
+function getStreakMultiplier() {
+  const d = loadDaily();
+  const now = new Date();
+  // 检查过去3个完整天（昨天、前天、大前天）
+  let streak = 0;
+  for (let i = 1; i <= 3; i++) {
+    const dt = new Date(now);
+    dt.setDate(now.getDate() - i);
+    const key = dt.toLocaleDateString('zh-CN');
+    const sec = d[key] || 0;
+    if (sec >= 14400) { // 4小时 = 14400秒
+      streak++;
+    } else {
+      break;
+    }
+  }
+  return streak >= 3 ? 1.5 : 1.0;
+}
+
+function updateStreakDisplay() {
+  const mult = getStreakMultiplier();
+  const el = document.getElementById('streakMult');
+  if (mult > 1) {
+    el.textContent = 'x' + mult.toFixed(1) + ' 🔥';
+    el.style.color = '#f97316';
+  } else {
+    // 检查进度
+    const d = loadDaily();
+    const now = new Date();
+    let curStreak = 0;
+    for (let i = 1; i <= 3; i++) {
+      const dt = new Date(now);
+      dt.setDate(now.getDate() - i);
+      const key = dt.toLocaleDateString('zh-CN');
+      if ((d[key] || 0) >= 14400) curStreak++;
+      else break;
+    }
+    el.textContent = 'x1.0 (' + curStreak + '/3天)';
+    el.style.color = 'var(--accent)';
+  }
+}
+
+function loadExHistory() {
+  try { return JSON.parse(localStorage.getItem(EX_HISTORY_KEY)) || []; }
+  catch (_) { return []; }
+}
+
+function saveExHistory(h) {
+  localStorage.setItem(EX_HISTORY_KEY, JSON.stringify(h));
+}
+
+function renderExchangeItems() {
+  const p = loadPoints();
+  const list = document.getElementById('exchangeList');
+
+  list.innerHTML = EXCHANGE_ITEMS.map(item => {
+    const canBuy = p.total >= item.points;
+    return `
+      <div class="ex-item">
+        <div class="ex-icon">${item.icon}</div>
+        <div class="ex-info">
+          <div class="ex-name">${item.name}</div>
+          <div class="ex-cost">${item.points} 积分 ≈ ¥${item.priceYuan.toFixed(2)}</div>
+        </div>
+        <button class="ex-btn" ${canBuy ? '' : 'disabled'}
+          data-id="${item.id}" ${canBuy ? '' : 'disabled'}>
+          ${canBuy ? '兑换' : '积分不足'}
+        </button>
+      </div>
+    `;
+  }).join('');
+
+  // 绑定兑换按钮
+  list.querySelectorAll('.ex-btn:not([disabled])').forEach(btn => {
+    btn.addEventListener('click', () => redeemItem(btn.dataset.id));
+  });
+}
+
+function redeemItem(itemId) {
+  const item = EXCHANGE_ITEMS.find(i => i.id === itemId);
+  if (!item) return;
+
+  const p = loadPoints();
+  if (p.total < item.points) {
+    showToast('⚠️ 积分不足，继续加油吧！');
+    return;
+  }
+
+  if (!confirm('确定要用 ' + item.points + ' 积分兑换「' + item.name + '」吗？\n（≈ ¥' + item.priceYuan.toFixed(2) + '）')) return;
+
+  // 扣除积分
+  p.total -= item.points;
+  if (p.today > p.total) p.today = p.total;
+  savePoints(p);
+
+  // 保存兑换记录
+  const now = new Date();
+  const history = loadExHistory();
+  history.unshift({
+    id: Date.now(),
+    icon: item.icon,
+    name: item.name,
+    points: item.points,
+    priceYuan: item.priceYuan,
+    date: now.toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit' })
+      + ' ' + now.toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' }),
+  });
+  saveExHistory(history);
+
+  // 刷新页面
+  renderPoints();
+  renderExchangeItems();
+  renderExHistory();
+  updateExBalance();
+  showToast('🎉 兑换成功！「' + item.name + '」');
+  vibrate([30, 50, 30]);
+  scheduleAutoSync();
+}
+
+function updateExBalance() {
+  const p = loadPoints();
+  document.getElementById('exPoints').textContent = p.total;
+  document.getElementById('exMoney').textContent = '≈ ¥' + (p.total / 100).toFixed(2);
+}
+
+function renderExHistory() {
+  const history = loadExHistory();
+  document.getElementById('exHistoryCount').textContent = '共 ' + history.length + ' 条';
+  const list = document.getElementById('exHistoryList');
+
+  if (history.length === 0) {
+    list.innerHTML = '<li class="empty-hint">还没有兑换记录哦~</li>';
+    return;
+  }
+
+  list.innerHTML = history.map(h => `
+    <li class="record-item">
+      <div style="min-width:0;">
+        <div class="rec-note">${h.icon} ${h.name} · ${h.points}分 ≈ ¥${h.priceYuan.toFixed(2)}</div>
+        <div class="rec-date">${h.date}</div>
+      </div>
+    </li>
+  `).join('');
+}
+
+// ── Tags ──
+document.querySelectorAll('.tag-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.id === 'btnCustomTag') {
+      const input = document.getElementById('customTagInput');
+      input.style.display = 'block';
+      input.focus();
+      return;
+    }
+    document.getElementById('customTagInput').style.display = 'none';
+    document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedTag = btn.dataset.tag;
+  });
+});
+
+document.getElementById('customTagInput').addEventListener('blur', function() {
+  const val = this.value.trim();
+  if (val) {
+    selectedTag = val;
+    document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('btnCustomTag').classList.add('active');
+    document.getElementById('btnCustomTag').textContent = '✏️ ' + val;
+  } else {
+    this.style.display = 'none';
+  }
+});
+document.getElementById('customTagInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { this.blur(); }
+});
+
+// ── Stats & Chart ──
+function getTagStats() {
+  const records = loadRecords();
+  const map = {};
+  let totalSec = 0;
+  records.forEach(r => {
+    const tag = r.tag || '无标签';
+    if (!map[tag]) map[tag] = 0;
+    map[tag] += r.duration || 0;
+    totalSec += r.duration || 0;
+  });
+  // 排序
+  const entries = Object.entries(map).sort((a, b) => b[1] - a[1]);
+  return { entries, totalSec, totalSessions: records.length };
+}
+
+function renderStatsPage() {
+  const { entries, totalSec, totalSessions } = getTagStats();
+
+  // 总览
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  document.getElementById('statsTotalTime').textContent = h > 0 ? h + 'h ' + m + 'm' : m + 'm';
+  document.getElementById('statsTotalSessions').textContent = totalSessions;
+  document.getElementById('statsTopTag').textContent = entries.length > 0 ? entries[0][0] : '-';
+
+  // 直方图
+  const chartArea = document.getElementById('chartArea');
+  if (entries.length === 0) {
+    chartArea.innerHTML = '<p class="empty-hint">还没有学习记录~</p>';
+    document.getElementById('tagDetailList').innerHTML = '';
+    return;
+  }
+
+  const maxTime = entries[0][1];
+  // 调色板
+  const colors = ['chart-colors-0','chart-colors-1','chart-colors-2','chart-colors-3','chart-colors-4','chart-colors-5','chart-colors-6','chart-colors-7'];
+
+  chartArea.innerHTML = entries.map(([tag, sec], i) => {
+    const pct = Math.max(5, Math.round((sec / maxTime) * 100));
+    const hh = Math.floor(sec / 3600);
+    const mm = Math.floor((sec % 3600) / 60);
+    const timeStr = hh > 0 ? hh + 'h' + mm + 'm' : mm + 'm';
+    return `
+      <div class="chart-bar-row">
+        <div class="chart-bar-label">${escapeHtml(tag)}</div>
+        <div class="chart-bar-track">
+          <div class="chart-bar-fill ${colors[i % colors.length]}" style="width:${pct}%;"></div>
+        </div>
+        <div class="chart-bar-time">${timeStr}</div>
+      </div>
+    `;
+  }).join('');
+
+  // 科目明细
+  const detail = document.getElementById('tagDetailList');
+  detail.innerHTML = entries.map(([tag, sec]) => {
+    const hh = Math.floor(sec / 3600);
+    const mm = Math.floor((sec % 3600) / 60);
+    const timeStr = hh > 0 ? hh + '小时 ' + mm + '分钟' : mm + '分钟';
+    return `
+      <div class="tag-detail-row">
+        <span>${escapeHtml(tag)}</span>
+        <span class="td-time">${timeStr}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── Lottery ──
+const LOTTERY_KEY = 'yaya_lottery';
+const LOTTERY_TASKS = [
+  // 简单 (⭐⭐)
+  { icon: '📖', name: '连续学习3天', desc: '本周任意连续3天，每天至少学习30分钟', reward: 200, diff: '⭐⭐ 简单' },
+  { icon: '✍️', name: '完成5次计时', desc: '本周累计完成5次计时学习', reward: 150, diff: '⭐⭐ 简单' },
+  { icon: '🎧', name: '专注2小时', desc: '单次计时达到2小时不间断', reward: 300, diff: '⭐⭐ 简单' },
+  { icon: '📝', name: '做一套试卷', desc: '完成一套完整试卷并批改', reward: 250, diff: '⭐⭐ 简单' },
+  // 中等 (⭐⭐⭐)
+  { icon: '🔥', name: '日学5小时', desc: '一天内累计学习达到5小时', reward: 800, diff: '⭐⭐⭐ 中等' },
+  { icon: '🏃', name: '早起学习', desc: '连续3天早上8点前开始学习', reward: 500, diff: '⭐⭐⭐ 中等' },
+  { icon: '📚', name: '周学20小时', desc: '本周累计学习时间达到20小时', reward: 1000, diff: '⭐⭐⭐ 中等' },
+  { icon: '🎯', name: '挑战3小时', desc: '单次计时达到3小时不间断', reward: 600, diff: '⭐⭐⭐ 中等' },
+  // 困难 (⭐⭐⭐⭐⭐)
+  { icon: '💪', name: '周学35小时', desc: '本周累计学习时间达到35小时', reward: 2500, diff: '⭐⭐⭐⭐⭐ 困难' },
+  { icon: '🏆', name: '全勤7天', desc: '本周每天都有学习记录', reward: 1500, diff: '⭐⭐⭐⭐⭐ 困难' },
+  { icon: '🌟', name: '日学8小时', desc: '一天内累计学习达到8小时', reward: 2000, diff: '⭐⭐⭐⭐⭐ 困难' },
+  { icon: '👑', name: '挑战5小时', desc: '单次计时达到5小时不间断', reward: 3000, diff: '⭐⭐⭐⭐⭐ 困难' },
+];
+
+function loadLottery() {
+  try {
+    const d = JSON.parse(localStorage.getItem(LOTTERY_KEY));
+    const def = { weekId: '', drawsUsed: 0, maxDraws: 1, currentTask: null, taskCompleted: false, history: [] };
+    return d ? Object.assign(def, d) : def;
+  } catch (_) {
+    return { weekId: '', drawsUsed: 0, maxDraws: 1, currentTask: null, taskCompleted: false, history: [] };
+  }
+}
+
+function saveLottery(l) {
+  localStorage.setItem(LOTTERY_KEY, JSON.stringify(l));
+}
+
+function getWeekId() {
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun
+  // 本周日的日期作为 weekId
+  const sun = new Date(now);
+  sun.setDate(now.getDate() - day);
+  return sun.toLocaleDateString('zh-CN');
+}
+
+function checkWeekReset() {
+  const l = loadLottery();
+  const weekId = getWeekId();
+  if (l.weekId !== weekId) {
+    l.weekId = weekId;
+    l.drawsUsed = 0;
+    l.maxDraws = 1;
+    l.currentTask = null;
+    l.taskCompleted = false;
+    saveLottery(l);
+  }
+  return l;
+}
+
+function renderLotteryPage() {
+  const l = checkWeekReset();
+  const remaining = l.maxDraws - l.drawsUsed;
+
+  document.getElementById('lotteryRemaining').textContent = remaining > 0
+    ? '本周剩余：' + remaining + '次'
+    : '本周次数已用完';
+
+  const btn = document.getElementById('btnDraw');
+  if (l.taskCompleted) {
+    btn.textContent = '✅ 任务已完成';
+    btn.disabled = true;
+  } else if (l.currentTask) {
+    btn.textContent = '🎲 重新抽取（剩余' + remaining + '次）';
+    btn.disabled = remaining <= 0;
+  } else {
+    btn.textContent = remaining > 0 ? '🎲 抽取任务' : '本周次数已用完';
+    btn.disabled = remaining <= 0;
+  }
+
+  // 显示当前任务
+  const card = document.getElementById('lotteryTaskCard');
+  const completeBtn = document.getElementById('btnCompleteTask');
+  if (l.currentTask) {
+    card.classList.remove('hidden');
+    document.getElementById('ltIcon').textContent = l.currentTask.icon;
+    document.getElementById('ltName').textContent = l.currentTask.name;
+    document.getElementById('ltDesc').textContent = l.currentTask.desc;
+    document.getElementById('ltReward').textContent = '🎁 奖励：+' + l.currentTask.reward + ' 积分';
+    document.getElementById('ltDiff').textContent = '难度：' + l.currentTask.diff;
+    completeBtn.classList.toggle('hidden', l.taskCompleted);
+    completeBtn.disabled = l.taskCompleted;
+    if (l.taskCompleted) completeBtn.textContent = '✅ 奖励已领取';
+  } else {
+    card.classList.add('hidden');
+  }
+
+  // 历史
+  renderLotteryHistory();
+}
+
+function drawLottery() {
+  const l = checkWeekReset();
+  if (l.drawsUsed >= l.maxDraws) {
+    showToast('⚠️ 本周抽取次数已用完');
+    return;
+  }
+  if (l.taskCompleted) {
+    showToast('⚠️ 本周任务已完成，请等待下周');
+    return;
+  }
+
+  // 随机抽取（避免与上次重复）
+  let pool = LOTTERY_TASKS;
+  if (l.currentTask) {
+    pool = LOTTERY_TASKS.filter(t => t.name !== l.currentTask.name);
+  }
+  const task = pool[Math.floor(Math.random() * pool.length)];
+
+  l.currentTask = task;
+  l.taskCompleted = false;
+  l.drawsUsed++;
+  l.history.unshift({
+    date: new Date().toLocaleDateString('zh-CN'),
+    task: task.name,
+    reward: task.reward,
+    completed: false,
+  });
+  saveLottery(l);
+  renderLotteryPage();
+  showToast('🎉 抽中：「' + task.name + '」');
+  vibrate([30, 50, 30, 50, 30]);
+}
+
+function completeTask() {
+  const l = loadLottery();
+  if (!l.currentTask || l.taskCompleted) return;
+
+  if (!confirm('确定已完成任务「' + l.currentTask.name + '」并领取奖励吗？')) return;
+
+  l.taskCompleted = true;
+  // 发放奖励
+  const p = loadPoints();
+  p.total += l.currentTask.reward;
+  p.today += l.currentTask.reward;
+  savePoints(p);
+  renderPoints();
+
+  // 更新历史
+  if (l.history.length > 0) l.history[0].completed = true;
+  saveLottery(l);
+  renderLotteryPage();
+  showToast('🎉 恭喜！获得 +' + l.currentTask.reward + ' 积分');
+  spawnFlyPoints(l.currentTask.reward);
+  scheduleAutoSync();
+}
+
+function addExtraDraws() {
+  openPasswordModal();
+  passwordCallback = 'extraDraws';
+}
+
+function doExtraDraws() {
+  const n = prompt('增加几次抽取机会？（输入数字，最多5次）', '1');
+  const num = parseInt(n) || 1;
+  if (num < 1 || num > 5) { showToast('⚠️ 请输入1-5之间的数字'); return; }
+  const l = loadLottery();
+  l.maxDraws += num;
+  saveLottery(l);
+  renderLotteryPage();
+  showToast('✅ 已增加 ' + num + ' 次抽取机会');
+}
+
+function renderLotteryHistory() {
+  const l = loadLottery();
+  const list = document.getElementById('lotteryHistoryList');
+  if (l.history.length === 0) {
+    list.innerHTML = '<li class="empty-hint">还没有抽奖记录~</li>';
+    return;
+  }
+  list.innerHTML = l.history.map(h => `
+    <li class="record-item">
+      <div style="min-width:0;">
+        <div class="rec-note">🎯 ${escapeHtml(h.task)} · +${h.reward}分</div>
+        <div class="rec-date">${h.date} ${h.completed ? '✅ 已完成' : '⏳ 进行中'}</div>
+      </div>
+    </li>
+  `).join('');
+}
+
+// ── Notes ──
+function loadNotes() {
+  try { return JSON.parse(localStorage.getItem(NOTES_KEY)) || []; }
+  catch (_) { return []; }
+}
+
+function saveNotes(notes) {
+  localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+}
+
+function renderNotes() {
+  const notes = loadNotes();
+  const list = document.getElementById('notesList');
+
+  if (notes.length === 0) {
+    list.innerHTML = '<li class="empty-hint">还没有收藏的资料~</li>';
+    return;
+  }
+
+  list.innerHTML = notes.map((n, i) => `
+    <li class="note-card">
+      <a class="note-title" href="${escapeHtml(n.link)}" target="_blank" rel="noopener">${escapeHtml(n.title) || '无标题'}</a>
+      ${n.link ? '<a class="note-link" href="' + escapeHtml(n.link) + '" target="_blank" rel="noopener">🔗 ' + escapeHtml(n.link) + '</a>' : ''}
+      ${n.desc ? '<div class="note-desc">' + escapeHtml(n.desc) + '</div>' : ''}
+      <div class="note-actions">
+        <button class="note-edit" data-idx="${i}">✏️ 编辑</button>
+        <button class="note-del" data-idx="${i}">🗑 删除</button>
+      </div>
+    </li>
+  `).join('');
+
+  // 编辑
+  list.querySelectorAll('.note-edit').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx);
+      const notes = loadNotes();
+      const n = notes[idx];
+      document.getElementById('noteTitleInput').value = n.title;
+      document.getElementById('noteLinkInput').value = n.link;
+      document.getElementById('noteDescInput').value = n.desc || '';
+      // 删除旧条目，等待用户重新添加
+      notes.splice(idx, 1);
+      saveNotes(notes);
+      renderNotes();
+      showToast('📝 已加载到编辑区，修改后点添加');
+    });
+  });
+
+  // 删除
+  list.querySelectorAll('.note-del').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx);
+      let notes = loadNotes();
+      notes.splice(idx, 1);
+      saveNotes(notes);
+      renderNotes();
+      showToast('🗑 已删除');
+      scheduleAutoSync();
+    });
+  });
+
+  // 链接点击
+  list.querySelectorAll('.note-title, .note-link').forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.open(a.href, '_blank');
+    });
+  });
+}
+
+function addNote() {
+  const title = document.getElementById('noteTitleInput').value.trim();
+  const link = document.getElementById('noteLinkInput').value.trim();
+  const desc = document.getElementById('noteDescInput').value.trim();
+
+  if (!title && !link) {
+    showToast('⚠️ 标题和链接至少填一个');
+    return;
+  }
+
+  const notes = loadNotes();
+  notes.unshift({ title, link, desc, date: Date.now() });
+  saveNotes(notes);
+  renderNotes();
+
+  // 清空输入
+  document.getElementById('noteTitleInput').value = '';
+  document.getElementById('noteLinkInput').value = '';
+  document.getElementById('noteDescInput').value = '';
+
+  showToast('✅ 已收藏');
+  scheduleAutoSync();
+}
+
+// ── Page Switching ──
+function switchTo(page) {
+  // 隐藏所有页面
+  pageMain.classList.remove('page-active');
+  pageExchange.classList.remove('page-active');
+  document.getElementById('pageNotes').classList.remove('page-active');
+  document.getElementById('pageStats').classList.remove('page-active');
+  document.getElementById('pageLottery').classList.remove('page-active');
+  document.getElementById('pageRules').classList.remove('page-active');
+
+  if (page === 'exchange') {
+    pageExchange.classList.add('page-active');
+    updateExBalance();
+    renderExchangeItems();
+    renderExHistory();
+  } else if (page === 'notes') {
+    document.getElementById('pageNotes').classList.add('page-active');
+    document.getElementById('qmsgKeyInput').value = getQmsgKey();
+    renderNotes();
+  } else if (page === 'stats') {
+    document.getElementById('pageStats').classList.add('page-active');
+    renderStatsPage();
+  } else if (page === 'lottery') {
+    document.getElementById('pageLottery').classList.add('page-active');
+    renderLotteryPage();
+  } else if (page === 'rules') {
+    document.getElementById('pageRules').classList.add('page-active');
+  } else {
+    pageMain.classList.add('page-active');
+    renderPoints();
+  }
+  window.scrollTo(0, 0);
+}
+
+// ── Events ──
+btnGoExchange.addEventListener('click', () => switchTo('exchange'));
+document.getElementById('btnGoNotes').addEventListener('click', () => switchTo('notes'));
+document.getElementById('btnGoStats').addEventListener('click', () => switchTo('stats'));
+document.getElementById('btnGoLottery').addEventListener('click', () => switchTo('lottery'));
+btnBack.addEventListener('click', () => switchTo('main'));
+document.getElementById('btnNotesBack').addEventListener('click', () => switchTo('main'));
+document.getElementById('btnStatsBack').addEventListener('click', () => switchTo('main'));
+document.getElementById('btnLotteryBack').addEventListener('click', () => switchTo('main'));
+document.getElementById('btnRulesBack').addEventListener('click', () => switchTo('main'));
+document.getElementById('btnGoRules').addEventListener('click', () => switchTo('rules'));
+
+// ── 抽奖事件 ──
+document.getElementById('btnDraw').addEventListener('click', drawLottery);
+document.getElementById('btnCompleteTask').addEventListener('click', completeTask);
+document.getElementById('btnLotteryExtra').addEventListener('click', addExtraDraws);
+document.getElementById('btnLotteryReset').addEventListener('click', () => {
+  if (!confirm('确定重置本周抽奖吗？（需要密码确认）')) return;
+  openPasswordModal();
+  passwordCallback = 'resetLottery';
+});
+document.getElementById('btnSaveQmsg').addEventListener('click', async () => {
+  const key = document.getElementById('qmsgKeyInput').value.trim();
+  if (!key) { showToast('⚠️ 请输入 Qmsg酱 Key'); return; }
+  setQmsgKey(key);
+  showToast('💾 已保存，正在测试…');
+  const result = await sendToQQ('🐧 丫丫计时器 QQ 通知已连接成功！🎉');
+  if (result.ok) {
+    showToast('✅ 测试成功！QQ 通知已连通');
+  } else {
+    showToast('❌ ' + (result.error || '发送失败，请检查 Key'));
+  }
+});
+document.getElementById('btnAddNote').addEventListener('click', addNote);
+document.getElementById('noteDescInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') addNote();
+});
+
+btnStart.addEventListener('click', start);
+btnPause.addEventListener('click', pause);
+btnReset.addEventListener('click', reset);
+btnClearAll.addEventListener('click', clearAllRecords);
+btnExport.addEventListener('click', exportTxt);
+
+// ── 庆祝弹窗关闭 ──
+btnCelebClose.addEventListener('click', () => celebrationOverlay.classList.add('hidden'));
+document.getElementById('btnCelebTell').addEventListener('click', () => {
+  celebrationOverlay.classList.add('hidden');
+  tellHer();
+});
+
+// ── 特别兑换 ──
+document.getElementById('btnSpecialExchange').addEventListener('click', () => {
+  const input = document.getElementById('seInput').value.trim();
+  if (!input) { showToast('⚠️ 请输入想要的东西'); return; }
+  openPasswordForSpecial();
+});
+document.getElementById('seInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('btnSpecialExchange').click();
+});
+
+// ── 积分编辑入口 ──
+document.getElementById('btnEditPoints').addEventListener('click', openPasswordModal);
+
+// ── 密码弹窗事件 ──
+document.getElementById('btnPwdConfirm').addEventListener('click', verifyPassword);
+document.getElementById('btnPwdCancel').addEventListener('click', hideAllModals);
+document.getElementById('btnChangePwd').addEventListener('click', openChangePwdModal);
+pwdInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') verifyPassword(); });
+
+// ── 积分编辑弹窗事件 ──
+document.getElementById('btnPtsPlus').addEventListener('click', () => adjustPoints(10));
+document.getElementById('btnPtsMinus').addEventListener('click', () => adjustPoints(-10));
+document.getElementById('btnEditSave').addEventListener('click', savePointsEdit);
+document.getElementById('btnEditCancel').addEventListener('click', hideAllModals);
+document.getElementById('btnEditZero').addEventListener('click', zeroPoints);
+
+// ── 修改密码弹窗事件 ──
+document.getElementById('btnChPwdConfirm').addEventListener('click', confirmChangePwd);
+document.getElementById('btnChPwdCancel').addEventListener('click', hideAllModals);
+document.getElementById('newPwdInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') confirmChangePwd(); });
+
+// ── 云同步弹窗事件 ──
+document.getElementById('syncBadge').addEventListener('click', () => {
+  const token = getSyncToken();
+  document.getElementById('syncTokenInput').value = token;
+  document.getElementById('syncStatusText').textContent = token ? '☁️ 云同步已配置' : '未配置云同步';
+  document.getElementById('modalSync').classList.remove('hidden');
+});
+document.getElementById('btnSyncCancel').addEventListener('click', () => {
+  document.getElementById('modalSync').classList.add('hidden');
+});
+document.getElementById('btnSyncSave').addEventListener('click', () => {
+  const token = document.getElementById('syncTokenInput').value.trim();
+  if (!token) { showToast('⚠️ 请输入 Token'); return; }
+  setSyncToken(token);
+  updateSyncBadge();
+  document.getElementById('modalSync').classList.add('hidden');
+  doSync(false);
+});
+document.getElementById('btnSyncDisable').addEventListener('click', () => {
+  if (!confirm('确定关闭云同步吗？')) return;
+  setSyncToken('');
+  updateSyncBadge();
+  document.getElementById('modalSync').classList.add('hidden');
+  showToast('☁️ 云同步已关闭');
+});
+document.getElementById('btnSyncNow').addEventListener('click', () => {
+  document.getElementById('modalSync').classList.add('hidden');
+  doSync(false);
+});
+
+// 点击计时器区域：手动记录
+timerDisplay.addEventListener('click', () => {
+  if (totalSeconds !== remaining && !isRunning) {
+    // 计时已结束（归零后），提示可以手动记录
+  }
+});
+
+// 长按计时器区域：手动记录（移动端友好）
+let longPressTimer = null;
+timerDisplay.addEventListener('pointerdown', (e) => {
+  longPressTimer = setTimeout(() => {
+    if (totalSeconds !== remaining) {
+      vibrate(20);
+      if (confirm('要手动记录当前已完成的学习时长吗？')) {
+        manualRecord();
+      }
+    }
+  }, 600);
+});
+timerDisplay.addEventListener('pointerup', () => clearTimeout(longPressTimer));
+timerDisplay.addEventListener('pointerleave', () => clearTimeout(longPressTimer));
+timerDisplay.addEventListener('pointercancel', () => clearTimeout(longPressTimer));
+
+// 预设按钮
+document.querySelectorAll('.preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    vibrate(10);
+    inputH.value = btn.dataset.h;
+    inputM.value = btn.dataset.m;
+    inputS.value = btn.dataset.s;
+    if (!isRunning) {
+      remaining = readInput();
+      totalSeconds = remaining;
+      updateDisplay();
+    }
+  });
+});
+
+// 输入框变化时同步
+[inputH, inputM, inputS].forEach(el => {
+  el.addEventListener('input', () => {
+    if (!isRunning) {
+      remaining = readInput();
+      totalSeconds = remaining;
+      updateDisplay();
+    }
+  });
+});
+
+// 键盘快捷键（桌面端）
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT') return;
+  switch (e.code) {
+    case 'Space':
+      e.preventDefault();
+      if (isRunning && !isPaused) pause();
+      else start();
+      break;
+    case 'KeyR':
+      if (!e.ctrlKey && !e.metaKey) reset();
+      break;
+  }
+});
+
+// ── Cloud Sync ──
+const SYNC_TOKEN_KEY = 'yaya_sync_token';
+const SYNC_TS_KEY    = 'yaya_last_sync_at';
+const SYNC_REPO = 'NOwoof/DYD_timer';
+const SYNC_FILE = 'data.json';
+const SYNC_RAW_URL = 'https://raw.githubusercontent.com/' + SYNC_REPO + '/master/' + SYNC_FILE;
+const SYNC_API_URL = 'https://api.github.com/repos/' + SYNC_REPO + '/contents/' + SYNC_FILE;
+
+function getSyncToken() {
+  return localStorage.getItem(SYNC_TOKEN_KEY) || '';
+}
+function setSyncToken(t) {
+  localStorage.setItem(SYNC_TOKEN_KEY, t);
+}
+function getLastSyncAt() {
+  return parseInt(localStorage.getItem(SYNC_TS_KEY)) || 0;
+}
+function setLastSyncAt(ts) {
+  localStorage.setItem(SYNC_TS_KEY, ts);
+}
+
+function updateSyncBadge() {
+  const badge = document.getElementById('syncBadge');
+  const token = getSyncToken();
+  if (!token) {
+    badge.textContent = '☁️';
+    badge.title = '云同步未配置，点击设置';
+    badge.style.color = '#666';
+  } else {
+    badge.textContent = '☁️✓';
+    badge.title = '云同步已开启，点击管理';
+    badge.style.color = '#4ade80';
+  }
+}
+
+// UTF-8 → Base64
+function utf8ToBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  bytes.forEach(b => binary += String.fromCharCode(b));
+  return btoa(binary);
+}
+
+function packSyncData(ts) {
+  return {
+    version: 1,
+    updatedAt: ts || Date.now(),
+    points: loadPoints(),
+    records: loadRecords(),
+    exHistory: loadExHistory(),
+    notes: loadNotes(),
+    password: getPassword(),
+  };
+}
+
+// 用云端数据覆盖本地
+function applyRemoteData(data) {
+  if (!data || !data.version) return;
+  savePoints(data.points || { total: 0, today: 0 });
+  saveRecords(data.records || []);
+  saveExHistory(data.exHistory || []);
+  saveNotes(data.notes || []);
+  if (data.password) setPassword(data.password);
+  setLastSyncAt(data.updatedAt || Date.now());
+}
+
+// 从 GitHub API 拉取（不走 CDN 缓存，实时）
+async function pullFromGitHub() {
+  const token = getSyncToken();
+  if (!token) return null;
+  try {
+    const resp = await fetch(SYNC_API_URL + '?t=' + Date.now(), {
+      headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' },
+      cache: 'no-store',
+    });
+    if (!resp.ok) return null;
+    const info = await resp.json();
+    if (!info.content) return null;
+    // GitHub API 返回 base64 → UTF-8 字节 → 字符串
+    const binary = atob(info.content.replace(/\s/g, ''));
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const json = new TextDecoder('utf-8').decode(bytes);
+    return JSON.parse(json);
+  } catch (e) {
+    console.error('[Sync] pull error:', e.message);
+    return null;
+  }
+}
+
+// 推送到 GitHub
+async function pushToGitHub() {
+  const token = getSyncToken();
+  if (!token) return false;
+  try {
+    const now = Date.now();
+    const content = JSON.stringify(packSyncData(now), null, 2);
+    const base64 = utf8ToBase64(content);
+
+    let sha = null;
+    try {
+      const getResp = await fetch(SYNC_API_URL, {
+        headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' }
+      });
+      if (getResp.ok) { const info = await getResp.json(); sha = info.sha; }
+    } catch (e) { console.error('[Sync] sha error:', e.message); }
+
+    const body = { message: '☁️ sync @ ' + new Date().toLocaleString('zh-CN'), content: base64 };
+    if (sha) body.sha = sha;
+
+    const putResp = await fetch(SYNC_API_URL, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github+json' },
+      body: JSON.stringify(body),
+    });
+
+    if (!putResp.ok) {
+      console.error('[Sync] push failed:', putResp.status);
+      return false;
+    }
+    setLastSyncAt(now);
+    console.log('[Sync] push OK @', now);
+    return true;
+  } catch (e) {
+    console.error('[Sync] push error:', e.message);
+    return false;
+  }
+}
+
+// 启动时：从云端拉取最新数据
+async function autoSync() {
+  const token = getSyncToken();
+  if (!token) return;
+  const remote = await pullFromGitHub();
+  if (!remote || !remote.updatedAt) return;
+
+  const lastSync = getLastSyncAt();
+  console.log('[Sync] remote ts:', remote.updatedAt, 'local lastSync:', lastSync);
+
+  // 云端比本地记录的时间戳更新 → 说明另一设备更新了数据
+  if (remote.updatedAt > lastSync) {
+    applyRemoteData(remote);
+    renderPoints();
+    renderRecords();
+    console.log('[Sync] loaded from cloud! records:', (remote.records||[]).length);
+    showToast('☁️ 已同步最新数据（' + (remote.records||[]).length + '条记录）');
+  }
+}
+
+// 完整同步：先拉后推
+async function doSync(silent) {
+  const token = getSyncToken();
+  if (!token) { if (!silent) showToast('⚠️ 请先设置 GitHub Token'); return; }
+
+  const badge = document.getElementById('syncBadge');
+  badge.textContent = '☁️↻';
+  badge.style.color = '#fbbf24';
+
+  // 先拉取合并
+  const remote = await pullFromGitHub();
+  if (remote && remote.updatedAt && remote.updatedAt > getLastSyncAt()) {
+    applyRemoteData(remote);
+    renderPoints();
+    renderRecords();
+    console.log('[Sync] merged from remote');
+    if (!silent) showToast('☁️ 已同步云端数据');
+  }
+
+  // 再推送
+  const ok = await pushToGitHub();
+  if (ok) {
+    badge.textContent = '☁️✓';
+    badge.style.color = '#4ade80';
+    if (!silent) showToast('☁️ 同步成功');
+  } else {
+    badge.textContent = '☁️✗';
+    badge.style.color = '#f87171';
+    if (!silent) showToast('☁️ 同步失败');
+  }
+}
+
+// 防抖推送
+let syncDebounce = null;
+function scheduleAutoSync() {
+  const token = getSyncToken();
+  if (!token) return;
+  clearTimeout(syncDebounce);
+  syncDebounce = setTimeout(async () => {
+    await pushToGitHub();
+    updateSyncBadge();
+  }, 3000);
+}
+
+// ── Theme ──
+const THEME_KEY = 'yaya_theme';
+
+function getAutoTheme() {
+  const h = new Date().getHours();
+  if (h >= 6 && h < 12) return 'morning';
+  if (h >= 12 && h < 17) return 'afternoon';
+  if (h >= 17 && h < 21) return 'evening';
+  return 'night';
+}
+
+function getTheme() {
+  return localStorage.getItem(THEME_KEY) || getAutoTheme();
+}
+
+function applyTheme(theme) {
+  document.body.setAttribute('data-theme', theme);
+  // 更新 meta theme-color
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) {
+    const colors = { morning: '#fef9ef', afternoon: '#f0f9ff', evening: '#fdf2f8', night: '#0f172a' };
+    meta.setAttribute('content', colors[theme] || '#0f172a');
+  }
+  // 更新按钮状态
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.theme === theme);
+  });
+}
+
+function setTheme(theme) {
+  localStorage.setItem(THEME_KEY, theme);
+  applyTheme(theme);
+}
+
+// ── Init ──
+applyTheme(getTheme());
+
+remaining = readInput();
+totalSeconds = remaining;
+updateDisplay();
+updateButtons();
+renderRecords();
+renderPoints();
+updateSyncBadge();
+// 启动时自动从云端拉取
+setTimeout(() => autoSync(), 1000);
+
+// ── 主题切换事件 ──
+document.querySelectorAll('.theme-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    setTheme(btn.dataset.theme);
+    showToast('🎨 已切换为' + btn.title);
+  });
+});
+</script>
+
+</body>
+</html>
