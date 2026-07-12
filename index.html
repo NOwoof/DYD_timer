@@ -1488,6 +1488,16 @@ body[data-theme="night"] .celebration-box {
         💡 关注「方糖」公众号即可接收微信推送，无需加好友
       </p>
     </div>
+
+    <!-- Cloudflare Worker 代理（可选，用于 GitHub Pages） -->
+    <details style="margin-top:8px;">
+      <summary style="font-size:0.75rem;color:var(--muted);cursor:pointer;">☁️ Cloudflare Worker 代理 URL（可选）</summary>
+      <input type="url" id="workerUrlInput" placeholder="https://xxx.workers.dev" maxlength="200" enterkeyhint="done" style="width:100%;height:36px;padding:0 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;margin-top:8px;outline:none;">
+      <button class="notes-add-btn" id="btnSaveWorker" style="background:linear-gradient(135deg, #f59e0b, #d97706);margin-top:8px;font-size:0.8rem;">💾 保存 Worker URL</button>
+      <p style="font-size:0.65rem;color:var(--muted);margin-top:4px;line-height:1.4;">
+        📌 部署 <code>worker.js</code> 到 Cloudflare Workers（免费），粘贴 URL 后即可在 GitHub Pages 上正常发送通知
+      </p>
+    </details>
   </div>
 
   <!-- 添加笔记 -->
@@ -2798,6 +2808,7 @@ const NOTES_KEY = 'yaya_notes';
 const DAILY_KEY = 'yaya_daily_time';
 const QMSG_KEY = 'yaya_qmsg_key';
 const SC_KEY = 'yaya_serverchan_key';
+const WORKER_URL_KEY = 'yaya_worker_url';
 const NOTIFY_CHANNEL_KEY = 'yaya_notify_channel';
 let selectedTag = '无标签';
 
@@ -2826,14 +2837,19 @@ function setNotifyKey(key) {
   }
 }
 
-// ── 统一发送通知（直连 API + 代理回退）──
+function getWorkerUrl() {
+  return localStorage.getItem(WORKER_URL_KEY) || '';
+}
+
+// ── 统一发送通知（直连 → Worker → 本地代理）──
 async function sendNotify(msg) {
   const key = getNotifyKey();
   if (!key) return { ok: false, error: '未配置通知 Key' };
 
   const ch = getNotifyChannel();
+  const workerUrl = getWorkerUrl();
 
-  // 先尝试直连 API（适用于 GitHub Pages 等无代理环境）
+  // ① 先尝试直连 API（大多数情况 CORS 阻止）
   try {
     let url, fetchBody, headers;
     if (ch === 'serverchan') {
@@ -2850,7 +2866,25 @@ async function sendNotify(msg) {
     if (data.success || data.code === 0) return { ok: true };
     return { ok: false, error: data.reason || data.message || '发送失败' };
   } catch (e) {
-    // 直连失败（可能是 CORS 阻止），尝试本地代理
+    // ② 直连失败（CORS），尝试 Cloudflare Worker
+    if (workerUrl) {
+      try {
+        const proxyBody = JSON.stringify(
+          ch === 'serverchan'
+            ? { channel: 'serverchan', key, title: '丫丫计时器', msg }
+            : { channel: 'qmsg', key, msg }
+        );
+        const resp = await fetch(workerUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: proxyBody
+        });
+        const data = await resp.json();
+        if (data.success || data.code === 0) return { ok: true };
+        return { ok: false, error: data.reason || data.message || '发送失败' };
+      } catch (e2) {}
+    }
+    // ③ Worker 失败，回退本地代理
     try {
       const proxyBody = JSON.stringify(
         ch === 'serverchan'
@@ -2866,7 +2900,7 @@ async function sendNotify(msg) {
       if (data.success || data.code === 0) return { ok: true };
       return { ok: false, error: data.reason || data.message || '发送失败' };
     } catch (e2) {
-      return { ok: false, error: '请求失败，请确认本地代理已启动，或检查网络' };
+      return { ok: false, error: '请求失败，请部署 Worker 或启动本地代理' };
     }
   }
 }
@@ -3515,6 +3549,7 @@ function switchTo(page) {
     const ch = getNotifyChannel();
     document.getElementById('qmsgKeyInput').value = localStorage.getItem(QMSG_KEY) || '';
     document.getElementById('sckeyInput').value = localStorage.getItem(SC_KEY) || '';
+    document.getElementById('workerUrlInput').value = localStorage.getItem(WORKER_URL_KEY) || '';
     // 更新渠道切换 UI
     document.querySelectorAll('.notify-channel').forEach(b => {
       b.classList.toggle('active', b.dataset.channel === ch);
@@ -3632,6 +3667,14 @@ document.getElementById('btnSaveSc').addEventListener('click', async () => {
   } else {
     showToast('❌ ' + (result.error || '发送失败，请检查 SendKey'));
   }
+});
+
+// ── 保存 Worker URL ──
+document.getElementById('btnSaveWorker').addEventListener('click', () => {
+  const url = document.getElementById('workerUrlInput').value.trim();
+  if (!url) { showToast('⚠️ 请输入 Worker URL'); return; }
+  localStorage.setItem(WORKER_URL_KEY, url);
+  showToast('✅ Worker URL 已保存');
 });
 document.getElementById('btnAddNote').addEventListener('click', addNote);
 document.getElementById('noteDescInput').addEventListener('keydown', (e) => {
