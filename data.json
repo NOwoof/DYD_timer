@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": 1783843275586,
+  "updatedAt": 1783846587828,
   "points": {
     "total": 1085,
     "today": 735,
@@ -165,12 +165,25 @@
     }
   ],
   "lottery": {
-    "weekId": "",
-    "drawsUsed": 0,
+    "weekId": "2026/7/12",
+    "drawsUsed": 1,
     "maxDraws": 1,
-    "currentTask": null,
+    "currentTask": {
+      "icon": "📝",
+      "name": "做一套试卷",
+      "desc": "完成一套完整试卷并批改",
+      "reward": 250,
+      "diff": "⭐⭐ 简单"
+    },
     "taskCompleted": false,
-    "history": []
+    "history": [
+      {
+        "date": "2026/7/12",
+        "task": "做一套试卷",
+        "reward": 250,
+        "completed": false
+      }
+    ]
   },
   "password": "1234"
 }
