@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": 1783843070305,
+  "updatedAt": 1783843275586,
   "points": {
     "total": 1085,
     "today": 735,
@@ -164,5 +164,13 @@
       "date": 1783677136136
     }
   ],
+  "lottery": {
+    "weekId": "",
+    "drawsUsed": 0,
+    "maxDraws": 1,
+    "currentTask": null,
+    "taskCompleted": false,
+    "history": []
+  },
   "password": "1234"
 }
