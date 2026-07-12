@@ -1431,15 +1431,14 @@ body[data-theme="night"] .celebration-box {
 
   <!-- 发送设置 -->
   <div class="notes-add-card" style="margin-bottom:4px;">
-    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:4px;">💬 微信通知（学习完成后自动推送）</div>
-    <input type="text" id="wecomWebhookInput" placeholder="企业微信机器人 Webhook 地址" maxlength="200" enterkeyhint="done">
-    <button class="notes-add-btn" id="btnSaveWecom" style="background:linear-gradient(135deg, #07c160, #06ad56);">💾 保存并测试</button>
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:4px;">🐧 QQ 通知（学习完成后自动推送）</div>
+    <input type="text" id="qmsgKeyInput" placeholder="Qmsg酱 Key" maxlength="60" enterkeyhint="done">
+    <button class="notes-add-btn" id="btnSaveQmsg" style="background:linear-gradient(135deg, #12b7f5, #0d9bdf);">💾 保存并测试</button>
     <p style="font-size:0.7rem;color:var(--muted);margin-top:6px;line-height:1.5;">
       📌 使用方法：<br>
-      1. 在企业微信中创建一个群聊<br>
-      2. 群设置 → 群机器人 → 添加机器人<br>
-      3. 复制 Webhook 地址粘贴到上方<br>
-      4. 点「保存并测试」验证连通
+      1. 打开 <a href="https://qmsg.zendee.cn" target="_blank" style="color:var(--accent);">qmsg.zendee.cn</a> 用 QQ 扫码登录<br>
+      2. 登录后复制你的 Key<br>
+      3. 粘贴到上方，点「保存并测试」
     </p>
   </div>
 
@@ -2355,7 +2354,7 @@ function autoRecord() {
   // 庆祝弹窗
   setTimeout(() => showCelebration(), 600);
 
-  // 企业微信推送
+  // QQ 推送
   autoNotify();
 
   scheduleAutoSync();
@@ -2658,16 +2657,32 @@ const EXCHANGE_ITEMS = [
 const EX_HISTORY_KEY = 'yaya_exchange_history';
 const NOTES_KEY = 'yaya_notes';
 const DAILY_KEY = 'yaya_daily_time';
-const CONTACT_KEY = 'yaya_wecom_webhook';
+const CONTACT_KEY = 'yaya_qmsg_key';
 let selectedTag = '无标签';
 
-// ── 企业微信推送 ──
-function getWebhookUrl() {
+// ── Qmsg酱 QQ 推送 ──
+function getQmsgKey() {
   return localStorage.getItem(CONTACT_KEY) || '';
 }
 
-function setWebhookUrl(url) {
-  localStorage.setItem(CONTACT_KEY, url);
+function setQmsgKey(key) {
+  localStorage.setItem(CONTACT_KEY, key);
+}
+
+async function sendToQQ(msg) {
+  const key = getQmsgKey();
+  if (!key) return false;
+  try {
+    const resp = await fetch('https://qmsg.zendee.cn/api/v2/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'key=' + encodeURIComponent(key) + '&type=2&msg=' + encodeURIComponent(msg)
+    });
+    const data = await resp.json();
+    return data.code === 0;
+  } catch (_) {
+    return false;
+  }
 }
 
 function buildLoveMessage() {
@@ -2693,28 +2708,9 @@ function buildLoveMessage() {
   return templates[Math.floor(Math.random() * templates.length)];
 }
 
-async function sendToWecom(msg) {
-  const url = getWebhookUrl();
-  if (!url) return false;
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        msgtype: 'markdown',
-        markdown: { content: msg }
-      })
-    });
-    const data = await resp.json();
-    return data.errcode === 0;
-  } catch (_) {
-    return false;
-  }
-}
-
 async function tellHer() {
-  const url = getWebhookUrl();
-  if (!url) {
+  const key = getQmsgKey();
+  if (!key) {
     // 未配置，复制到剪贴板
     const msg = buildLoveMessage();
     if (navigator.clipboard) {
@@ -2724,16 +2720,16 @@ async function tellHer() {
     }
     return;
   }
-  const msg = buildWecomMessage();
-  const ok = await sendToWecom(msg);
+  const msg = buildQQMessage();
+  const ok = await sendToQQ(msg);
   if (ok) {
-    showToast('💬 微信通知已发送');
+    showToast('🐧 QQ 通知已发送');
   } else {
-    showToast('❌ 发送失败，请检查 Webhook 地址');
+    showToast('❌ 发送失败，请检查 Key 是否正确');
   }
 }
 
-function buildWecomMessage() {
+function buildQQMessage() {
   const p = loadPoints();
   const records = loadRecords();
   const today = new Date().toLocaleDateString('zh-CN');
@@ -2752,24 +2748,15 @@ function buildWecomMessage() {
   const now = new Date();
   const timeLabel = now.toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' });
 
-  return `## ${emoji} 丫丫学习打卡
-> ${now.toLocaleDateString('zh-CN')} ${timeLabel}
-
-**今日已学：** <font color="info">${timeStr}</font>
-**今日积分：** <font color="warning">+${p.today}</font>
-**总积分：** <font color="warning">${p.total}</font>
-**称号：** ${rank.emoji} ${rank.title}
-
----
-❤️ 继续加油！爱你哟~`;
+  return `${emoji} 丫丫学习打卡\n\n📅 ${now.toLocaleDateString('zh-CN')} ${timeLabel}\n⏱ 今日已学：${timeStr}\n💰 今日积分：+${p.today}\n🏆 总积分：${p.total}\n⭐ 称号：${rank.emoji} ${rank.title}\n\n❤️ 继续加油！爱你哟~`;
 }
 
 // 计时完成时自动推送
 async function autoNotify() {
-  const url = getWebhookUrl();
-  if (!url) return;
-  const msg = buildWecomMessage();
-  await sendToWecom(msg);
+  const key = getQmsgKey();
+  if (!key) return;
+  const msg = buildQQMessage();
+  await sendToQQ(msg);
 }
 
 // ── 每日学习追踪 & 连击倍率 ──
@@ -3338,7 +3325,7 @@ function switchTo(page) {
     renderExHistory();
   } else if (page === 'notes') {
     document.getElementById('pageNotes').classList.add('page-active');
-    document.getElementById('wecomWebhookInput').value = getWebhookUrl();
+    document.getElementById('qmsgKeyInput').value = getQmsgKey();
     renderNotes();
   } else if (page === 'stats') {
     document.getElementById('pageStats').classList.add('page-active');
@@ -3376,20 +3363,16 @@ document.getElementById('btnLotteryReset').addEventListener('click', () => {
   openPasswordModal();
   passwordCallback = 'resetLottery';
 });
-document.getElementById('btnSaveWecom').addEventListener('click', async () => {
-  const url = document.getElementById('wecomWebhookInput').value.trim();
-  if (!url) { showToast('⚠️ 请输入 Webhook 地址'); return; }
-  if (!url.startsWith('https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=')) {
-    showToast('⚠️ Webhook 地址格式不正确');
-    return;
-  }
-  setWebhookUrl(url);
+document.getElementById('btnSaveQmsg').addEventListener('click', async () => {
+  const key = document.getElementById('qmsgKeyInput').value.trim();
+  if (!key) { showToast('⚠️ 请输入 Qmsg酱 Key'); return; }
+  setQmsgKey(key);
   showToast('💾 已保存，正在测试…');
-  const ok = await sendToWecom('## 💬 测试消息\n丫丫计时器微信通知已连接成功！🎉');
+  const ok = await sendToQQ('🐧 丫丫计时器 QQ 通知已连接成功！🎉');
   if (ok) {
-    showToast('✅ 测试成功！微信通知已连通');
+    showToast('✅ 测试成功！QQ 通知已连通');
   } else {
-    showToast('❌ 测试失败，请检查地址是否正确');
+    showToast('❌ 测试失败，请检查 Key 是否正确');
   }
 });
 document.getElementById('btnAddNote').addEventListener('click', addNote);
