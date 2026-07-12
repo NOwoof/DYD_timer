@@ -2715,30 +2715,48 @@ function setNotifyKey(key) {
   }
 }
 
-// ── 统一发送通知 ──
+// ── 统一发送通知（直连 API + 代理回退）──
 async function sendNotify(msg) {
   const key = getNotifyKey();
   if (!key) return { ok: false, error: '未配置通知 Key' };
 
   const ch = getNotifyChannel();
-  let body;
-  if (ch === 'serverchan') {
-    body = JSON.stringify({ channel: 'serverchan', key, title: '丫丫计时器', msg });
-  } else {
-    body = JSON.stringify({ channel: 'qmsg', key, msg });
-  }
 
+  // 先尝试直连 API（适用于 GitHub Pages 等无代理环境）
   try {
-    const resp = await fetch('/api/notify/send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body
-    });
+    let url, fetchBody, headers;
+    if (ch === 'serverchan') {
+      url = `https://sctapi.ftqq.com/${key}.send`;
+      headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+      fetchBody = new URLSearchParams({ title: '丫丫计时器', desp: msg }).toString();
+    } else {
+      url = `https://qmsg.zendee.cn/jsend/${key}`;
+      headers = { 'Content-Type': 'application/json' };
+      fetchBody = JSON.stringify({ msg });
+    }
+    const resp = await fetch(url, { method: 'POST', headers, body: fetchBody });
     const data = await resp.json();
     if (data.success || data.code === 0) return { ok: true };
     return { ok: false, error: data.reason || data.message || '发送失败' };
   } catch (e) {
-    return { ok: false, error: '请求失败: ' + (e.message || '未知错误') };
+    // 直连失败（可能是 CORS 阻止），尝试本地代理
+    try {
+      const proxyBody = JSON.stringify(
+        ch === 'serverchan'
+          ? { channel: 'serverchan', key, title: '丫丫计时器', msg }
+          : { channel: 'qmsg', key, msg }
+      );
+      const resp = await fetch('/api/notify/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: proxyBody
+      });
+      const data = await resp.json();
+      if (data.success || data.code === 0) return { ok: true };
+      return { ok: false, error: data.reason || data.message || '发送失败' };
+    } catch (e2) {
+      return { ok: false, error: '请求失败，请确认本地代理已启动，或检查网络' };
+    }
   }
 }
 
