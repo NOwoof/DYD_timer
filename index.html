@@ -3866,6 +3866,7 @@ function packSyncData(ts) {
     records: loadRecords(),
     exHistory: loadExHistory(),
     notes: loadNotes(),
+    lottery: loadLottery(),
     password: getPassword(),
   };
 }
@@ -3877,6 +3878,7 @@ function applyRemoteData(data) {
   saveRecords(data.records || []);
   saveExHistory(data.exHistory || []);
   saveNotes(data.notes || []);
+  if (data.lottery) saveLottery(data.lottery);
   if (data.password) setPassword(data.password);
   setLastSyncAt(data.updatedAt || Date.now());
 }
