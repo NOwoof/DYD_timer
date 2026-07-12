@@ -2673,44 +2673,54 @@ async function sendToQQ(msg) {
   const key = getQmsgKey();
   if (!key) return { ok: false, error: '未配置 Key' };
 
-  const url = 'https://qmsg.zendee.cn/api/v2/send';
-  const body = JSON.stringify({ key: key, type: 2, msg: msg });
-  const headers = { 'Content-Type': 'application/json' };
+  const base = 'https://qmsg.zendee.cn/api/v2/send';
+  const params = `key=${encodeURIComponent(key)}&msg=${encodeURIComponent(msg)}&type=2`;
 
-  // 第一手：直接请求
+  // 方案1：GET 请求（不会触发 CORS 预检，最可能绕过跨域限制）
   try {
-    const resp = await fetch(url, { method: 'POST', headers, body });
+    const resp = await fetch(`${base}?${params}`);
     const data = await resp.json();
     if (data.code === 0) return { ok: true };
-    return { ok: false, error: data.reason || ('code=' + data.code) };
-  } catch (_directErr) {
-    // 直连失败（大概率 CORS），走代理重试
-    console.warn('Qmsg 直连失败，尝试代理:', _directErr.message);
-  }
-
-  // 第二手：CORS 代理
-  const proxies = [
-    { url: 'https://corsproxy.io/?' + encodeURIComponent(url), post: true },
-  ];
-  for (const proxy of proxies) {
-    try {
-      const resp = await fetch(proxy.url, {
-        method: 'POST',
-        headers: { ...headers, 'x-corsproxy-api': 'post' },
-        body
-      });
-      const data = await resp.json();
-      if (data && data.code === 0) return { ok: true };
-      if (data && data.code !== undefined) {
-        return { ok: false, error: data.reason || ('code=' + data.code) };
-      }
-      // proxy 返回了非 Qmsg 格式，继续尝试下一个
-    } catch (_proxyErr) {
-      console.warn('代理尝试失败:', _proxyErr.message);
+    if (data.code !== undefined) {
+      return { ok: false, error: data.reason || ('code=' + data.code) };
     }
+  } catch (e) {
+    console.warn('Qmsg GET 失败:', e.message);
   }
 
-  return { ok: false, error: '网络请求失败，请检查网络或尝试切换至 HTTPS 环境打开本页面' };
+  // 方案2：POST JSON（部分环境下可行）
+  try {
+    const resp = await fetch(base, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, type: 2, msg })
+    });
+    const data = await resp.json();
+    if (data.code === 0) return { ok: true };
+    if (data.code !== undefined) {
+      return { ok: false, error: data.reason || ('code=' + data.code) };
+    }
+  } catch (e) {
+    console.warn('Qmsg POST JSON 失败:', e.message);
+  }
+
+  // 方案3：POST form-urlencoded
+  try {
+    const resp = await fetch(base, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params
+    });
+    const data = await resp.json();
+    if (data.code === 0) return { ok: true };
+    if (data.code !== undefined) {
+      return { ok: false, error: data.reason || ('code=' + data.code) };
+    }
+  } catch (e) {
+    console.warn('Qmsg POST form 失败:', e.message);
+  }
+
+  return { ok: false, error: '网络请求失败，请用浏览器打开本页面（非微信/QQ内置浏览器）或检查 Qmsg Key 是否正确' };
 }
 
 function buildLoveMessage() {
