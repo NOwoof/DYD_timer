@@ -1301,6 +1301,7 @@ body[data-theme="night"] .celebration-box {
     <button class="exchange-entry" id="btnGoStats" style="background:linear-gradient(135deg, rgba(74,222,128,.15), rgba(74,222,128,.05));border-color:rgba(74,222,128,.3);color:var(--success);">📊 统计</button>
     <button class="exchange-entry" id="btnGoLottery" style="background:linear-gradient(135deg, rgba(244,114,182,.15), rgba(244,114,182,.05));border-color:rgba(244,114,182,.3);color:#f472b6;">🎰 抽奖</button>
     <button class="exchange-entry" id="btnGoRules" style="background:linear-gradient(135deg, rgba(148,163,184,.15), rgba(148,163,184,.05));border-color:rgba(148,163,184,.3);color:var(--muted);">📖 规则</button>
+    <button class="exchange-entry" id="btnSendMsg" style="background:linear-gradient(135deg, rgba(244,114,182,.15), rgba(244,114,182,.05));border-color:rgba(244,114,182,.3);color:#f472b6;">📨 发送通知</button>
   </div>
 
   <!-- 时间设置 -->
@@ -1431,15 +1432,32 @@ body[data-theme="night"] .celebration-box {
 
   <!-- 发送设置 -->
   <div class="notes-add-card" style="margin-bottom:4px;">
-    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:4px;">🐧 QQ 通知（学习完成后自动推送）</div>
-    <input type="text" id="qmsgKeyInput" placeholder="Qmsg酱 Key" maxlength="60" enterkeyhint="done">
-    <button class="notes-add-btn" id="btnSaveQmsg" style="background:linear-gradient(135deg, #12b7f5, #0d9bdf);">💾 保存并测试</button>
-    <p style="font-size:0.7rem;color:var(--muted);margin-top:6px;line-height:1.5;">
-      📌 使用方法：<br>
-      1. 打开 <a href="https://qmsg.zendee.cn" target="_blank" style="color:var(--accent);">qmsg.zendee.cn</a> 用 QQ 扫码登录<br>
-      2. 登录后复制你的 Key<br>
-      3. 粘贴到上方，点「保存并测试」
-    </p>
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:8px;">🔔 学习完成通知（自动推送）</div>
+
+    <!-- 通知渠道选择 -->
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+      <button class="preset-btn notify-channel active" data-channel="qmsg" style="flex:1;font-size:0.8rem;">🐧 Qmsg酱</button>
+      <button class="preset-btn notify-channel" data-channel="serverchan" style="flex:1;font-size:0.8rem;">🔔 Server酱</button>
+    </div>
+
+    <!-- Qmsg 设置 -->
+    <div class="notify-panel" id="panelQmsg">
+      <input type="text" id="qmsgKeyInput" placeholder="Qmsg酱 Key" maxlength="60" enterkeyhint="done">
+      <button class="notes-add-btn" id="btnSaveQmsg" style="background:linear-gradient(135deg, #12b7f5, #0d9bdf);margin-top:8px;">💾 保存并测试</button>
+      <p style="font-size:0.7rem;color:var(--muted);margin-top:6px;line-height:1.5;">
+        📌 <a href="https://qmsg.zendee.cn" target="_blank" style="color:var(--accent);">qmsg.zendee.cn</a> 扫码登录 → 复制 Key → 粘贴
+      </p>
+    </div>
+
+    <!-- Server酱 设置 -->
+    <div class="notify-panel" id="panelServerchan" style="display:none;">
+      <input type="text" id="sckeyInput" placeholder="Server酱 SendKey (SCT开头)" maxlength="80" enterkeyhint="done">
+      <button class="notes-add-btn" id="btnSaveSc" style="background:linear-gradient(135deg, #f59e0b, #d97706);margin-top:8px;">💾 保存并测试</button>
+      <p style="font-size:0.7rem;color:var(--muted);margin-top:6px;line-height:1.5;">
+        📌 <a href="https://sct.ftqq.com/sendkey" target="_blank" style="color:var(--accent);">sct.ftqq.com</a> 微信登录 → 获取 SendKey → 粘贴<br>
+        💡 关注「方糖」公众号即可接收微信推送，无需加好友
+      </p>
+    </div>
   </div>
 
   <!-- 添加笔记 -->
@@ -1727,6 +1745,19 @@ body[data-theme="night"] .celebration-box {
   </div>
 </div>
 
+<!-- ═══════════ 发送通知弹窗 ═══════════ -->
+<div class="modal-overlay hidden" id="modalSendMsg">
+  <div class="modal-box" style="max-width:380px;gap:12px;">
+    <h3>📨 发送通知到微信</h3>
+    <textarea id="sendMsgText" placeholder="编辑消息内容…" maxlength="500" style="width:100%;height:120px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;resize:vertical;outline:none;font-family:inherit;"></textarea>
+    <div class="modal-btns">
+      <button class="btn-cancel" id="btnSendMsgCancel">取消</button>
+      <button class="btn-confirm" id="btnSendMsgConfirm" style="background:#f472b6;">📨 发送</button>
+    </div>
+    <p style="font-size:0.7rem;color:var(--muted);text-align:center;">💡 留空内容将自动生成今日学习报告</p>
+  </div>
+</div>
+
 <!-- ═══════════ 庆祝弹窗 ═══════════ -->
 <div class="celebration-overlay hidden" id="celebrationOverlay">
   <div class="celebration-box">
@@ -1735,7 +1766,6 @@ body[data-theme="night"] .celebration-box {
     <div class="celeb-sub">继续加油</div>
     <div class="celeb-heart">爱你哟~ 💖</div>
     <button class="celeb-btn" id="btnCelebClose">✨ 好的！✨</button>
-    <button class="celeb-btn" id="btnCelebTell" style="background:linear-gradient(135deg, #f472b6, #e879a0);color:#fff;margin-top:8px;">💌 告诉她</button>
   </div>
 </div>
 
@@ -2354,8 +2384,6 @@ function autoRecord() {
   // 庆祝弹窗
   setTimeout(() => showCelebration(), 600);
 
-  // QQ 推送
-  autoNotify();
 
   scheduleAutoSync();
 
@@ -2657,70 +2685,61 @@ const EXCHANGE_ITEMS = [
 const EX_HISTORY_KEY = 'yaya_exchange_history';
 const NOTES_KEY = 'yaya_notes';
 const DAILY_KEY = 'yaya_daily_time';
-const CONTACT_KEY = 'yaya_qmsg_key';
+const QMSG_KEY = 'yaya_qmsg_key';
+const SC_KEY = 'yaya_serverchan_key';
+const NOTIFY_CHANNEL_KEY = 'yaya_notify_channel';
 let selectedTag = '无标签';
 
-// ── Qmsg酱 QQ 推送 ──
-function getQmsgKey() {
-  return localStorage.getItem(CONTACT_KEY) || '';
+// ── 通知渠道 ──
+function getNotifyChannel() {
+  return localStorage.getItem(NOTIFY_CHANNEL_KEY) || 'qmsg';
 }
 
-function setQmsgKey(key) {
-  localStorage.setItem(CONTACT_KEY, key);
+function setNotifyChannel(ch) {
+  localStorage.setItem(NOTIFY_CHANNEL_KEY, ch);
 }
 
-async function sendToQQ(msg) {
-  const key = getQmsgKey();
-  if (!key) return { ok: false, error: '未配置 Key' };
+function getNotifyKey() {
+  const ch = getNotifyChannel();
+  return ch === 'serverchan'
+    ? localStorage.getItem(SC_KEY) || ''
+    : localStorage.getItem(QMSG_KEY) || '';
+}
 
-  const base = 'https://qmsg.zendee.cn/api/v2/send';
-  const params = `key=${encodeURIComponent(key)}&msg=${encodeURIComponent(msg)}&type=2`;
+function setNotifyKey(key) {
+  const ch = getNotifyChannel();
+  if (ch === 'serverchan') {
+    localStorage.setItem(SC_KEY, key);
+  } else {
+    localStorage.setItem(QMSG_KEY, key);
+  }
+}
 
-  // 方案1：GET 请求（不会触发 CORS 预检，最可能绕过跨域限制）
-  try {
-    const resp = await fetch(`${base}?${params}`);
-    const data = await resp.json();
-    if (data.code === 0) return { ok: true };
-    if (data.code !== undefined) {
-      return { ok: false, error: data.reason || ('code=' + data.code) };
-    }
-  } catch (e) {
-    console.warn('Qmsg GET 失败:', e.message);
+// ── 统一发送通知 ──
+async function sendNotify(msg) {
+  const key = getNotifyKey();
+  if (!key) return { ok: false, error: '未配置通知 Key' };
+
+  const ch = getNotifyChannel();
+  let body;
+  if (ch === 'serverchan') {
+    body = JSON.stringify({ channel: 'serverchan', key, title: '丫丫计时器', msg });
+  } else {
+    body = JSON.stringify({ channel: 'qmsg', key, msg });
   }
 
-  // 方案2：POST JSON（部分环境下可行）
   try {
-    const resp = await fetch(base, {
+    const resp = await fetch('/api/notify/send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key, type: 2, msg })
+      body
     });
     const data = await resp.json();
-    if (data.code === 0) return { ok: true };
-    if (data.code !== undefined) {
-      return { ok: false, error: data.reason || ('code=' + data.code) };
-    }
+    if (data.success || data.code === 0) return { ok: true };
+    return { ok: false, error: data.reason || data.message || '发送失败' };
   } catch (e) {
-    console.warn('Qmsg POST JSON 失败:', e.message);
+    return { ok: false, error: '请求失败: ' + (e.message || '未知错误') };
   }
-
-  // 方案3：POST form-urlencoded
-  try {
-    const resp = await fetch(base, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params
-    });
-    const data = await resp.json();
-    if (data.code === 0) return { ok: true };
-    if (data.code !== undefined) {
-      return { ok: false, error: data.reason || ('code=' + data.code) };
-    }
-  } catch (e) {
-    console.warn('Qmsg POST form 失败:', e.message);
-  }
-
-  return { ok: false, error: '网络请求失败，请用浏览器打开本页面（非微信/QQ内置浏览器）或检查 Qmsg Key 是否正确' };
 }
 
 function buildLoveMessage() {
@@ -2747,7 +2766,7 @@ function buildLoveMessage() {
 }
 
 async function tellHer() {
-  const key = getQmsgKey();
+  const key = getNotifyKey();
   if (!key) {
     // 未配置，复制到剪贴板
     const msg = buildLoveMessage();
@@ -2759,9 +2778,9 @@ async function tellHer() {
     return;
   }
   const msg = buildQQMessage();
-  const result = await sendToQQ(msg);
+  const result = await sendNotify(msg);
   if (result.ok) {
-    showToast('🐧 QQ 通知已发送');
+    showToast('✅ 通知已发送');
   } else {
     showToast('❌ ' + (result.error || '发送失败'));
   }
@@ -2791,10 +2810,10 @@ function buildQQMessage() {
 
 // 计时完成时自动推送
 async function autoNotify() {
-  const key = getQmsgKey();
+  const key = getNotifyKey();
   if (!key) return;
   const msg = buildQQMessage();
-  await sendToQQ(msg);
+  await sendNotify(msg);
 }
 
 // ── 每日学习追踪 & 连击倍率 ──
@@ -3363,7 +3382,16 @@ function switchTo(page) {
     renderExHistory();
   } else if (page === 'notes') {
     document.getElementById('pageNotes').classList.add('page-active');
-    document.getElementById('qmsgKeyInput').value = getQmsgKey();
+    // 恢复通知设置
+    const ch = getNotifyChannel();
+    document.getElementById('qmsgKeyInput').value = localStorage.getItem(QMSG_KEY) || '';
+    document.getElementById('sckeyInput').value = localStorage.getItem(SC_KEY) || '';
+    // 更新渠道切换 UI
+    document.querySelectorAll('.notify-channel').forEach(b => {
+      b.classList.toggle('active', b.dataset.channel === ch);
+    });
+    document.getElementById('panelQmsg').style.display = ch === 'qmsg' ? '' : 'none';
+    document.getElementById('panelServerchan').style.display = ch === 'serverchan' ? '' : 'none';
     renderNotes();
   } else if (page === 'stats') {
     document.getElementById('pageStats').classList.add('page-active');
@@ -3401,16 +3429,44 @@ document.getElementById('btnLotteryReset').addEventListener('click', () => {
   openPasswordModal();
   passwordCallback = 'resetLottery';
 });
+// ── 通知渠道切换 ──
+document.querySelectorAll('.notify-channel').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const ch = btn.dataset.channel;
+    setNotifyChannel(ch);
+    document.querySelectorAll('.notify-channel').forEach(b => b.classList.toggle('active', b.dataset.channel === ch));
+    document.getElementById('panelQmsg').style.display = ch === 'qmsg' ? '' : 'none';
+    document.getElementById('panelServerchan').style.display = ch === 'serverchan' ? '' : 'none';
+  });
+});
+
+// ── 保存并测试 Qmsg ──
 document.getElementById('btnSaveQmsg').addEventListener('click', async () => {
   const key = document.getElementById('qmsgKeyInput').value.trim();
   if (!key) { showToast('⚠️ 请输入 Qmsg酱 Key'); return; }
-  setQmsgKey(key);
+  setNotifyChannel('qmsg');
+  setNotifyKey(key);
   showToast('💾 已保存，正在测试…');
-  const result = await sendToQQ('🐧 丫丫计时器 QQ 通知已连接成功！🎉');
+  const result = await sendNotify('🐧 丫丫计时器 QQ 通知已连接成功！🎉');
   if (result.ok) {
     showToast('✅ 测试成功！QQ 通知已连通');
   } else {
     showToast('❌ ' + (result.error || '发送失败，请检查 Key'));
+  }
+});
+
+// ── 保存并测试 Server酱 ──
+document.getElementById('btnSaveSc').addEventListener('click', async () => {
+  const key = document.getElementById('sckeyInput').value.trim();
+  if (!key) { showToast('⚠️ 请输入 Server酱 SendKey'); return; }
+  setNotifyChannel('serverchan');
+  setNotifyKey(key);
+  showToast('💾 已保存，正在测试…');
+  const result = await sendNotify('🔔 丫丫计时器 Server酱通知已连接成功！');
+  if (result.ok) {
+    showToast('✅ 测试成功！微信通知已连通');
+  } else {
+    showToast('❌ ' + (result.error || '发送失败，请检查 SendKey'));
   }
 });
 document.getElementById('btnAddNote').addEventListener('click', addNote);
@@ -3426,9 +3482,38 @@ btnExport.addEventListener('click', exportTxt);
 
 // ── 庆祝弹窗关闭 ──
 btnCelebClose.addEventListener('click', () => celebrationOverlay.classList.add('hidden'));
-document.getElementById('btnCelebTell').addEventListener('click', () => {
-  celebrationOverlay.classList.add('hidden');
-  tellHer();
+
+// ── 发送通知弹窗 ──
+const modalSendMsg = document.getElementById('modalSendMsg');
+const sendMsgText = document.getElementById('sendMsgText');
+
+document.getElementById('btnSendMsg').addEventListener('click', () => {
+  if (isRunning && !isPaused) pause();
+  const key = getNotifyKey();
+  if (!key) {
+    showToast('⚠️ 请先在「📝 更多」中配置通知渠道');
+    return;
+  }
+  sendMsgText.value = '';
+  modalSendMsg.classList.remove('hidden');
+  setTimeout(() => sendMsgText.focus(), 200);
+});
+
+document.getElementById('btnSendMsgCancel').addEventListener('click', () => {
+  modalSendMsg.classList.add('hidden');
+});
+
+document.getElementById('btnSendMsgConfirm').addEventListener('click', async () => {
+  const text = sendMsgText.value.trim();
+  const msg = text || buildQQMessage();
+  showToast('📨 正在发送…');
+  const result = await sendNotify(msg);
+  if (result.ok) {
+    showToast('✅ 通知已发送！');
+    modalSendMsg.classList.add('hidden');
+  } else {
+    showToast('❌ ' + (result.error || '发送失败'));
+  }
 });
 
 // ── 特别兑换 ──
