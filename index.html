@@ -1325,6 +1325,7 @@ body[data-theme="night"] .celebration-box {
     <div class="points-item">
       <span class="p-value" id="streakMult" style="color:var(--accent);">x1.0</span>
       <span class="p-label">🔥 积分倍率</span>
+      <span class="p-rank" id="streakSub" style="font-size:0.68rem;color:var(--muted);margin-top:2px;">今日 0分钟 · 差4h</span>
     </div>
     <button class="exchange-entry" id="btnGoExchange">🎁 积分兑换</button>
     <button class="exchange-entry" id="btnGoNotes" style="background:linear-gradient(135deg, rgba(129,140,248,.15), rgba(129,140,248,.05));border-color:rgba(129,140,248,.3);color:var(--accent2);">📝 更多</button>
@@ -3022,25 +3023,48 @@ function getStreakMultiplier() {
 }
 
 function updateStreakDisplay() {
+  const GOAL = 14400; // 4小时 = 14400秒
+  const d = loadDaily();
+  const todayKey = getTodayStr();
+  const todaySec = d[todayKey] || 0;
+  const todayMin = Math.floor(todaySec / 60);
+  const todayH = Math.floor(todayMin / 60);
+  const todayRem = todayMin % 60;
+  const remainingSec = Math.max(0, GOAL - todaySec);
+  const remainingMin = Math.ceil(remainingSec / 60);
+
   const mult = getStreakMultiplier();
   const el = document.getElementById('streakMult');
+  const sub = document.getElementById('streakSub');
+
+  // 倍率显示
   if (mult > 1) {
     el.textContent = 'x' + mult.toFixed(1) + ' 🔥';
     el.style.color = '#f97316';
   } else {
-    // 检查进度
-    const d = loadDaily();
     const now = new Date();
     let curStreak = 0;
     for (let i = 1; i <= 3; i++) {
       const dt = new Date(now);
       dt.setDate(now.getDate() - i);
       const key = dt.toLocaleDateString('zh-CN');
-      if ((d[key] || 0) >= 14400) curStreak++;
+      if ((d[key] || 0) >= GOAL) curStreak++;
       else break;
     }
     el.textContent = 'x1.0 (' + curStreak + '/3天)';
     el.style.color = 'var(--accent)';
+  }
+
+  // 今日进度副标题
+  if (todaySec >= GOAL) {
+    sub.textContent = '今日 ' + todayH + 'h' + (todayRem > 0 ? todayRem + 'm' : '') + ' · 已达标 ✅';
+    sub.style.color = '#4ade80';
+  } else {
+    const hStr = todayH > 0 ? todayH + 'h' : '';
+    const remStr = todayRem > 0 ? todayRem + 'm' : '';
+    const todayStr = (hStr || remStr) ? '今日 ' + hStr + (hStr && remStr ? '' : '') + remStr : '今日 0m';
+    sub.textContent = todayStr + ' · 差 ' + remainingMin + 'min';
+    sub.style.color = 'var(--muted)';
   }
 }
 
