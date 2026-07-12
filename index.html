@@ -323,6 +323,61 @@ body[data-theme="night"] .celebration-box {
     color: var(--accent);
     font-weight: 600;
   }
+  .p-clickable {
+    cursor: pointer;
+    position: relative;
+    transition: all .15s;
+    border-radius: 6px;
+    padding: 2px 6px;
+  }
+  .p-clickable:hover {
+    background: rgba(251,191,36,.12);
+  }
+  .p-clickable:active {
+    transform: scale(0.94);
+    background: rgba(251,191,36,.2);
+  }
+  .p-clickable::after {
+    content: ' 🔍';
+    font-size: 0.55rem;
+    opacity: 0.4;
+    vertical-align: super;
+  }
+
+  /* ── 积分明细弹窗 ── */
+  .detail-section-title {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 600;
+    letter-spacing: .03em;
+  }
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-row .d-label { color: var(--text); }
+  .detail-row .d-value { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .detail-row .d-value.income { color: var(--success); }
+  .detail-row .d-value.expense { color: var(--danger); }
+  .detail-row .d-value.neutral { color: var(--warn); }
+  .detail-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0 4px;
+    margin-top: 6px;
+    border-top: 2px solid var(--border);
+    font-weight: 800;
+    font-size: 0.9rem;
+  }
+  .detail-total-row .d-label { color: var(--text); }
+  .detail-total-row .d-value { color: var(--warn); font-size: 1.1rem; }
 
   /* 积分飞入动画 */
   .points-fly {
@@ -506,6 +561,37 @@ body[data-theme="night"] .celebration-box {
     color: #0f172a;
     border-color: var(--accent);
     font-weight: 700;
+  }
+
+  /* ── Stats Tabs ── */
+  .stats-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 12px;
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 3px;
+  }
+  .stats-tab {
+    flex: 1;
+    height: 38px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .stats-tab.active {
+    background: var(--card);
+    color: var(--text);
+    box-shadow: 0 1px 3px rgba(0,0,0,.15);
+  }
+  .stats-tab:active:not(.active) {
+    color: var(--text);
   }
 
   /* ── Chart ── */
@@ -1311,7 +1397,7 @@ body[data-theme="night"] .celebration-box {
   <div class="points-card" style="flex-wrap:wrap;">
     <button class="edit-pts-btn" id="btnEditPoints" title="管理积分">🔧</button>
     <div class="points-item">
-      <span class="p-value" id="totalPoints">0</span>
+      <span class="p-value p-clickable" id="totalPoints" title="点击查看积分明细">0</span>
       <span class="p-label">🏆 总积分</span>
     </div>
     <div class="points-item">
@@ -1529,34 +1615,84 @@ body[data-theme="night"] .celebration-box {
     <div style="width:56px;"></div>
   </div>
 
-  <!-- 总览 -->
-  <div class="points-card">
-    <div class="points-item">
-      <span class="p-value" id="statsTotalTime">0h</span>
-      <span class="p-label">⏱ 总时长</span>
+  <!-- 统计选项卡 -->
+  <div class="stats-tabs">
+    <button class="stats-tab active" data-stats-tab="week">📅 本周</button>
+    <button class="stats-tab" data-stats-tab="total">📊 总计</button>
+  </div>
+
+  <!-- ═════ 本周统计 ═════ -->
+  <div class="stats-panel" id="statsPanelWeek">
+    <!-- 本周概览 -->
+    <div class="points-card">
+      <div class="points-item">
+        <span class="p-value" id="statsWeekTime">0h</span>
+        <span class="p-label">⏱ 本周时长</span>
+      </div>
+      <div class="points-item">
+        <span class="p-value" id="statsWeekSessions">0</span>
+        <span class="p-label">📋 本周次数</span>
+      </div>
+      <div class="points-item">
+        <span class="p-value" id="statsWeekDays">0</span>
+        <span class="p-label">📅 学习天数</span>
+      </div>
     </div>
-    <div class="points-item">
-      <span class="p-value" id="statsTotalSessions">0</span>
-      <span class="p-label">📋 总次数</span>
+
+    <!-- 每日时长柱状图 -->
+    <div class="chart-card">
+      <h3>📅 每日学习时长</h3>
+      <div class="chart-area" id="dailyChartArea">
+        <p class="empty-hint">本周还没有学习记录~</p>
+      </div>
     </div>
-    <div class="points-item">
-      <span class="p-value" id="statsTopTag">-</span>
-      <span class="p-label">🏅 最多科目</span>
+
+    <!-- 本周各科 -->
+    <div class="chart-card">
+      <h3>📊 本周各科</h3>
+      <div class="chart-area" id="weekChartArea">
+        <p class="empty-hint">本周还没有学习记录~</p>
+      </div>
+    </div>
+
+    <!-- 本周科目明细 -->
+    <div class="records">
+      <div class="records-header"><h3>📋 本周科目明细</h3></div>
+      <div id="weekTagDetailList"></div>
     </div>
   </div>
 
-  <!-- 直方图 -->
-  <div class="chart-card" id="chartCard">
-    <h3>📊 各科学习时长</h3>
-    <div class="chart-area" id="chartArea">
-      <p class="empty-hint">还没有学习记录~</p>
+  <!-- ═════ 总计统计 ═════ -->
+  <div class="stats-panel" id="statsPanelTotal" style="display:none;">
+    <!-- 总览 -->
+    <div class="points-card">
+      <div class="points-item">
+        <span class="p-value" id="statsTotalTime">0h</span>
+        <span class="p-label">⏱ 总时长</span>
+      </div>
+      <div class="points-item">
+        <span class="p-value" id="statsTotalSessions">0</span>
+        <span class="p-label">📋 总次数</span>
+      </div>
+      <div class="points-item">
+        <span class="p-value" id="statsTopTag">-</span>
+        <span class="p-label">🏅 最多科目</span>
+      </div>
     </div>
-  </div>
 
-  <!-- 各科明细 -->
-  <div class="records" id="tagDetailCard">
-    <div class="records-header"><h3>📋 科目明细</h3></div>
-    <div id="tagDetailList"></div>
+    <!-- 直方图 -->
+    <div class="chart-card">
+      <h3>📊 各科学习时长</h3>
+      <div class="chart-area" id="chartArea">
+        <p class="empty-hint">还没有学习记录~</p>
+      </div>
+    </div>
+
+    <!-- 各科明细 -->
+    <div class="records">
+      <div class="records-header"><h3>📋 科目明细</h3></div>
+      <div id="tagDetailList"></div>
+    </div>
   </div>
 </div>
 <!-- ═══════════ /统计页面 ═══════════ -->
@@ -1755,6 +1891,27 @@ body[data-theme="night"] .celebration-box {
   </div>
 </div>
 
+<!-- ═══════════ 积分明细弹窗 ═══════════ -->
+<div class="modal-overlay hidden" id="modalPointsDetail">
+  <div class="modal-box" style="max-width:400px;">
+    <h3>📊 积分明细</h3>
+    <div style="text-align:center;margin-bottom:4px;">
+      <span style="font-size:2.2rem;font-weight:800;color:var(--warn);line-height:1.1;" id="detailTotal">0</span>
+      <span style="font-size:0.72rem;color:var(--muted);display:block;">当前可用积分</span>
+    </div>
+    <div style="background:var(--bg);border-radius:8px;padding:12px 14px;text-align:left;">
+      <div class="detail-section-title">📥 收入来源</div>
+      <div id="detailIncome"></div>
+      <div class="detail-section-title" style="margin-top:12px;">📤 积分消耗</div>
+      <div id="detailExpense"></div>
+      <div style="color:var(--muted);font-size:0.65rem;text-align:center;margin-top:8px;" id="detailNote"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-confirm" id="btnDetailClose" style="flex:1;">知道了</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════ 云同步设置弹窗 ═══════════ -->
 <div class="modal-overlay hidden" id="modalSync">
   <div class="modal-box">
@@ -1847,6 +2004,7 @@ const toast        = document.getElementById('toast');
 const STORAGE_KEY = 'exam_timer_records';
 const POINTS_KEY = 'yaya_timer_points';
 const PWD_KEY = 'yaya_timer_pwd';
+const ADJUST_KEY = 'yaya_points_adjustments';
 const ALARM_DURATION = 8000;
 
 // ── Celebration DOM ──
@@ -1881,6 +2039,7 @@ function hideAllModals() {
   modalPassword.classList.add('hidden');
   modalEditPts.classList.add('hidden');
   modalChangePwd.classList.add('hidden');
+  document.getElementById('modalPointsDetail').classList.add('hidden');
 }
 
 // 打开密码验证弹窗（积分编辑）
@@ -1974,6 +2133,18 @@ function doSpecialExchange() {
   showToast('💝 特别兑换成功！「' + input + '」');
   vibrate([50, 100, 50]);
   scheduleAutoSync();
+
+  // 发送通知
+  const rank = getRank(p.lifetime || p.total);
+  sendNotify(
+    '💝 特别兑换通知\n\n' +
+    '兑换物品：' + input + '\n' +
+    '消耗积分：-' + todayPts + '（今日全部积分）\n' +
+    '剩余积分：' + p.total + '\n' +
+    '⭐ 称号：' + rank.emoji + ' ' + rank.title + '\n\n' +
+    '爸爸妈妈来买单~ 💝\n' +
+    '—— ' + new Date().toLocaleDateString('zh-CN')
+  ).catch(() => {}); // 静默失败，不阻塞UI
 }
 
 // 积分编辑弹窗
@@ -2009,6 +2180,7 @@ function savePointsEdit() {
   p.today = (p.todayStudy || 0) + (p.todayReward || 0);
   if (p.total < p.today) p.today = p.total;
   savePoints(p);
+  logAdjustment(delta, '手动调整');
   renderPoints();
   hideAllModals();
   if (delta > 0) {
@@ -2022,12 +2194,14 @@ function savePointsEdit() {
 function zeroPoints() {
   if (!confirm('确定要将积分归零吗？（称号等级不受影响）')) return;
   const p = loadPoints();
+  const oldTotal = p.total;
   p.total = 0;
   p.today = 0;
   p.todayStudy = 0;
   p.todayReward = 0;
   // lifetime 不重置，称号永不降级
   savePoints(p);
+  logAdjustment(-oldTotal, '积分归零');
   renderPoints();
   hideAllModals();
   showToast('🔄 积分已归零（称号保留）');
@@ -2364,6 +2538,120 @@ function loadPoints() {
 
 function savePoints(p) {
   localStorage.setItem(POINTS_KEY, JSON.stringify(p));
+}
+
+// ── 手动调整记录（用于积分明细） ──
+function loadAdjustments() {
+  try { return JSON.parse(localStorage.getItem(ADJUST_KEY)) || []; }
+  catch (_) { return []; }
+}
+function saveAdjustments(a) {
+  localStorage.setItem(ADJUST_KEY, JSON.stringify(a));
+}
+function logAdjustment(amount, note) {
+  const a = loadAdjustments();
+  a.unshift({
+    id: Date.now(),
+    amount: amount,
+    note: note || (amount >= 0 ? '手动增加' : '手动减少'),
+    date: new Date().toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit' })
+      + ' ' + new Date().toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' }),
+  });
+  saveAdjustments(a);
+}
+
+// ── 积分明细弹窗 ──
+function getPointsDetail() {
+  const p = loadPoints();
+  const exHistory = loadExHistory();
+  const lottery = loadLottery();
+  const adjustments = loadAdjustments();
+
+  // 称号升级奖励（从已领取的称号计算）
+  let rankRewards = 0;
+  if (p.claimedRanks) {
+    p.claimedRanks.forEach(title => {
+      const rank = RANK_LEVELS.find(r => r.title === title);
+      if (rank) rankRewards += rank.reward;
+    });
+  }
+
+  // 纯学习积分 = lifetime - 称号奖励（lifetime 在 awardPoints 时已包含称号奖励）
+  const pureStudy = Math.max(0, (p.lifetime || 0) - rankRewards);
+
+  // 抽奖/任务奖励：从抽奖历史中累加已完成的任务奖励
+  let lotteryRewards = 0;
+  if (lottery.history) {
+    lottery.history.forEach(h => {
+      if (h.completed && h.reward) lotteryRewards += h.reward;
+    });
+  }
+
+  // 兑换消耗：从兑换历史中累加
+  let exchangeCost = 0;
+  let specialExchangeCost = 0;
+  exHistory.forEach(h => {
+    if (h.name && h.name.includes('特别兑换')) {
+      specialExchangeCost += h.points || 0;
+    } else {
+      exchangeCost += h.points || 0;
+    }
+  });
+
+  // 手动调整合计
+  const totalAdjust = adjustments.reduce((sum, a) => sum + (a.amount || 0), 0);
+
+  // 理论余额 = 纯学习 + 称号奖励 + 任务奖励 + 手动调整 - 兑换消耗 - 特别兑换
+  const computedTotal = pureStudy + rankRewards + lotteryRewards + totalAdjust - exchangeCost - specialExchangeCost;
+
+  return {
+    total: p.total,
+    computedTotal: computedTotal,
+    pureStudy: pureStudy,
+    rankRewards: rankRewards,
+    lotteryRewards: lotteryRewards,
+    totalAdjust: totalAdjust,
+    exchangeCost: exchangeCost,
+    specialExchangeCost: specialExchangeCost,
+  };
+}
+
+function showPointsDetail() {
+  const d = getPointsDetail();
+  const modal = document.getElementById('modalPointsDetail');
+  const incomeEl = document.getElementById('detailIncome');
+  const expenseEl = document.getElementById('detailExpense');
+  const noteEl = document.getElementById('detailNote');
+
+  document.getElementById('detailTotal').textContent = d.total;
+
+  // 收入明细
+  let incomeHTML = '';
+  if (d.pureStudy > 0) incomeHTML += `<div class="detail-row"><span class="d-label">📖 学习获得</span><span class="d-value income">+${d.pureStudy}</span></div>`;
+  if (d.rankRewards > 0) incomeHTML += `<div class="detail-row"><span class="d-label">⭐ 称号升级奖励</span><span class="d-value income">+${d.rankRewards}</span></div>`;
+  if (d.lotteryRewards > 0) incomeHTML += `<div class="detail-row"><span class="d-label">🎰 抽奖任务奖励</span><span class="d-value income">+${d.lotteryRewards}</span></div>`;
+  if (d.totalAdjust > 0) incomeHTML += `<div class="detail-row"><span class="d-label">🔧 手动调整</span><span class="d-value income">+${d.totalAdjust}</span></div>`;
+  if (d.totalAdjust < 0) incomeHTML += `<div class="detail-row"><span class="d-label">🔧 手动调整</span><span class="d-value expense">${d.totalAdjust}</span></div>`;
+  if (!incomeHTML) incomeHTML = `<div class="detail-row"><span class="d-label" style="color:var(--muted);">暂无收入记录</span><span class="d-value" style="color:var(--muted);">—</span></div>`;
+  incomeEl.innerHTML = incomeHTML;
+
+  // 消耗明细
+  let expenseHTML = '';
+  if (d.exchangeCost > 0) expenseHTML += `<div class="detail-row"><span class="d-label">🛒 积分兑换</span><span class="d-value expense">−${d.exchangeCost}</span></div>`;
+  if (d.specialExchangeCost > 0) expenseHTML += `<div class="detail-row"><span class="d-label">💝 特别兑换</span><span class="d-value expense">−${d.specialExchangeCost}</span></div>`;
+  if (!expenseHTML) expenseHTML = `<div class="detail-row"><span class="d-label" style="color:var(--muted);">暂无消耗记录</span><span class="d-value" style="color:var(--muted);">—</span></div>`;
+  expenseEl.innerHTML = expenseHTML;
+
+  // 合计校验
+  if (d.total === d.computedTotal) {
+    noteEl.textContent = '✅ 账目平衡，以上各项之和 = 当前可用积分';
+  } else {
+    const diff = d.total - d.computedTotal;
+    const sign = diff >= 0 ? '+' : '';
+    noteEl.textContent = '⚠️ 以上各项之和与当前余额有 ' + sign + diff + ' 分差额（可能来自旧数据或未记录的调整）';
+  }
+
+  modal.classList.remove('hidden');
 }
 
 const RANK_LEVELS = [
@@ -3178,6 +3466,17 @@ function redeemItem(itemId) {
   showToast('🎉 兑换成功！「' + item.name + '」');
   vibrate([30, 50, 30]);
   scheduleAutoSync();
+
+  // 发送通知
+  const rank = getRank(p.lifetime || p.total);
+  sendNotify(
+    '🎁 积分兑换通知\n\n' +
+    '兑换物品：' + item.icon + ' ' + item.name + '\n' +
+    '消耗积分：-' + item.points + '（≈ ¥' + item.priceYuan.toFixed(2) + '）\n' +
+    '剩余积分：' + p.total + '\n' +
+    '⭐ 称号：' + rank.emoji + ' ' + rank.title + '\n\n' +
+    '—— ' + new Date().toLocaleDateString('zh-CN')
+  ).catch(() => {}); // 静默失败，不阻塞UI
 }
 
 function updateExBalance() {
@@ -3238,8 +3537,44 @@ document.getElementById('customTagInput').addEventListener('keydown', function(e
 });
 
 // ── Stats & Chart ──
-function getTagStats() {
+// 获取本周起止日期
+function getWeekRange() {
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun, 1=Mon, ...
+  // 周一到周日
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+  monday.setHours(0, 0, 0, 0);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  sunday.setHours(23, 59, 59, 999);
+  return { monday, sunday };
+}
+
+// 判断记录是否在本周内
+function isRecordInWeek(record, weekRange) {
+  if (!record.date) return false;
+  // record.date 格式: "2024/07/12 14:30" (zh-CN)
+  const parts = record.date.split(' ')[0]; // "2024/7/12"
+  const dateParts = parts.split('/');
+  if (dateParts.length < 3) return false;
+  const recDate = new Date(
+    parseInt(dateParts[0]),
+    parseInt(dateParts[1]) - 1,
+    parseInt(dateParts[2])
+  );
+  return recDate >= weekRange.monday && recDate <= weekRange.sunday;
+}
+
+// 获取本周记录
+function getWeekRecords() {
   const records = loadRecords();
+  const weekRange = getWeekRange();
+  return records.filter(r => isRecordInWeek(r, weekRange));
+}
+
+function getTagStats(recordsOverride) {
+  const records = recordsOverride || loadRecords();
   const map = {};
   let totalSec = 0;
   records.forEach(r => {
@@ -3253,29 +3588,42 @@ function getTagStats() {
   return { entries, totalSec, totalSessions: records.length };
 }
 
-function renderStatsPage() {
-  const { entries, totalSec, totalSessions } = getTagStats();
+// 每日学习时长统计（本周）
+function getDailyStats(records) {
+  const weekRange = getWeekRange();
+  const dayNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+  const dailyMap = {};
+  // 初始化7天
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(weekRange.monday);
+    d.setDate(d.getDate() + i);
+    const key = d.toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit' });
+    dailyMap[key] = { label: dayNames[i], sec: 0, dateStr: key };
+  }
+  records.forEach(r => {
+    if (!r.date) return;
+    const dateKey = r.date.split(' ')[0];
+    if (dailyMap[dateKey] !== undefined) {
+      dailyMap[dateKey].sec += r.duration || 0;
+    }
+  });
+  return Object.values(dailyMap);
+}
 
-  // 总览
-  const h = Math.floor(totalSec / 3600);
-  const m = Math.floor((totalSec % 3600) / 60);
-  document.getElementById('statsTotalTime').textContent = h > 0 ? h + 'h ' + m + 'm' : m + 'm';
-  document.getElementById('statsTotalSessions').textContent = totalSessions;
-  document.getElementById('statsTopTag').textContent = entries.length > 0 ? entries[0][0] : '-';
-
-  // 直方图
-  const chartArea = document.getElementById('chartArea');
+function renderChart(containerId, entries, maxTimeOverride, emptyMsg) {
+  const container = document.getElementById(containerId);
+  const colors = ['chart-colors-0','chart-colors-1','chart-colors-2','chart-colors-3',
+                   'chart-colors-4','chart-colors-5','chart-colors-6','chart-colors-7'];
   if (entries.length === 0) {
-    chartArea.innerHTML = '<p class="empty-hint">还没有学习记录~</p>';
-    document.getElementById('tagDetailList').innerHTML = '';
+    container.innerHTML = '<p class="empty-hint">' + (emptyMsg || '还没有学习记录~') + '</p>';
     return;
   }
-
-  const maxTime = entries[0][1];
-  // 调色板
-  const colors = ['chart-colors-0','chart-colors-1','chart-colors-2','chart-colors-3','chart-colors-4','chart-colors-5','chart-colors-6','chart-colors-7'];
-
-  chartArea.innerHTML = entries.map(([tag, sec], i) => {
+  const maxTime = maxTimeOverride || entries[0][1];
+  if (maxTime <= 0) {
+    container.innerHTML = '<p class="empty-hint">' + (emptyMsg || '还没有学习记录~') + '</p>';
+    return;
+  }
+  container.innerHTML = entries.map(([tag, sec], i) => {
     const pct = Math.max(5, Math.round((sec / maxTime) * 100));
     const hh = Math.floor(sec / 3600);
     const mm = Math.floor((sec % 3600) / 60);
@@ -3290,9 +3638,14 @@ function renderStatsPage() {
       </div>
     `;
   }).join('');
+}
 
-  // 科目明细
-  const detail = document.getElementById('tagDetailList');
+function renderTagDetail(containerId, entries) {
+  const detail = document.getElementById(containerId);
+  if (entries.length === 0) {
+    detail.innerHTML = '';
+    return;
+  }
   detail.innerHTML = entries.map(([tag, sec]) => {
     const hh = Math.floor(sec / 3600);
     const mm = Math.floor((sec % 3600) / 60);
@@ -3304,6 +3657,65 @@ function renderStatsPage() {
       </div>
     `;
   }).join('');
+}
+
+function renderWeekStats(weekRecords) {
+  const { entries, totalSec, totalSessions } = getTagStats(weekRecords);
+  const dailyStats = getDailyStats(weekRecords);
+
+  // 本周概览
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  document.getElementById('statsWeekTime').textContent = h > 0 ? h + 'h ' + m + 'm' : m + 'm';
+  document.getElementById('statsWeekSessions').textContent = totalSessions;
+  // 有学习记录的天数
+  const learningDays = dailyStats.filter(d => d.sec > 0).length;
+  document.getElementById('statsWeekDays').textContent = learningDays + '/7';
+
+  // 每日时长柱状图
+  const dailyEntries = dailyStats.map(d => [d.label, d.sec]);
+  const dailyMax = Math.max(...dailyStats.map(d => d.sec), 1);
+  renderChart('dailyChartArea', dailyEntries, dailyMax, '本周还没有学习记录~');
+
+  // 本周各科柱状图
+  renderChart('weekChartArea', entries, undefined, '本周还没有学习记录~');
+
+  // 本周科目明细
+  renderTagDetail('weekTagDetailList', entries);
+}
+
+function renderTotalStats() {
+  const { entries, totalSec, totalSessions } = getTagStats();
+
+  // 总览
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  document.getElementById('statsTotalTime').textContent = h > 0 ? h + 'h ' + m + 'm' : m + 'm';
+  document.getElementById('statsTotalSessions').textContent = totalSessions;
+  document.getElementById('statsTopTag').textContent = entries.length > 0 ? entries[0][0] : '-';
+
+  // 直方图
+  renderChart('chartArea', entries, undefined, '还没有学习记录~');
+
+  // 科目明细
+  renderTagDetail('tagDetailList', entries);
+}
+
+function renderStatsPage() {
+  const weekRecords = getWeekRecords();
+  renderWeekStats(weekRecords);
+  renderTotalStats();
+}
+
+// Stats tab switching
+let currentStatsTab = 'week';
+function switchStatsTab(tab) {
+  currentStatsTab = tab;
+  document.querySelectorAll('.stats-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.statsTab === tab);
+  });
+  document.getElementById('statsPanelWeek').style.display = tab === 'week' ? '' : 'none';
+  document.getElementById('statsPanelTotal').style.display = tab === 'total' ? '' : 'none';
 }
 
 // ── Lottery ──
@@ -3460,6 +3872,17 @@ function completeTask() {
   showToast('🎉 恭喜！获得 +' + l.currentTask.reward + ' 积分');
   spawnFlyPoints(l.currentTask.reward);
   scheduleAutoSync();
+
+  // 发送通知
+  const rank = getRank(p.lifetime || p.total);
+  sendNotify(
+    '🎉 抽奖任务完成\n\n' +
+    '任务：' + l.currentTask.name + '\n' +
+    '获得奖励：+' + l.currentTask.reward + ' 积分\n' +
+    '当前积分：' + p.total + '\n' +
+    '⭐ 称号：' + rank.emoji + ' ' + rank.title + '\n\n' +
+    '—— ' + new Date().toLocaleDateString('zh-CN')
+  ).catch(() => {}); // 静默失败，不阻塞UI
 }
 
 function addExtraDraws() {
@@ -3620,6 +4043,7 @@ function switchTo(page) {
     renderNotes();
   } else if (page === 'stats') {
     document.getElementById('pageStats').classList.add('page-active');
+    switchStatsTab('week');
     renderStatsPage();
   } else if (page === 'lottery') {
     document.getElementById('pageLottery').classList.add('page-active');
@@ -3679,6 +4103,11 @@ document.getElementById('btnStatsBack').addEventListener('click', () => switchTo
 document.getElementById('btnLotteryBack').addEventListener('click', () => switchTo('main'));
 document.getElementById('btnRulesBack').addEventListener('click', () => switchTo('main'));
 document.getElementById('btnGoRules').addEventListener('click', () => switchTo('rules'));
+
+// ── 统计选项卡事件 ──
+document.querySelectorAll('.stats-tab').forEach(btn => {
+  btn.addEventListener('click', () => switchStatsTab(btn.dataset.statsTab));
+});
 
 // ── 抽奖事件 ──
 document.getElementById('btnDraw').addEventListener('click', drawLottery);
@@ -3809,6 +4238,15 @@ document.getElementById('btnPtsMinus').addEventListener('click', () => adjustPoi
 document.getElementById('btnEditSave').addEventListener('click', savePointsEdit);
 document.getElementById('btnEditCancel').addEventListener('click', hideAllModals);
 document.getElementById('btnEditZero').addEventListener('click', zeroPoints);
+
+// ── 积分明细弹窗事件 ──
+totalPointsEl.addEventListener('click', showPointsDetail);
+document.getElementById('btnDetailClose').addEventListener('click', () => {
+  document.getElementById('modalPointsDetail').classList.add('hidden');
+});
+document.getElementById('modalPointsDetail').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.add('hidden');
+});
 
 // ── 修改密码弹窗事件 ──
 document.getElementById('btnChPwdConfirm').addEventListener('click', confirmChangePwd);
