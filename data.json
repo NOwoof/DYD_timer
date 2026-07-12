@@ -1,15 +1,22 @@
 {
   "version": 1,
-  "updatedAt": 1783846601192,
+  "updatedAt": 1783846948792,
   "points": {
-    "total": 1085,
-    "today": 735,
+    "total": 1090,
+    "today": 740,
     "claimedRanks": [
       "学习新芽"
     ],
-    "lifetime": 745
+    "lifetime": 750
   },
   "records": [
+    {
+      "id": 1783846945790,
+      "date": "2026/07/12 17:02",
+      "duration": 64,
+      "note": "正计时",
+      "tag": "无标签"
+    },
     {
       "id": 1783829242531,
       "date": "2026/07/12 12:07",
