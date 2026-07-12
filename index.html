@@ -1315,8 +1315,12 @@ body[data-theme="night"] .celebration-box {
       <span class="p-label">🏆 总积分</span>
     </div>
     <div class="points-item">
-      <span class="p-value" id="todayPoints">0</span>
-      <span class="p-label">📅 今日获得</span>
+      <span class="p-value" id="todayStudyPoints">0</span>
+      <span class="p-label">📖 今日学习</span>
+    </div>
+    <div class="points-item">
+      <span class="p-value" id="todayRewardPoints" style="font-size:clamp(0.9rem,3.5vw,1.2rem);">0</span>
+      <span class="p-label">🎁 今日奖励</span>
     </div>
     <div class="points-item">
       <span class="p-rank" id="rankText">🌱 学习新芽</span>
@@ -1830,7 +1834,8 @@ const statsText    = document.getElementById('statsText');
 const btnClearAll  = document.getElementById('btnClearAll');
 const btnExport    = document.getElementById('btnExport');
 const totalPointsEl = document.getElementById('totalPoints');
-const todayPointsEl = document.getElementById('todayPoints');
+const todayPointsEl = document.getElementById('todayStudyPoints');
+const todayRewardEl = document.getElementById('todayRewardPoints');
 const rankTextEl    = document.getElementById('rankText');
 const pageMain      = document.getElementById('pageMain');
 const pageExchange  = document.getElementById('pageExchange');
@@ -1942,6 +1947,8 @@ function doSpecialExchange() {
   // 扣除今日积分
   p.total = Math.max(0, p.total - todayPts);
   p.today = 0;
+  p.todayStudy = 0;
+  p.todayReward = 0;
   savePoints(p);
 
   // 保存兑换记录
@@ -1996,7 +2003,10 @@ function savePointsEdit() {
   }
   const p = loadPoints();
   p.total = Math.max(0, p.total + delta);
+  p.todayStudy = (p.todayStudy || 0) + delta;
+  if (p.todayStudy < 0) p.todayStudy = 0;
   // 同步 today 避免出现负数
+  p.today = (p.todayStudy || 0) + (p.todayReward || 0);
   if (p.total < p.today) p.today = p.total;
   savePoints(p);
   renderPoints();
@@ -2014,6 +2024,8 @@ function zeroPoints() {
   const p = loadPoints();
   p.total = 0;
   p.today = 0;
+  p.todayStudy = 0;
+  p.todayReward = 0;
   // lifetime 不重置，称号永不降级
   savePoints(p);
   renderPoints();
@@ -2394,15 +2406,17 @@ function awardPoints(seconds, note) {
   const oldLifetime = p.lifetime || 0;
   p.total += points;
   p.today += points;
+  p.todayStudy = (p.todayStudy || 0) + points;
   p.lifetime = (p.lifetime || 0) + points; // 终身累计，只增不减
   if (!p.claimedRanks) p.claimedRanks = [];
 
   // 检查升级
   const rankUp = checkRankUp(oldLifetime, p.lifetime);
   if (rankUp && !p.claimedRanks.includes(rankUp.title)) {
-    // 升级奖励
+    // 升级奖励（归为学习积分）
     p.total += rankUp.reward;
     p.today += rankUp.reward;
+    p.todayStudy = (p.todayStudy || 0) + rankUp.reward;
     p.lifetime += rankUp.reward;
     p.claimedRanks.push(rankUp.title);
     savePoints(p);
@@ -2431,10 +2445,14 @@ function showRankUpCelebration(rank) {
 function renderPoints() {
   const p = loadPoints();
   if (!p.claimedRanks) p.claimedRanks = [];
+  p.todayStudy = p.todayStudy || 0;
+  p.todayReward = p.todayReward || 0;
+  p.today = (p.todayStudy + p.todayReward) || p.today || 0;
   savePoints(p);
 
   totalPointsEl.textContent = p.total;
-  todayPointsEl.textContent = '+' + p.today;
+  todayPointsEl.textContent = '+' + p.todayStudy;
+  todayRewardEl.textContent = p.todayReward > 0 ? '+' + p.todayReward : '0';
 
   const rank = getRank(p.lifetime || p.total);
   rankTextEl.textContent = rank.emoji + ' ' + rank.title;
@@ -2908,13 +2926,9 @@ async function sendNotify(msg) {
 
 function buildLoveMessage() {
   const p = loadPoints();
-  const records = loadRecords();
-  const today = new Date().toLocaleDateString('zh-CN');
-  // 今日学习时长
-  let todaySec = 0;
-  records.forEach(r => {
-    if (r.date && r.date.startsWith(today)) todaySec += r.duration || 0;
-  });
+  const todayKey = getTodayStr();
+  // 今日学习时长：从学习积分反算
+  let todaySec = Math.floor((p.todayStudy || 0) / 5) * 60;
   const h = Math.floor(todaySec / 3600);
   const m = Math.floor((todaySec % 3600) / 60);
   const timeStr = h > 0 ? h + '小时' + m + '分钟' : m + '分钟';
@@ -2952,12 +2966,15 @@ async function tellHer() {
 
 function buildQQMessage() {
   const p = loadPoints();
+  const todayKey = getTodayStr();
   const records = loadRecords();
-  const today = new Date().toLocaleDateString('zh-CN');
-  let todaySec = 0;
-  records.forEach(r => {
-    if (r.date && r.date.startsWith(today)) todaySec += r.duration || 0;
-  });
+  // 今日学习时长：从学习积分反算 + records 兜底
+  let todaySec = Math.floor((p.todayStudy || 0) / 5) * 60;
+  if (!todaySec) {
+    records.forEach(r => {
+      if (r.date && r.date.startsWith(todayKey)) todaySec += r.duration || 0;
+    });
+  }
   const h = Math.floor(todaySec / 3600);
   const m = Math.floor((todaySec % 3600) / 60);
   const timeStr = h > 0 ? h + '小时' + m + '分钟' : m + '分钟';
@@ -2989,8 +3006,12 @@ function saveDaily(d) {
   localStorage.setItem(DAILY_KEY, JSON.stringify(d));
 }
 
+// 统一日期格式：必须与 record.date 前缀一致
+function fmtDate(date) {
+  return date.toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit' });
+}
 function getTodayStr() {
-  return new Date().toLocaleDateString('zh-CN');
+  return fmtDate(new Date());
 }
 
 function addDailyTime(seconds) {
@@ -3011,7 +3032,7 @@ function getStreakMultiplier() {
   for (let i = 1; i <= 3; i++) {
     const dt = new Date(now);
     dt.setDate(now.getDate() - i);
-    const key = dt.toLocaleDateString('zh-CN');
+    const key = fmtDate(dt);
     const sec = d[key] || 0;
     if (sec >= 14400) { // 4小时 = 14400秒
       streak++;
@@ -3027,9 +3048,15 @@ function updateStreakDisplay() {
   const d = loadDaily();
   const todayKey = getTodayStr();
 
-  // 今日时长：优先 daily 数据，回退到 records 计算
+  // 今日学习时长：优先 daily 数据，回退到学习积分反算（1分钟=5积分）
   let todaySec = d[todayKey] || 0;
   if (!todaySec) {
+    const p = loadPoints();
+    const studyPts = p.todayStudy || 0;
+    todaySec = Math.floor(studyPts / 5) * 60; // 积分→秒
+  }
+  if (!todaySec) {
+    // 最后回退：从 records 计算
     const records = loadRecords();
     records.forEach(r => {
       if (r.date && r.date.startsWith(todayKey)) todaySec += r.duration || 0;
@@ -3055,7 +3082,7 @@ function updateStreakDisplay() {
     for (let i = 1; i <= 3; i++) {
       const dt = new Date(now);
       dt.setDate(now.getDate() - i);
-      const key = dt.toLocaleDateString('zh-CN');
+      const key = fmtDate(dt);
       if ((d[key] || 0) >= GOAL) curStreak++;
       else break;
     }
@@ -3418,10 +3445,11 @@ function completeTask() {
   if (!confirm('确定已完成任务「' + l.currentTask.name + '」并领取奖励吗？')) return;
 
   l.taskCompleted = true;
-  // 发放奖励
+  // 发放奖励（归为奖励积分）
   const p = loadPoints();
   p.total += l.currentTask.reward;
   p.today += l.currentTask.reward;
+  p.todayReward = (p.todayReward || 0) + l.currentTask.reward;
   savePoints(p);
   renderPoints();
 
