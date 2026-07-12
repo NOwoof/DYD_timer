@@ -1431,10 +1431,16 @@ body[data-theme="night"] .celebration-box {
 
   <!-- 发送设置 -->
   <div class="notes-add-card" style="margin-bottom:4px;">
-    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:4px;">💌 发送设置（学习完成后告诉她）</div>
-    <input type="tel" id="gfPhoneInput" placeholder="她的手机号（如：13800138000）" maxlength="20">
-    <input type="email" id="gfEmailInput" placeholder="她的邮箱（如：xxx@qq.com）" maxlength="60">
-    <button class="notes-add-btn" id="btnSaveContact" style="background:linear-gradient(135deg, #f472b6, #e879a0);">💾 保存联系方式</button>
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:4px;">💬 微信通知（学习完成后自动推送）</div>
+    <input type="text" id="wecomWebhookInput" placeholder="企业微信机器人 Webhook 地址" maxlength="200" enterkeyhint="done">
+    <button class="notes-add-btn" id="btnSaveWecom" style="background:linear-gradient(135deg, #07c160, #06ad56);">💾 保存并测试</button>
+    <p style="font-size:0.7rem;color:var(--muted);margin-top:6px;line-height:1.5;">
+      📌 使用方法：<br>
+      1. 在企业微信中创建一个群聊<br>
+      2. 群设置 → 群机器人 → 添加机器人<br>
+      3. 复制 Webhook 地址粘贴到上方<br>
+      4. 点「保存并测试」验证连通
+    </p>
   </div>
 
   <!-- 添加笔记 -->
@@ -2349,6 +2355,9 @@ function autoRecord() {
   // 庆祝弹窗
   setTimeout(() => showCelebration(), 600);
 
+  // 企业微信推送
+  autoNotify();
+
   scheduleAutoSync();
 
   remaining = totalSeconds;
@@ -2649,17 +2658,16 @@ const EXCHANGE_ITEMS = [
 const EX_HISTORY_KEY = 'yaya_exchange_history';
 const NOTES_KEY = 'yaya_notes';
 const DAILY_KEY = 'yaya_daily_time';
-const CONTACT_KEY = 'yaya_contact';
+const CONTACT_KEY = 'yaya_wecom_webhook';
 let selectedTag = '无标签';
 
-// ── 发送消息 ──
-function loadContact() {
-  try { return JSON.parse(localStorage.getItem(CONTACT_KEY)) || { phone: '', email: '' }; }
-  catch (_) { return { phone: '', email: '' }; }
+// ── 企业微信推送 ──
+function getWebhookUrl() {
+  return localStorage.getItem(CONTACT_KEY) || '';
 }
 
-function saveContact(c) {
-  localStorage.setItem(CONTACT_KEY, JSON.stringify(c));
+function setWebhookUrl(url) {
+  localStorage.setItem(CONTACT_KEY, url);
 }
 
 function buildLoveMessage() {
@@ -2685,27 +2693,83 @@ function buildLoveMessage() {
   return templates[Math.floor(Math.random() * templates.length)];
 }
 
-function tellHer() {
-  const contact = loadContact();
-  const msg = buildLoveMessage();
+async function sendToWecom(msg) {
+  const url = getWebhookUrl();
+  if (!url) return false;
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        msgtype: 'markdown',
+        markdown: { content: msg }
+      })
+    });
+    const data = await resp.json();
+    return data.errcode === 0;
+  } catch (_) {
+    return false;
+  }
+}
 
-  if (contact.phone) {
-    // 优先短信
-    window.open('sms:' + contact.phone + '?body=' + encodeURIComponent(msg), '_blank');
-    showToast('💌 已打开短信');
-  } else if (contact.email) {
-    window.open('mailto:' + contact.email + '?subject=' + encodeURIComponent('学习打卡💕') + '&body=' + encodeURIComponent(msg), '_blank');
-    showToast('📧 已打开邮件');
-  } else {
-    // 都没设置，复制到剪贴板
+async function tellHer() {
+  const url = getWebhookUrl();
+  if (!url) {
+    // 未配置，复制到剪贴板
+    const msg = buildLoveMessage();
     if (navigator.clipboard) {
       navigator.clipboard.writeText(msg).then(() => {
         showToast('📋 消息已复制，去发给她吧~');
       });
-    } else {
-      prompt('复制这条消息发给她吧~', msg);
     }
+    return;
   }
+  const msg = buildWecomMessage();
+  const ok = await sendToWecom(msg);
+  if (ok) {
+    showToast('💬 微信通知已发送');
+  } else {
+    showToast('❌ 发送失败，请检查 Webhook 地址');
+  }
+}
+
+function buildWecomMessage() {
+  const p = loadPoints();
+  const records = loadRecords();
+  const today = new Date().toLocaleDateString('zh-CN');
+  let todaySec = 0;
+  records.forEach(r => {
+    if (r.date && r.date.startsWith(today)) todaySec += r.duration || 0;
+  });
+  const h = Math.floor(todaySec / 3600);
+  const m = Math.floor((todaySec % 3600) / 60);
+  const timeStr = h > 0 ? h + '小时' + m + '分钟' : m + '分钟';
+  const rank = getRank(p.lifetime || p.total);
+
+  const emojis = ['💕', '🌟', '💪', '📚', '✨', '🎯', '💖', '🔥'];
+  const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+
+  const now = new Date();
+  const timeLabel = now.toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' });
+
+  return `## ${emoji} 丫丫学习打卡
+> ${now.toLocaleDateString('zh-CN')} ${timeLabel}
+
+**今日已学：** <font color="info">${timeStr}</font>
+**今日积分：** <font color="warning">+${p.today}</font>
+**总积分：** <font color="warning">${p.total}</font>
+**称号：** ${rank.emoji} ${rank.title}
+
+---
+❤️ 继续加油！爱你哟~`;
+}
+
+// 计时完成时自动推送
+async function autoNotify() {
+  const url = getWebhookUrl();
+  if (!url) return;
+  const msg = buildWecomMessage();
+  await sendToWecom(msg);
 }
 
 // ── 每日学习追踪 & 连击倍率 ──
@@ -3274,9 +3338,7 @@ function switchTo(page) {
     renderExHistory();
   } else if (page === 'notes') {
     document.getElementById('pageNotes').classList.add('page-active');
-    const c = loadContact();
-    document.getElementById('gfPhoneInput').value = c.phone || '';
-    document.getElementById('gfEmailInput').value = c.email || '';
+    document.getElementById('wecomWebhookInput').value = getWebhookUrl();
     renderNotes();
   } else if (page === 'stats') {
     document.getElementById('pageStats').classList.add('page-active');
@@ -3314,11 +3376,21 @@ document.getElementById('btnLotteryReset').addEventListener('click', () => {
   openPasswordModal();
   passwordCallback = 'resetLottery';
 });
-document.getElementById('btnSaveContact').addEventListener('click', () => {
-  const phone = document.getElementById('gfPhoneInput').value.trim();
-  const email = document.getElementById('gfEmailInput').value.trim();
-  saveContact({ phone, email });
-  showToast('💌 联系方式已保存');
+document.getElementById('btnSaveWecom').addEventListener('click', async () => {
+  const url = document.getElementById('wecomWebhookInput').value.trim();
+  if (!url) { showToast('⚠️ 请输入 Webhook 地址'); return; }
+  if (!url.startsWith('https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=')) {
+    showToast('⚠️ Webhook 地址格式不正确');
+    return;
+  }
+  setWebhookUrl(url);
+  showToast('💾 已保存，正在测试…');
+  const ok = await sendToWecom('## 💬 测试消息\n丫丫计时器微信通知已连接成功！🎉');
+  if (ok) {
+    showToast('✅ 测试成功！微信通知已连通');
+  } else {
+    showToast('❌ 测试失败，请检查地址是否正确');
+  }
 });
 document.getElementById('btnAddNote').addEventListener('click', addNote);
 document.getElementById('noteDescInput').addEventListener('keydown', (e) => {
