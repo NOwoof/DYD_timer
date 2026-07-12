@@ -261,6 +261,32 @@ body[data-theme="night"] .celebration-box {
     color: var(--muted);
   }
 
+  /* ---- Mode Switch ---- */
+  .mode-switch {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .mode-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mode-btn:active { transform: scale(0.96); }
+  .mode-btn.active {
+    background: var(--accent);
+    color: #0f172a;
+    border-color: var(--accent);
+  }
+
   /* ---- Points Card ---- */
   .points-card {
     background: linear-gradient(135deg, #1e293b 0%, #1a2040 100%);
@@ -1273,7 +1299,11 @@ body[data-theme="night"] .celebration-box {
 
   <!-- 计时显示 -->
   <div class="timer-display" id="timerDisplay">
-    <div class="time" id="timeText">25:00</div>
+    <div class="mode-switch" id="modeSwitch">
+      <button class="mode-btn active" data-mode="stopwatch">⏱ 正计时</button>
+      <button class="mode-btn" data-mode="countdown">⏲ 倒计时</button>
+    </div>
+    <div class="time" id="timeText">00:00</div>
     <div class="time-label" id="timeLabel">准备开始</div>
   </div>
 
@@ -1305,8 +1335,8 @@ body[data-theme="night"] .celebration-box {
   </div>
 
   <!-- 时间设置 -->
-  <div class="setter">
-    <h3>⚙️ 设置倒计时</h3>
+  <div class="setter" id="setterSection">
+    <h3 id="setterTitle">⚙️ 设置倒计时</h3>
     <div class="input-row">
       <div class="input-group">
         <label>小时</label>
@@ -1339,7 +1369,7 @@ body[data-theme="night"] .celebration-box {
   <div class="actions">
     <button class="btn btn-start" id="btnStart">▶ 开始</button>
     <button class="btn btn-pause" id="btnPause">⏸ 暂停</button>
-    <button class="btn btn-reset" id="btnReset">↺ 重置</button>
+    <button class="btn btn-reset" id="btnReset">⏹ 停止记录</button>
   </div>
 
   <!-- 记录区域 -->
@@ -2007,8 +2037,9 @@ function confirmChangePwd() {
 }
 
 // ── State ──
+let timerMode    = 'stopwatch';  // 'stopwatch' | 'countdown'
 let totalSeconds = 25 * 60;
-let remaining    = totalSeconds;
+let remaining    = 0;            // stopwatch: elapsed, countdown: remaining
 let timerId      = null;
 let alarmId      = null;
 let isRunning    = false;
@@ -2112,21 +2143,36 @@ function formatTime(s) {
 }
 
 function updateDisplay() {
-  timeText.textContent = formatTime(remaining);
+  const isSw = timerMode === 'stopwatch';
+  timeText.textContent = isSw ? formatTime(remaining) : formatTime(remaining);
   timerDisplay.classList.remove('warning', 'timeout');
 
-  if (remaining === 0 && isRunning) {
-    timerDisplay.classList.add('timeout');
-    timeLabel.textContent = '⏰ 时间到！';
-  } else if (remaining <= 60 && isRunning) {
-    timerDisplay.classList.add('warning');
-    timeLabel.textContent = '⚠️ 最后 1 分钟';
-  } else if (isRunning) {
-    timeLabel.textContent = '▶ 计时中…';
-  } else if (isPaused) {
-    timeLabel.textContent = '⏸ 已暂停';
+  if (isSw) {
+    // Stopwatch mode: no warning/timeout, just running/paused/idle
+    if (isRunning && !isPaused) {
+      timeText.style.color = '';  // use default accent color
+      timeLabel.textContent = '⏱ 正计时中…';
+    } else if (isPaused) {
+      timeLabel.textContent = '⏸ 已暂停 · 已过 ' + formatTime(remaining);
+    } else {
+      timeLabel.textContent = '准备开始';
+    }
   } else {
-    timeLabel.textContent = '准备开始';
+    // Countdown mode: existing logic
+    timeText.style.color = '';
+    if (remaining === 0 && isRunning) {
+      timerDisplay.classList.add('timeout');
+      timeLabel.textContent = '⏰ 时间到！';
+    } else if (remaining <= 60 && isRunning) {
+      timerDisplay.classList.add('warning');
+      timeLabel.textContent = '⚠️ 最后 1 分钟';
+    } else if (isRunning) {
+      timeLabel.textContent = '▶ 计时中…';
+    } else if (isPaused) {
+      timeLabel.textContent = '⏸ 已暂停';
+    } else {
+      timeLabel.textContent = '准备开始';
+    }
   }
 }
 
@@ -2151,24 +2197,48 @@ function syncInputsFromRemaining() {
 
 // ── Timer ──
 function tick() {
-  if (remaining > 0) {
-    remaining--;
+  if (timerMode === 'stopwatch') {
+    remaining++;
     updateDisplay();
-    syncInputsFromRemaining();
-  }
-  if (remaining === 0) {
-    stop();
-    isRunning = true;
-    updateDisplay();
-    playAlarm();
-    vibrate([500, 200, 500, 200, 500]);
-    autoRecord();
-    releaseWakeLock();
+  } else {
+    if (remaining > 0) {
+      remaining--;
+      updateDisplay();
+      syncInputsFromRemaining();
+    }
+    if (remaining === 0) {
+      stop();
+      isRunning = true;
+      updateDisplay();
+      playAlarm();
+      vibrate([500, 200, 500, 200, 500]);
+      autoRecord();
+      releaseWakeLock();
+    }
   }
 }
 
 function start() {
   if (isRunning && !isPaused) return;
+
+  if (timerMode === 'stopwatch') {
+    // Stopwatch: start from 0 or resume from pause
+    if (!isPaused) {
+      remaining = 0;
+    }
+    resumeAudio();
+    isRunning = true;
+    isPaused = false;
+    stopAlarm();
+    updateDisplay();
+    timerId = setInterval(tick, 1000);
+    updateButtons();
+    requestWakeLock();
+    showToast('▶ 正计时开始');
+    return;
+  }
+
+  // Countdown mode
   if (remaining <= 0) reset();
 
   if (!isPaused) {
@@ -2203,6 +2273,23 @@ function pause() {
 
 function reset() {
   stop();
+
+  if (timerMode === 'stopwatch') {
+    // Record elapsed time before clearing (if any time passed)
+    if (remaining > 0) {
+      autoRecord();
+    }
+    remaining = 0;
+    isRunning = false;
+    isPaused = false;
+    stopAlarm();
+    updateDisplay();
+    updateButtons();
+    releaseWakeLock();
+    return;
+  }
+
+  // Countdown mode
   remaining = readInput();
   totalSeconds = remaining;
   isRunning = false;
@@ -2222,6 +2309,8 @@ function stop() {
 }
 
 function updateButtons() {
+  const isSw = timerMode === 'stopwatch';
+
   if (isRunning && !isPaused) {
     btnStart.textContent = '▶ 计时中…';
     btnStart.style.opacity = '0.6';
@@ -2234,6 +2323,13 @@ function updateButtons() {
     btnStart.textContent = '▶ 开始';
     btnStart.style.opacity = '1';
     btnPause.textContent = '⏸ 暂停';
+  }
+
+  // Reset button text depends on mode
+  if (isSw) {
+    btnReset.textContent = remaining > 0 ? '⏹ 停止记录' : '↺ 清零';
+  } else {
+    btnReset.textContent = '↺ 重置';
   }
 }
 
@@ -2358,15 +2454,18 @@ function saveRecords(records) {
 }
 
 function autoRecord() {
+  const isSw = timerMode === 'stopwatch';
+  const duration = isSw ? remaining : totalSeconds;
+
   const now = new Date();
   const dateStr = now.toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit' });
   const timeStr = now.toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' });
-  const note = noteInput.value.trim() || '无备注';
+  const note = noteInput.value.trim() || (isSw ? '正计时' : '无备注');
 
   const record = {
     id: Date.now(),
     date: dateStr + ' ' + timeStr,
-    duration: totalSeconds,
+    duration,
     note,
     tag: selectedTag,
   };
@@ -2377,17 +2476,16 @@ function autoRecord() {
   renderRecords();
 
   // 积分奖励
-  const earned = awardPoints(totalSeconds, note);
+  const earned = awardPoints(duration, note);
   spawnFlyPoints(earned);
-  showToast('✅ 完成！+' + earned + '积分 · ' + formatDuration(totalSeconds));
+  showToast('✅ 完成！+' + earned + '积分 · ' + formatDuration(duration));
 
   // 庆祝弹窗
   setTimeout(() => showCelebration(), 600);
 
-
   scheduleAutoSync();
 
-  remaining = totalSeconds;
+  remaining = isSw ? 0 : totalSeconds;
   isRunning = false;
   isPaused = false;
   stopAlarm();
@@ -2396,6 +2494,19 @@ function autoRecord() {
 }
 
 function manualRecord() {
+  // Stopwatch mode: just record current elapsed and stop
+  if (timerMode === 'stopwatch') {
+    if (remaining <= 0) {
+      showToast('⚠️ 还没有开始计时');
+      return;
+    }
+    stop();
+    autoRecord();
+    showToast('📝 已记录 · ' + formatDuration(remaining));
+    return;
+  }
+
+  // Countdown mode: record elapsed portion
   if (totalSeconds === remaining) {
     showToast('⚠️ 还没有开始计时');
     return;
@@ -3426,6 +3537,41 @@ function switchTo(page) {
   window.scrollTo(0, 0);
 }
 
+// ── Mode Switch ──
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const newMode = btn.dataset.mode;
+    if (timerMode === newMode) return;
+
+    if (isRunning) {
+      if (!confirm('切换模式会停止当前计时，确定吗？')) return;
+      stop();
+      releaseWakeLock();
+    }
+
+    timerMode = newMode;
+    localStorage.setItem('yaya_timer_mode', timerMode);
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === newMode));
+
+    // Show/hide setter
+    const setter = document.getElementById('setterSection');
+    const setterTitle = document.getElementById('setterTitle');
+    if (timerMode === 'stopwatch') {
+      setter.style.display = 'none';
+      if (setterTitle) setterTitle.textContent = '⏱ 正计时模式';
+      remaining = 0;
+    } else {
+      setter.style.display = '';
+      if (setterTitle) setterTitle.textContent = '⚙️ 设置倒计时';
+      remaining = readInput();
+      totalSeconds = remaining;
+    }
+    updateDisplay();
+    updateButtons();
+    showToast(timerMode === 'stopwatch' ? '⏱ 正计时模式' : '⏲ 倒计时模式');
+  });
+});
+
 // ── Events ──
 btnGoExchange.addEventListener('click', () => switchTo('exchange'));
 document.getElementById('btnGoNotes').addEventListener('click', () => switchTo('notes'));
@@ -3606,10 +3752,19 @@ timerDisplay.addEventListener('click', () => {
 let longPressTimer = null;
 timerDisplay.addEventListener('pointerdown', (e) => {
   longPressTimer = setTimeout(() => {
-    if (totalSeconds !== remaining) {
-      vibrate(20);
-      if (confirm('要手动记录当前已完成的学习时长吗？')) {
-        manualRecord();
+    if (timerMode === 'stopwatch') {
+      if (remaining > 0) {
+        vibrate(20);
+        if (confirm('要记录当前的正计时时长吗？')) {
+          manualRecord();
+        }
+      }
+    } else {
+      if (totalSeconds !== remaining) {
+        vibrate(20);
+        if (confirm('要手动记录当前已完成的学习时长吗？')) {
+          manualRecord();
+        }
       }
     }
   }, 600);
@@ -3621,6 +3776,7 @@ timerDisplay.addEventListener('pointercancel', () => clearTimeout(longPressTimer
 // 预设按钮
 document.querySelectorAll('.preset-btn').forEach(btn => {
   btn.addEventListener('click', () => {
+    if (timerMode === 'stopwatch') return; // not applicable in stopwatch mode
     vibrate(10);
     inputH.value = btn.dataset.h;
     inputM.value = btn.dataset.m;
@@ -3636,7 +3792,7 @@ document.querySelectorAll('.preset-btn').forEach(btn => {
 // 输入框变化时同步
 [inputH, inputM, inputS].forEach(el => {
   el.addEventListener('input', () => {
-    if (!isRunning) {
+    if (!isRunning && timerMode === 'countdown') {
       remaining = readInput();
       totalSeconds = remaining;
       updateDisplay();
@@ -3889,8 +4045,18 @@ function setTheme(theme) {
 // ── Init ──
 applyTheme(getTheme());
 
-remaining = readInput();
-totalSeconds = remaining;
+// Apply saved mode, default to stopwatch
+timerMode = localStorage.getItem('yaya_timer_mode') || 'stopwatch';
+document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === timerMode));
+
+if (timerMode === 'stopwatch') {
+  document.getElementById('setterSection').style.display = 'none';
+  document.getElementById('setterTitle').textContent = '⏱ 正计时模式';
+  remaining = 0;
+} else {
+  remaining = readInput();
+  totalSeconds = remaining;
+}
 updateDisplay();
 updateButtons();
 renderRecords();
