@@ -3374,6 +3374,7 @@ function drawLottery() {
   });
   saveLottery(l);
   renderLotteryPage();
+  scheduleAutoSync();
   showToast('🎉 抽中：「' + task.name + '」');
   vibrate([30, 50, 30, 50, 30]);
 }
@@ -4004,6 +4005,7 @@ async function autoSync() {
     applyRemoteData(remote);
     renderPoints();
     renderRecords();
+    renderLotteryPage();
     console.log('[Sync] loaded from cloud! records:', (remote.records||[]).length);
     showToast('☁️ 已同步最新数据（' + (remote.records||[]).length + '条记录）');
   }
@@ -4024,6 +4026,7 @@ async function doSync(silent) {
     applyRemoteData(remote);
     renderPoints();
     renderRecords();
+    renderLotteryPage();
     console.log('[Sync] merged from remote');
     if (!silent) showToast('☁️ 已同步云端数据');
   }
