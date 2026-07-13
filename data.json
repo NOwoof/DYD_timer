@@ -1,19 +1,26 @@
 {
   "version": 1,
-  "updatedAt": 1783948239006,
+  "updatedAt": 1783986829687,
   "points": {
-    "total": 4640,
-    "today": 2675,
+    "total": 4790,
+    "today": 150,
     "claimedRanks": [
       "学习新芽",
       "学习达人"
     ],
-    "lifetime": 2300,
-    "todayStudy": 2675,
+    "lifetime": 2450,
+    "todayStudy": 150,
     "todayReward": 0,
-    "lastResetDate": "2026/07/13"
+    "lastResetDate": "2026/07/14"
   },
   "records": [
+    {
+      "id": 1783986826668,
+      "date": "2026/07/14 07:53",
+      "duration": 1850,
+      "note": "正计时",
+      "tag": "英语"
+    },
     {
       "id": 1783948235988,
       "date": "2026/07/13 21:10",
@@ -249,7 +256,8 @@
   "daily": {
     "2026/07/12": 8542,
     "2026/07/11": 6000,
-    "2026/07/13": 8192
+    "2026/07/13": 8192,
+    "2026/07/14": 1850
   },
   "lottery": {
     "weekId": "2026/7/12",
