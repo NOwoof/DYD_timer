@@ -2532,8 +2532,20 @@ function updateButtons() {
 
 // ── Points ──
 function loadPoints() {
-  try { return JSON.parse(localStorage.getItem(POINTS_KEY)) || { total: 0, today: 0, lifetime: 0, claimedRanks: [] }; }
-  catch (_) { return { total: 0, today: 0, lifetime: 0, claimedRanks: [] }; }
+  try {
+    const p = JSON.parse(localStorage.getItem(POINTS_KEY)) || { total: 0, today: 0, lifetime: 0, claimedRanks: [] };
+    // 每日重置：检查日期是否变化
+    const todayStr = getTodayStr();
+    if (p.lastResetDate !== todayStr) {
+      p.today = 0;
+      p.todayStudy = 0;
+      p.todayReward = 0;
+      p.lastResetDate = todayStr;
+      savePoints(p);
+    }
+    return p;
+  }
+  catch (_) { return { total: 0, today: 0, lifetime: 0, claimedRanks: [], lastResetDate: getTodayStr() }; }
 }
 
 function savePoints(p) {

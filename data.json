@@ -3,14 +3,15 @@
   "updatedAt": 1783903886620,
   "points": {
     "total": 1965,
-    "today": 830,
+    "today": 0,
     "claimedRanks": [
       "学习新芽",
       "学习达人"
     ],
     "lifetime": 1625,
-    "todayStudy": 830,
-    "todayReward": 0
+    "todayStudy": 0,
+    "todayReward": 0,
+    "lastResetDate": "2026/07/13"
   },
   "records": [
     {
