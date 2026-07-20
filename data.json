@@ -1,18 +1,18 @@
 {
   "version": 1,
-  "updatedAt": 1784433173489,
+  "updatedAt": 1784507586445,
   "points": {
     "total": 7640,
-    "today": 555,
+    "today": 0,
     "claimedRanks": [
       "学习新芽",
       "学习达人",
       "学习高手"
     ],
     "lifetime": 5300,
-    "todayStudy": 555,
+    "todayStudy": 0,
     "todayReward": 0,
-    "lastResetDate": "2026/07/19"
+    "lastResetDate": "2026/07/20"
   },
   "records": [
     {
