@@ -1,18 +1,18 @@
 {
   "version": 1,
-  "updatedAt": 1784597701629,
+  "updatedAt": 1784685267879,
   "points": {
     "total": 9725,
-    "today": 85,
+    "today": 0,
     "claimedRanks": [
       "学习新芽",
       "学习达人",
       "学习高手"
     ],
     "lifetime": 5385,
-    "todayStudy": 85,
+    "todayStudy": 0,
     "todayReward": 0,
-    "lastResetDate": "2026/07/21"
+    "lastResetDate": "2026/07/22"
   },
   "records": [
     {
@@ -393,14 +393,7 @@
       "date": "2026/07/10 17:51"
     }
   ],
-  "notes": [
-    {
-      "title": "数学",
-      "link": "https://pan.baidu.com/s/1vzg9GIMeqhna1qrR_msrCQ?pwd=597h",
-      "desc": "",
-      "date": 1783677136136
-    }
-  ],
+  "notes": [],
   "daily": {
     "2026/07/19": 6810,
     "2026/07/18": 11077,
